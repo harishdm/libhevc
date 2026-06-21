@@ -20,3 +20,7 @@ libhevc_add_gtest_executable(
 )
 
 include(GoogleTest)
+include("${HEVC_ROOT}/tests/common/helpers.cmake")
+include("${HEVC_ROOT}/tests/decoder/DecHelper.cmake")
+include("${HEVC_ROOT}/tests/encoder/EncHelper.cmake")
+

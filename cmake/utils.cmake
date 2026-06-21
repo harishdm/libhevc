@@ -39,10 +39,10 @@ function(libhevc_add_definitions)
       add_definitions(-DX86 -DDARWIN -DDISABLE_AVX2 -DDEFAULT_ARCH=D_ARCH_X86_GENERIC)
     endif()
   elseif("${SYSTEM_PROCESSOR}" STREQUAL "aarch64")
-    add_definitions(-DARMV8 -DDEFAULT_ARCH=D_ARCH_ARMV8_GENERIC -DENABLE_NEON)
+    add_definitions(-DARMV8 -DDEFAULT_ARCH=D_ARCH_ARMV8_GENERIC -DENABLE_NEON -DDISABLE_MD5)
   elseif("${SYSTEM_PROCESSOR}" STREQUAL "aarch32")
     add_definitions(-DARMV7 -DDEFAULT_ARCH=D_ARCH_ARM_A9Q -DENABLE_NEON
-                    -DDISABLE_NEONINTR)
+                    -DDISABLE_NEONINTR -DDISABLE_MD5)
   else()
     add_definitions(-DX86 -DX86_LINUX=1 -DDISABLE_AVX2
                     -DDEFAULT_ARCH=D_ARCH_X86_SSE42)
