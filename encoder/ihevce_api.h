@@ -1120,7 +1120,14 @@ typedef struct
     /* and 0 for blocking mode */
     WORD32 i4_outbuf_buf_free_control;
 
+    /* Reconstructed frame callback registered by the application/wrapper */
+    IV_API_CALL_STATUS_T (*pf_recon_dump_cb)(void *pv_recon_cb_handle,
+                                             void *pv_curr_out,
+                                             WORD32 i4_bitrate_instance,
+                                             WORD32 i4_res_instance);
+    void *pv_recon_dump_cb_handle;
 } ihevce_static_cfg_params_t;
+
 
 /**
  *  @brief  Input structure in which input data and
