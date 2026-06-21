@@ -11,7 +11,7 @@
 #include "ihevc_macros.h"
 #include "ihevc_structs.h"
 #include "ihevc_typedefs.h"
-#include "tests_common.h"
+#include "TestCommon.h"
 
 namespace {
 

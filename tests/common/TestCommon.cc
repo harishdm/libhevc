@@ -32,7 +32,7 @@
 #include "ihevcd_function_selector.h"
 #include "iv.h"
 #include "ivd.h"
-#include "tests_common.h"
+#include "TestCommon.h"
 // clang-format on
 
 const std::vector<std::pair<int, int>> kPUBlockSizes = {

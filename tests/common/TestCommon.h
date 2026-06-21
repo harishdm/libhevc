@@ -15,8 +15,9 @@
  * limitations under the License.
  *
  ******************************************************************************/
-#ifndef __TESTS_COMMON_H__
-#define __TESTS_COMMON_H__
+
+#pragma once
+
 #include <algorithm>
 #include <cstring>
 #include <gtest/gtest.h>
@@ -34,6 +35,8 @@
 #include "iv.h"
 #include "ivd.h"
 // clang-format on
+
+#include "TestEnums.h"
 
 static constexpr int kMaxSize = 64;
 static constexpr int kTapSize = 8;
@@ -58,4 +61,3 @@ static void compare_output(const std::vector<T> &ref,
 }
 
 std::string get_arch_str(IVD_ARCH_T arch);
-#endif /* __TESTS_COMMON_H__ */
