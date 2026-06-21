@@ -292,6 +292,9 @@ IHEVCE_PLUGIN_STATUS_T ihevce_set_def_params(ihevce_static_cfg_params_t *ps_para
     /* 1  for non_blocking mode */
     /* and 0 for blocking mode */
     ps_params->i4_outbuf_buf_free_control = 1;
+    ps_params->pf_recon_dump_cb = NULL;
+    ps_params->pv_recon_dump_cb_handle = NULL;
+
 
     /* coding tools parameters */
     ps_params->s_coding_tools_prms.i4_size = sizeof(ihevce_coding_params_t);
@@ -788,7 +791,13 @@ IHEVCE_PLUGIN_STATUS_T ihevce_init(ihevce_static_cfg_params_t *ps_params, void *
 
         /* reigter the callbacks */
         ps_interface_ctxt->ihevce_output_strm_fill_done = ihevce_strm_fill_done;
-        ps_interface_ctxt->ihevce_output_recon_fill_done = NULL;
+        ps_interface_ctxt->ihevce_output_recon_fill_done = ps_params->pf_recon_dump_cb;
+        if (ps_params->pf_recon_dump_cb != NULL) {
+            ps_interface_ctxt->pv_recon_cb_handle = ps_params->pv_recon_dump_cb_handle;
+        } else {
+            ps_interface_ctxt->pv_recon_cb_handle = (void *)ps_ctxt;
+        }
+
         ps_interface_ctxt->ihevce_set_free_input_buff = NULL;
 
         /*Added for run time or create time creation*/

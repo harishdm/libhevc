@@ -203,11 +203,11 @@ bool EncHelper::initEncoder() {
   // Configure reconstruction frame dumping if requested
   if (mReconMd5FilePath.has_value()) {
     params.i4_save_recon = 1;
+    params.pf_recon_dump_cb = reconCallback;
+    params.pv_recon_dump_cb_handle = this;
   } else {
     params.i4_save_recon = 0;
   }
-  // TODO: Remove the following once recon save is verified
-  params.i4_save_recon = 0;
 
   // Call native init
   if (ihevce_init(&params, &mCodec) != IHEVCE_EOK) {
