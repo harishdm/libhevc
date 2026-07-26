@@ -61,6 +61,7 @@ ENTRY ihevc_deblk_chroma_horz_av8
     sxtw        x5,w5
     sxtw        x6,w6
     ldr         w9, [sp]
+    ldrsb       w11, [sp, #8]
     sxtw        x9,w9
     push_v_regs
     stp         x19, x20,[sp,#-16]!
@@ -79,6 +80,8 @@ ENTRY ihevc_deblk_chroma_horz_av8
     add         x2,x1,#1
     ld1         {v4.8b},[x5]
     ld1         {v16.8b},[x6]
+    cmp         w11, #3
+    beq         yuv444_path
     adds        x1,x10,x2,asr #1
     uxtl        v2.8h, v2.8b
     adrp        x3, :got:gai4_ihevc_qp_table
@@ -101,6 +104,7 @@ lbl85:
     sub         x20,x2,#6
     csel        x2, x20, x2,gt
 l1.3332:
+common_path:
     add         x1,x1,x4,lsl #1
     sub         v6.8h,  v0.8h ,  v2.8h
     add         x3,x1,#2
@@ -167,3 +171,15 @@ l1.3540:
     pop_v_regs
     EXIT_FUNC
     ret
+
+yuv444_path:
+    uxtl        v2.8h, v2.8b
+    add         x1, x10, x2, asr #1
+    cmp         x1, #51
+    mov         x20, #51
+    csel        x1, x20, x1, gt
+    add         x2, x7, x2, asr #1
+    cmp         x2, #51
+    csel        x2, x20, x2, gt
+    uxtl        v4.8h, v4.8b
+    b           common_path

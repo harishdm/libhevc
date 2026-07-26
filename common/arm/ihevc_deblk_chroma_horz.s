@@ -62,6 +62,7 @@ gai4_ihevc_tc_table_addr:
 
 ihevc_deblk_chroma_horz_a9q:
     push        {r4-r12,lr}
+    ldrsb       r11,[sp,#60]
     sub         r12,r0,r1
     vld1.8      {d0},[r0]
     sub         r5,r12,r1
@@ -76,6 +77,8 @@ ihevc_deblk_chroma_horz_a9q:
     ldr         r8,[sp,#filter_p_offset]
     vld1.8      {d16},[r6]
     ldr         r9,[sp,#filter_q_offset]
+    cmp         r11,#3
+    beq         yuv444_qp_u
     adds        r1,r10,r2,asr #1
     vmovl.u8    q1,d2
     ldr         r7,[sp,#qp_offset_v_offset]
@@ -87,6 +90,8 @@ ulbl1:
     ldrle       r1,[r3,r1,lsl #2]
     subgt       r1,r1,#6
 l1.3312:
+    cmp         r11,#3
+    beq         yuv444_qp_v
     adds        r2,r7,r2,asr #1
     vmovl.u8    q2,d4
     bmi         l1.3332
@@ -150,5 +155,20 @@ l1.3528:
     vst1.8      {d0},[r0]
 l1.3540:
     pop         {r4-r12,pc}
+
+yuv444_qp_u:
+    vmovl.u8    q1,d2
+    ldr         r7,[sp,#qp_offset_v_offset]
+    add         r1,r10,r2,asr #1
+    cmp         r1,#51
+    movgt       r1,#51
+    b           l1.3312
+
+yuv444_qp_v:
+    vmovl.u8    q2,d4
+    add         r2,r7,r2,asr #1
+    cmp         r2,#51
+    movgt       r2,#51
+    b           l1.3332
 
 

@@ -109,9 +109,6 @@ TEST_P(ChromaInterPred_8_8_Test, ChromaCopyTest) {
 }
 
 TEST_P(ChromaInterPred_8_8_Test, ChromaHorzTest) {
-#if defined(__arm__) || defined(__aarch64__)
-  GTEST_SKIP() << "Skipping ChromaHorzTest on ARM";
-#endif
   RunTest(&ihevc_func_selector_t::ihevc_inter_pred_chroma_horz_fptr);
 }
 
@@ -136,9 +133,6 @@ TEST_P(ChromaInterPred_16_8_Test, ChromaVertTest) {
 }
 
 TEST_P(ChromaInterPred_16_16_Test, ChromaVertTest) {
-#if defined(__arm__) || defined(__aarch64__)
-  GTEST_SKIP() << "Skipping ChromaVertTest on ARM";
-#endif
 #if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || \
     defined(_M_IX86)
   // TODO: SSE4.2 and SSSE3 are not matching C implementation

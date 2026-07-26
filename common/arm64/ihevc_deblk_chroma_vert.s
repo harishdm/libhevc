@@ -67,6 +67,7 @@ ENTRY ihevc_deblk_chroma_vert_av8
     mov         x12, x7
     mov         x7, x4
     ldr         w4, [sp]
+    ldrsb       w11, [sp, #8]
 
     push_v_regs
     stp         x19, x20,[sp,#-16]!
@@ -86,11 +87,11 @@ ENTRY ihevc_deblk_chroma_vert_av8
     trn1        v29.8b, v16.8b, v4.8b
     trn2        v4.8b, v16.8b, v4.8b
     mov         v16.d[0], v29.d[0]
+    cmp         w11, #3
+    beq         yuv444_qp_u
     adrp        x7, :got:gai4_ihevc_qp_table
     ldr         x7, [x7, #:got_lo12:gai4_ihevc_qp_table]
-
-
-    bmi         l1.2944
+    tbnz        x3, #63, l1.2944
     cmp         x3,#0x39
     bgt         lbl78
     ldr         w3, [x7,x3,lsl #2]
@@ -106,7 +107,9 @@ l1.2944:
     trn1        v29.4h, v17.4h, v4.4h
     trn2        v4.4h, v17.4h, v4.4h
     mov         v17.d[0], v29.d[0]
-    bmi         l1.2964
+    cmp         w11, #3
+    beq         yuv444_qp_v
+    tbnz        x2, #63, l1.2964
     cmp         x2,#0x39
     bgt         lbl86
     ldr         w2, [x7,x2,lsl #2]
@@ -206,5 +209,17 @@ l1.3228:
     pop_v_regs
     EXIT_FUNC
     ret
+
+yuv444_qp_u:
+    cmp         x3, #51
+    mov         x20, #51
+    csel        x3, x20, x3, gt
+    b           l1.2944
+
+yuv444_qp_v:
+    cmp         x2, #51
+    mov         x20, #51
+    csel        x2, x20, x2, gt
+    b           l1.2964
 
 
