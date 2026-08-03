@@ -93,14 +93,7 @@ static INLINE UWORD32 CTZ(UWORD32 u4_word)
 
 #define GCC_ENABLE 1
 
-#if GCC_ENABLE
-#define _mm256_loadu2_m128i(X,Y) _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_loadu_si128((Y))), _mm_loadu_si128((X)),1);
 
-#define _mm256_storeu2_m128i(X,Y,Z) {_mm_storeu_si128 ((Y), _mm256_castsi256_si128((Z)));_mm_storeu_si128 ((X), _mm256_extracti128_si256((Z),1));}
-
-#define _mm256_set_m128i(X,Y) _mm256_insertf128_si256(_mm256_castsi128_si256((Y)),(X),1);
-
-#endif
 
 
 #define PREFETCH_ENABLE 1

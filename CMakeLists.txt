@@ -1,0 +1,68 @@
+cmake_minimum_required(VERSION 3.10)
+project(libhevc C CXX)
+
+option(ENABLE_COVERAGE "Enable coverage" OFF)
+if(ENABLE_COVERAGE)
+  add_compile_options(-O0 -g)
+endif()
+
+
+if(POLICY CMP0135)
+  cmake_policy(SET CMP0135 NEW)
+endif()
+
+
+if(NOT DEFINED SYSTEM_NAME)
+  set(SYSTEM_NAME ${CMAKE_HOST_SYSTEM_NAME})
+endif()
+
+if(NOT DEFINED SYSTEM_PROCESSOR)
+  set(SYSTEM_PROCESSOR ${CMAKE_HOST_SYSTEM_PROCESSOR})
+endif()
+
+if(NOT "${SYSTEM_NAME}" STREQUAL "Darwin")
+  enable_language(ASM)
+endif()
+
+set(HEVC_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
+set(HEVC_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+
+if("${HEVC_ROOT}" STREQUAL "${HEVC_CONFIG_DIR}")
+  message(
+    FATAL_ERROR
+      "Building from within the libhevc source tree is not supported.\n"
+      "Hint: Run these commands\n"
+      "$ rm -rf CMakeCache.txt CMakeFiles\n"
+      "$ mkdir -p ./build\n"
+      "$ cd ./build\n"
+      "And re-run CMake from the build directory.")
+endif()
+
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Threads REQUIRED)
+
+set(CMAKE_STATIC_LIBRARY_PREFIX "")
+
+if(${CMAKE_CROSSCOMPILING})
+  set(THREADS_PTHREAD_ARG
+      "2"
+      CACHE STRING
+            "Refer https://gitlab.kitware.com/cmake/cmake/-/issues/16920" FORCE)
+endif()
+
+include("${HEVC_ROOT}/cmake/utils.cmake")
+
+libhevc_add_compile_options()
+libhevc_add_gtest()
+libhevc_add_definitions()
+libhevc_set_link_libraries()
+
+include("${HEVC_ROOT}/common/common.cmake")
+include("${HEVC_ROOT}/decoder/libhevcdec.cmake")
+
+include("${HEVC_ROOT}/test/decoder/hevcdec.cmake")
