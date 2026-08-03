@@ -73,6 +73,8 @@
 #ifdef GPU_BUILD
 #include "ihevcd_opencl_mc_interface.h"
 #endif
+#include "ihevcd_parse_residual.h"
+#include "ihevcd_iquant_itrans_recon_ctb.h"
 
 #define COPY_DEFAULT_SCALING_LIST(pi2_scaling_mat)                                                                                      \
 {                                                                                                                                       \
@@ -99,141 +101,24 @@
     memcpy(pi2_scaling_mat + scaling_mat_offset[19], gi2_inter_default_scale_mat_32x32, 1024*sizeof(WORD16));                           \
 }
 
-#define COPY_FLAT_SCALING_LIST(pi2_scaling_mat)                                                                                         \
+#define COPY_FLAT_SCALING_LIST(pi2_scaling_mat)                                                                                      \
 {                                                                                                                                       \
     WORD32 scaling_mat_offset[]={0, 16, 32, 48, 64, 80, 96, 160, 224, 288, 352, 416, 480, 736, 992, 1248, 1504, 1760, 2016, 3040};      \
                                                                                                                                         \
     /* scaling matrix for 4x4 */                                                                                                        \
     memcpy(pi2_scaling_mat, gi2_flat_scale_mat_32x32, 6*16*sizeof(WORD16));                                                             \
-    /* scaling matrix for 8x8 */                                                                                                        \
-    memcpy(pi2_scaling_mat + scaling_mat_offset[6], gi2_flat_scale_mat_32x32, 6*64*sizeof(WORD16));                                     \
+    /* scaling matrix for 8x8 */                                                                                                            \
+    memcpy(pi2_scaling_mat + scaling_mat_offset[6], gi2_flat_scale_mat_32x32, 6*64*sizeof(WORD16));                                \
     /* scaling matrix for 16x16 */                                                                                                      \
-    memcpy(pi2_scaling_mat + scaling_mat_offset[12], gi2_flat_scale_mat_32x32, 3*256*sizeof(WORD16));                                   \
-    memcpy(pi2_scaling_mat + scaling_mat_offset[15], gi2_flat_scale_mat_32x32, 3*256*sizeof(WORD16));                                   \
+    memcpy(pi2_scaling_mat + scaling_mat_offset[12], gi2_flat_scale_mat_32x32, 3*256*sizeof(WORD16));                            \
+    memcpy(pi2_scaling_mat + scaling_mat_offset[15], gi2_flat_scale_mat_32x32, 3*256*sizeof(WORD16));                            \
     /* scaling matrix for 32x32 */                                                                                                      \
-    memcpy(pi2_scaling_mat + scaling_mat_offset[18], gi2_flat_scale_mat_32x32, 1024*sizeof(WORD16));                                    \
-    memcpy(pi2_scaling_mat + scaling_mat_offset[19], gi2_flat_scale_mat_32x32, 1024*sizeof(WORD16));                                    \
+    memcpy(pi2_scaling_mat + scaling_mat_offset[18], gi2_flat_scale_mat_32x32, 1024*sizeof(WORD16));                           \
+    memcpy(pi2_scaling_mat + scaling_mat_offset[19], gi2_flat_scale_mat_32x32, 1024*sizeof(WORD16));                           \
 }
 
 /* Function declarations */
 
-#if 0
-/**
-*******************************************************************************
-*
-* @brief
-*  Parses VPS operation point
-*
-* @par   Description
-* Parses VPS operation point as per section 7.3.5
-*
-* @param[out] ps_vps
-*  Pointer to VPS structure
-*
-* @param[in] ps_bitstrm
-*  Pointer to bitstream structure
-*
-* @param[in] ops_idx
-*  Operating point index
-*
-* @returns Error code from IHEVCD_ERROR_T
-*
-* @remarks
-*
-*******************************************************************************
-*/
-
-IHEVCD_ERROR_T ihevcd_operation_point_set( vps_t *ps_vps, bitstrm_t *ps_bitstrm, WORD32 ops_idx)
-{
-    WORD32 i;
-    WORD32 value;
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
-    for( i = 0; i <= ps_vps->i1_vps_max_nuh_reserved_zero_layer_id; i++ )
-    {
-        BITS_PARSE("list_entry_l0[ i ]", value, ps_bitstrm, 1);
-        //ps_vps->ai1_layer_id_included_flag[ops_idx][i] = value;
-
-    }
-    return ret;
-}
-
-/**
-*******************************************************************************
-*
-* @brief
-*  Parses pic_lismod_t (picture list mod syntax)  Section:7.3.8.3 Reference
-* picture list mod syntax
-*
-* @par Description:
-*  Parse pict list mod synt and update pic_lismod_t struct
-*
-* @param[in] ps_codec
-*  Pointer to codec context
-*
-* @returns  Error code from IHEVCD_ERROR_T
-*
-* @remarks
-*
-*
-*******************************************************************************
-*/
-
-WORD32 ihevcd_ref_pic_list_modification(bitstrm_t *ps_bitstrm,
-                                        slice_header_t *ps_slice_hdr,
-                                        WORD32 num_poc_total_curr)
-{
-    WORD32 ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
-    WORD32 value;
-    WORD32 i;
-    rplm_t *ps_rplm;
-    WORD32 num_bits_list_entry;
-
-    ps_rplm = &(ps_slice_hdr->s_rplm);
-
-    /* Calculate Ceil(Log2(num_poc_total_curr)) */
-    {
-        num_bits_list_entry = 32 - CLZ(num_poc_total_curr);
-        /* Check if num_poc_total_curr is power of 2 */
-        if(0 == (num_poc_total_curr & (num_poc_total_curr - 1)))
-        {
-            num_bits_list_entry--;
-        }
-    }
-
-    if(ps_slice_hdr->i1_slice_type  == PSLICE || ps_slice_hdr->i1_slice_type  == BSLICE)
-    {
-        BITS_PARSE("ref_pic_list_modification_flag_l0", value, ps_bitstrm, 1);
-        ps_rplm->i1_ref_pic_list_modification_flag_l0 = value;
-
-        if(ps_rplm->i1_ref_pic_list_modification_flag_l0)
-            for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l0_active; i++)
-            {
-                BITS_PARSE("list_entry_l0", value, ps_bitstrm, num_bits_list_entry);
-                ps_rplm->i1_list_entry_l0[i] = value;
-
-                ps_rplm->i1_list_entry_l0[i] = CLIP3(ps_rplm->i1_list_entry_l0[i], 0, num_poc_total_curr - 1);
-            }
-    }
-
-    if(ps_slice_hdr->i1_slice_type  == BSLICE)
-    {
-        BITS_PARSE("ref_pic_list_modification_flag_l1", value, ps_bitstrm, 1);
-        ps_rplm->i1_ref_pic_list_modification_flag_l1 = value;
-
-        if(ps_rplm->i1_ref_pic_list_modification_flag_l1)
-            for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l1_active; i++)
-            {
-                BITS_PARSE("list_entry_l1", value, ps_bitstrm, num_bits_list_entry);
-                ps_rplm->i1_list_entry_l1[i] = value;
-
-                ps_rplm->i1_list_entry_l1[i] = CLIP3(ps_rplm->i1_list_entry_l1[i], 0, num_poc_total_curr - 1);
-            }
-
-    }
-
-    return ret;
-}
-#endif
 /**
 *******************************************************************************
 *
@@ -268,16 +153,17 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
                                  pps_t *ps_pps,
                                  slice_header_t *ps_slice_hdr)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 value;
     WORD32 i;
-    UNUSED(ps_pps);
+
     pred_wt_ofst_t *ps_wt_ofst = &ps_slice_hdr->s_wt_ofst;
+
 
     UEV_PARSE("luma_log2_weight_denom", value, ps_bitstrm);
     ps_wt_ofst->i1_luma_log2_weight_denom = value;
 
-    if(ps_sps->i1_chroma_format_idc != 0)
+    if(ps_sps->i1_chroma_format_idc != 0) /* Nithya: For the profiles being supported, ChromaArrayType = chroma_format_idc */
     {
         SEV_PARSE("delta_chroma_log2_weight_denom", value, ps_bitstrm);
         ps_wt_ofst->i1_chroma_log2_weight_denom = ps_wt_ofst->i1_luma_log2_weight_denom + value;
@@ -285,8 +171,8 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
 
     for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l0_active; i++)
     {
-        BITS_PARSE("luma_weight_l0_flag[ i ]", value, ps_bitstrm, 1);
-        ps_wt_ofst->i1_luma_weight_l0_flag[i] = value;
+         BITS_PARSE("luma_weight_l0_flag[ i ]", value, ps_bitstrm, 1);
+         ps_wt_ofst->i1_luma_weight_l0_flag[i] = value;
     }
 
 
@@ -295,8 +181,8 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
     {
         for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l0_active; i++)
         {
-            BITS_PARSE("chroma_weight_l0_flag[ i ]", value, ps_bitstrm, 1);
-            ps_wt_ofst->i1_chroma_weight_l0_flag[i] = value;
+             BITS_PARSE("chroma_weight_l0_flag[ i ]", value, ps_bitstrm, 1);
+             ps_wt_ofst->i1_chroma_weight_l0_flag[i] = value;
         }
     }
     else
@@ -315,7 +201,7 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
             SEV_PARSE("delta_luma_weight_l0[ i ]", value, ps_bitstrm);
 
 
-            ps_wt_ofst->i2_luma_weight_l0[i] = (1 << ps_wt_ofst->i1_luma_log2_weight_denom) + value;
+            ps_wt_ofst->i2_luma_weight_l0[i] = (1 << ps_wt_ofst->i1_luma_log2_weight_denom ) + value;
 
             SEV_PARSE("luma_offset_l0[ i ]", value, ps_bitstrm);
             ps_wt_ofst->i2_luma_offset_l0[i] = value;
@@ -323,7 +209,7 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
         }
         else
         {
-            ps_wt_ofst->i2_luma_weight_l0[i] = (1 << ps_wt_ofst->i1_luma_log2_weight_denom);
+            ps_wt_ofst->i2_luma_weight_l0[i] = (1 << ps_wt_ofst->i1_luma_log2_weight_denom );
             ps_wt_ofst->i2_luma_offset_l0[i] = 0;
         }
         if(ps_wt_ofst->i1_chroma_weight_l0_flag[i])
@@ -331,7 +217,7 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
             WORD32 ofst;
             WORD32 shift = (1 << (BIT_DEPTH_CHROMA - 1));
             SEV_PARSE("delta_chroma_weight_l0[ i ][ j ]", value, ps_bitstrm);
-            ps_wt_ofst->i2_chroma_weight_l0_cb[i] = (1 << ps_wt_ofst->i1_chroma_log2_weight_denom) + value;
+            ps_wt_ofst->i2_chroma_weight_l0_cb[i] = ( 1 << ps_wt_ofst->i1_chroma_log2_weight_denom ) + value;
 
 
             SEV_PARSE("delta_chroma_offset_l0[ i ][ j ]", value, ps_bitstrm);
@@ -341,7 +227,7 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
             ps_wt_ofst->i2_chroma_offset_l0_cb[i] = CLIP_S8(ofst);
 
             SEV_PARSE("delta_chroma_weight_l0[ i ][ j ]", value, ps_bitstrm);
-            ps_wt_ofst->i2_chroma_weight_l0_cr[i] = (1 << ps_wt_ofst->i1_chroma_log2_weight_denom) + value;
+            ps_wt_ofst->i2_chroma_weight_l0_cr[i] = ( 1 << ps_wt_ofst->i1_chroma_log2_weight_denom ) + value;
 
 
             SEV_PARSE("delta_chroma_offset_l0[ i ][ j ]", value, ps_bitstrm);
@@ -353,8 +239,8 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
         }
         else
         {
-            ps_wt_ofst->i2_chroma_weight_l0_cb[i] = (1 << ps_wt_ofst->i1_chroma_log2_weight_denom);
-            ps_wt_ofst->i2_chroma_weight_l0_cr[i] = (1 << ps_wt_ofst->i1_chroma_log2_weight_denom);
+            ps_wt_ofst->i2_chroma_weight_l0_cb[i] = ( 1 << ps_wt_ofst->i1_chroma_log2_weight_denom );
+            ps_wt_ofst->i2_chroma_weight_l0_cr[i] = ( 1 << ps_wt_ofst->i1_chroma_log2_weight_denom );
 
             ps_wt_ofst->i2_chroma_offset_l0_cb[i] = 0;
             ps_wt_ofst->i2_chroma_offset_l0_cr[i] = 0;
@@ -363,81 +249,81 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
     if(BSLICE == ps_slice_hdr->i1_slice_type)
     {
         for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l1_active; i++)
-        {
-            BITS_PARSE("luma_weight_l1_flag[ i ]", value, ps_bitstrm, 1);
-            ps_wt_ofst->i1_luma_weight_l1_flag[i] = value;
-        }
+         {
+              BITS_PARSE("luma_weight_l1_flag[ i ]", value, ps_bitstrm, 1);
+              ps_wt_ofst->i1_luma_weight_l1_flag[i] = value;
+         }
 
-        if(ps_sps->i1_chroma_format_idc != 0)
-        {
-            for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l1_active; i++)
-            {
-                BITS_PARSE("chroma_weight_l1_flag[ i ]", value, ps_bitstrm, 1);
-                ps_wt_ofst->i1_chroma_weight_l1_flag[i] = value;
-            }
-        }
-        else
-        {
-            for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l1_active; i++)
-            {
-                ps_wt_ofst->i1_chroma_weight_l1_flag[i] = 0;
-            }
-        }
+         if(ps_sps->i1_chroma_format_idc != 0)
+         {
+             for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l1_active; i++)
+             {
+                  BITS_PARSE("chroma_weight_l1_flag[ i ]", value, ps_bitstrm, 1);
+                  ps_wt_ofst->i1_chroma_weight_l1_flag[i] = value;
+             }
+         }
+         else
+         {
+             for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l1_active; i++)
+             {
+                  ps_wt_ofst->i1_chroma_weight_l1_flag[i] = 0;
+             }
+         }
 
-        for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l1_active; i++)
-        {
-            if(ps_wt_ofst->i1_luma_weight_l1_flag[i])
-            {
-                SEV_PARSE("delta_luma_weight_l1[ i ]", value, ps_bitstrm);
-
-
-                ps_wt_ofst->i2_luma_weight_l1[i] = (1 << ps_wt_ofst->i1_luma_log2_weight_denom) + value;
-
-                SEV_PARSE("luma_offset_l1[ i ]", value, ps_bitstrm);
-                ps_wt_ofst->i2_luma_offset_l1[i] = value;
-
-            }
-            else
-            {
-                ps_wt_ofst->i2_luma_weight_l1[i] = (1 << ps_wt_ofst->i1_luma_log2_weight_denom);
-                ps_wt_ofst->i2_luma_offset_l1[i] = 0;
-            }
-
-            if(ps_wt_ofst->i1_chroma_weight_l1_flag[i])
-            {
-                WORD32 ofst;
-                WORD32 shift = (1 << (BIT_DEPTH_CHROMA - 1));
-                SEV_PARSE("delta_chroma_weight_l1[ i ][ j ]", value, ps_bitstrm);
-                ps_wt_ofst->i2_chroma_weight_l1_cb[i] = (1 << ps_wt_ofst->i1_chroma_log2_weight_denom) + value;;
+         for(i = 0; i < ps_slice_hdr->i1_num_ref_idx_l1_active; i++)
+         {
+             if(ps_wt_ofst->i1_luma_weight_l1_flag[i])
+             {
+                 SEV_PARSE("delta_luma_weight_l1[ i ]", value, ps_bitstrm);
 
 
-                SEV_PARSE("delta_chroma_offset_l1[ i ][ j ]", value, ps_bitstrm);
-                ofst = ((shift * ps_wt_ofst->i2_chroma_weight_l1_cb[i]) >> ps_wt_ofst->i1_chroma_log2_weight_denom);
-                ofst = value - ofst + shift;
+                 ps_wt_ofst->i2_luma_weight_l1[i] = (1 << ps_wt_ofst->i1_luma_log2_weight_denom ) + value;
 
-                ps_wt_ofst->i2_chroma_offset_l1_cb[i] = CLIP_S8(ofst);;
+                 SEV_PARSE("luma_offset_l1[ i ]", value, ps_bitstrm);
+                 ps_wt_ofst->i2_luma_offset_l1[i] = value;
 
-                SEV_PARSE("delta_chroma_weight_l1[ i ][ j ]", value, ps_bitstrm);
-                ps_wt_ofst->i2_chroma_weight_l1_cr[i] = (1 << ps_wt_ofst->i1_chroma_log2_weight_denom) + value;
+             }
+             else
+             {
+                 ps_wt_ofst->i2_luma_weight_l1[i] = (1 << ps_wt_ofst->i1_luma_log2_weight_denom );
+                 ps_wt_ofst->i2_luma_offset_l1[i] = 0;
+             }
+
+             if(ps_wt_ofst->i1_chroma_weight_l1_flag[i])
+             {
+                 WORD32 ofst;
+                 WORD32 shift = (1 << (BIT_DEPTH_CHROMA - 1));
+                 SEV_PARSE("delta_chroma_weight_l1[ i ][ j ]", value, ps_bitstrm);
+                 ps_wt_ofst->i2_chroma_weight_l1_cb[i] = ( 1 << ps_wt_ofst->i1_chroma_log2_weight_denom ) + value;;
 
 
-                SEV_PARSE("delta_chroma_offset_l1[ i ][ j ]", value, ps_bitstrm);
-                ofst = ((shift * ps_wt_ofst->i2_chroma_weight_l1_cr[i]) >> ps_wt_ofst->i1_chroma_log2_weight_denom);
-                ofst = value - ofst + shift;
+                 SEV_PARSE("delta_chroma_offset_l1[ i ][ j ]", value, ps_bitstrm);
+                 ofst = ((shift * ps_wt_ofst->i2_chroma_weight_l1_cb[i]) >> ps_wt_ofst->i1_chroma_log2_weight_denom);
+                 ofst = value - ofst + shift;
 
-                ps_wt_ofst->i2_chroma_offset_l1_cr[i] = CLIP_S8(ofst);;
+                 ps_wt_ofst->i2_chroma_offset_l1_cb[i] = CLIP_S8(ofst);
 
-            }
-            else
-            {
-                ps_wt_ofst->i2_chroma_weight_l1_cb[i] = (1 << ps_wt_ofst->i1_chroma_log2_weight_denom);
-                ps_wt_ofst->i2_chroma_weight_l1_cr[i] = (1 << ps_wt_ofst->i1_chroma_log2_weight_denom);
+                 SEV_PARSE("delta_chroma_weight_l1[ i ][ j ]", value, ps_bitstrm);
+                 ps_wt_ofst->i2_chroma_weight_l1_cr[i] = ( 1 << ps_wt_ofst->i1_chroma_log2_weight_denom ) + value;
 
-                ps_wt_ofst->i2_chroma_offset_l1_cb[i] = 0;
-                ps_wt_ofst->i2_chroma_offset_l1_cr[i] = 0;
 
-            }
-        }
+                 SEV_PARSE("delta_chroma_offset_l1[ i ][ j ]", value, ps_bitstrm);
+                 ofst = ((shift * ps_wt_ofst->i2_chroma_weight_l1_cr[i]) >> ps_wt_ofst->i1_chroma_log2_weight_denom);
+                 ofst = value - ofst + shift;
+
+                 ps_wt_ofst->i2_chroma_offset_l1_cr[i] = CLIP_S8(ofst);
+
+             }
+             else
+             {
+                 ps_wt_ofst->i2_chroma_weight_l1_cb[i] = ( 1 << ps_wt_ofst->i1_chroma_log2_weight_denom );
+                 ps_wt_ofst->i2_chroma_weight_l1_cr[i] = ( 1 << ps_wt_ofst->i1_chroma_log2_weight_denom );
+
+                 ps_wt_ofst->i2_chroma_offset_l1_cb[i] = 0;
+                 ps_wt_ofst->i2_chroma_offset_l1_cr[i] = 0;
+
+             }
+         }
     }
     return ret;
 }
@@ -471,12 +357,12 @@ WORD32 ihevcd_parse_pred_wt_ofst(bitstrm_t *ps_bitstrm,
 *******************************************************************************
 */
 IHEVCD_ERROR_T ihevcd_short_term_ref_pic_set(bitstrm_t *ps_bitstrm,
-                                             stref_picset_t *ps_stref_picset_base,
-                                             WORD32 num_short_term_ref_pic_sets,
-                                             WORD32 idx,
-                                             stref_picset_t *ps_stref_picset)
+                                     stref_picset_t *ps_stref_picset_base,
+                                     WORD32 num_short_term_ref_pic_sets,
+                                     WORD32 idx,
+                                     stref_picset_t *ps_stref_picset)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 value;
     stref_picset_t *ps_stref_picset_ref;
     WORD32 delta_idx, delta_rps;
@@ -523,7 +409,7 @@ IHEVCD_ERROR_T ihevcd_short_term_ref_pic_set(bitstrm_t *ps_bitstrm,
 
 
 
-        for(i = 0; i <= ps_stref_picset_ref->i1_num_delta_pocs; i++)
+        for( i = 0; i <= ps_stref_picset_ref->i1_num_delta_pocs; i++ )
         {
             WORD32 ref_idc;
 
@@ -546,11 +432,11 @@ IHEVCD_ERROR_T ihevcd_short_term_ref_pic_set(bitstrm_t *ps_bitstrm,
             if((ref_idc == 1) || (ref_idc == 2))
             {
                 WORD32 delta_poc;
-                delta_poc = delta_rps;
+                delta_poc = delta_rps ;
                 delta_poc +=
-                                ((i < ps_stref_picset_ref->i1_num_delta_pocs) ?
-                                ps_stref_picset_ref->ai2_delta_poc[i] :
-                                0);
+                ((i < ps_stref_picset_ref->i1_num_delta_pocs) ?
+                  ps_stref_picset_ref->ai2_delta_poc[i] :
+                  0);
 
                 ps_stref_picset->ai2_delta_poc[num_pics] = delta_poc;
 
@@ -572,7 +458,7 @@ IHEVCD_ERROR_T ihevcd_short_term_ref_pic_set(bitstrm_t *ps_bitstrm,
         num_pics = num_neg_pics + num_pos_pics;
 
         ps_stref_picset->i1_num_ref_idc =
-                        ps_stref_picset_ref->i1_num_delta_pocs + 1;
+            ps_stref_picset_ref->i1_num_delta_pocs + 1;
         ps_stref_picset->i1_num_delta_pocs = num_pics;
         ps_stref_picset->i1_num_pos_pics = num_pos_pics;
         ps_stref_picset->i1_num_neg_pics = num_neg_pics;
@@ -585,7 +471,7 @@ IHEVCD_ERROR_T ihevcd_short_term_ref_pic_set(bitstrm_t *ps_bitstrm,
             for(k = j - 1; k >= 0; k--)
             {
                 temp = ps_stref_picset->ai2_delta_poc[k];
-                if(delta_poc < temp)
+                if (delta_poc < temp)
                 {
                     ps_stref_picset->ai2_delta_poc[k + 1] = temp;
                     ps_stref_picset->ai1_used[k + 1] = ps_stref_picset->ai1_used[k];
@@ -595,7 +481,7 @@ IHEVCD_ERROR_T ihevcd_short_term_ref_pic_set(bitstrm_t *ps_bitstrm,
             }
         }
         // flip the negative values to largest first
-        for(j = 0, k = num_neg_pics - 1; j < num_neg_pics >> 1; j++, k--)
+        for(j = 0, k = num_neg_pics - 1; j < num_neg_pics>>1; j++, k--)
         {
             WORD32 delta_poc = ps_stref_picset->ai2_delta_poc[j];
             WORD8 i1_used = ps_stref_picset->ai1_used[j];
@@ -624,11 +510,11 @@ IHEVCD_ERROR_T ihevcd_short_term_ref_pic_set(bitstrm_t *ps_bitstrm,
                                                  (MAX_DPB_SIZE - 1 - ps_stref_picset->i1_num_neg_pics));
 
         ps_stref_picset->i1_num_delta_pocs =
-                        ps_stref_picset->i1_num_neg_pics +
-                        ps_stref_picset->i1_num_pos_pics;
+                            ps_stref_picset->i1_num_neg_pics +
+                            ps_stref_picset->i1_num_pos_pics;
 
 
-        for(i = 0; i < ps_stref_picset->i1_num_neg_pics; i++)
+        for( i = 0; i < ps_stref_picset->i1_num_neg_pics; i++ )
         {
             UEV_PARSE("delta_poc_s0_minus1", value, ps_bitstrm);
             poc = prev_poc - (value + 1);
@@ -640,9 +526,9 @@ IHEVCD_ERROR_T ihevcd_short_term_ref_pic_set(bitstrm_t *ps_bitstrm,
 
         }
         prev_poc = 0;
-        for(i = ps_stref_picset->i1_num_neg_pics;
-                        i < ps_stref_picset->i1_num_delta_pocs;
-                        i++)
+        for( i = ps_stref_picset->i1_num_neg_pics;
+             i < ps_stref_picset->i1_num_delta_pocs;
+             i++ )
         {
             UEV_PARSE("delta_poc_s1_minus1", value, ps_bitstrm);
             poc = prev_poc + (value + 1);
@@ -665,7 +551,7 @@ static WORD32 ihevcd_parse_sub_layer_hrd_parameters(bitstrm_t *ps_bitstrm,
                                                     WORD32 cpb_cnt,
                                                     WORD32 sub_pic_cpb_params_present_flag)
 {
-    WORD32 ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    WORD32 ret = IHEVCD_SUCCESS;
     WORD32 i;
 
     for(i = 0; i <= cpb_cnt; i++)
@@ -690,7 +576,7 @@ static WORD32 ihevcd_parse_hrd_parameters(bitstrm_t *ps_bitstrm,
                                           WORD32 common_info_present_flag,
                                           WORD32 max_num_sub_layers_minus1)
 {
-    WORD32 ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    WORD32 ret = IHEVCD_SUCCESS;
     WORD32 i;
 
     ps_hrd->u1_nal_hrd_parameters_present_flag = 0;
@@ -716,7 +602,7 @@ static WORD32 ihevcd_parse_hrd_parameters(bitstrm_t *ps_bitstrm,
         BITS_PARSE("nal_hrd_parameters_present_flag", ps_hrd->u1_nal_hrd_parameters_present_flag, ps_bitstrm, 1);
         BITS_PARSE("vcl_hrd_parameters_present_flag", ps_hrd->u1_vcl_hrd_parameters_present_flag, ps_bitstrm, 1);
 
-        if(ps_hrd->u1_nal_hrd_parameters_present_flag  ||  ps_hrd->u1_vcl_hrd_parameters_present_flag)
+        if( ps_hrd->u1_nal_hrd_parameters_present_flag  ||  ps_hrd->u1_vcl_hrd_parameters_present_flag )
         {
             BITS_PARSE("sub_pic_cpb_params_present_flag", ps_hrd->u1_sub_pic_cpb_params_present_flag, ps_bitstrm, 1);
             if(ps_hrd->u1_sub_pic_cpb_params_present_flag)
@@ -784,7 +670,7 @@ static WORD32 ihevcd_parse_vui_parameters(bitstrm_t *ps_bitstrm,
                                           vui_t *ps_vui,
                                           WORD32 sps_max_sub_layers_minus1)
 {
-    WORD32 ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    WORD32 ret = IHEVCD_SUCCESS;
 
     BITS_PARSE("aspect_ratio_info_present_flag", ps_vui->u1_aspect_ratio_info_present_flag, ps_bitstrm, 1);
 
@@ -842,7 +728,7 @@ static WORD32 ihevcd_parse_vui_parameters(bitstrm_t *ps_bitstrm,
     ps_vui->u4_def_disp_win_right_offset = 0;
     ps_vui->u4_def_disp_win_top_offset = 0;
     ps_vui->u4_def_disp_win_bottom_offset = 0;
-    if(ps_vui->u1_default_display_window_flag)
+    if (ps_vui->u1_default_display_window_flag)
     {
         UEV_PARSE("def_disp_win_left_offset", ps_vui->u4_def_disp_win_left_offset, ps_bitstrm);
         UEV_PARSE("def_disp_win_right_offset", ps_vui->u4_def_disp_win_right_offset, ps_bitstrm);
@@ -917,11 +803,11 @@ static WORD32 ihevcd_parse_vui_parameters(bitstrm_t *ps_bitstrm,
 */
 
 static IHEVCD_ERROR_T ihevcd_parse_profile_tier_level_layer(bitstrm_t *ps_bitstrm,
-                                                            profile_tier_lvl_t *ps_ptl)
+                         profile_tier_lvl_t *ps_ptl)
 {
     WORD32 value;
     WORD32 i;
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
 
     BITS_PARSE("XXX_profile_space[]", value, ps_bitstrm, 2);
     ps_ptl->i1_profile_space = value;
@@ -942,19 +828,21 @@ static IHEVCD_ERROR_T ihevcd_parse_profile_tier_level_layer(bitstrm_t *ps_bitstr
     ps_ptl->i1_general_progressive_source_flag = value;
 
     BITS_PARSE("general_interlaced_source_flag", value, ps_bitstrm, 1);
-    ps_ptl->i1_general_progressive_source_flag = value;
+    ps_ptl->i1_general_interlaced_source_flag = value;
 
     BITS_PARSE("general_non_packed_constraint_flag", value, ps_bitstrm, 1);
-    ps_ptl->i1_general_progressive_source_flag = value;
+    ps_ptl->i1_general_non_packed_constraint_flag = value;
 
     BITS_PARSE("general_frame_only_constraint_flag", value, ps_bitstrm, 1);
-    ps_ptl->i1_general_progressive_source_flag = value;
+    ps_ptl->i1_frame_only_constraint_flag = value;
 
-    BITS_PARSE("XXX_reserved_zero_44bits[0..15]", value, ps_bitstrm, 16);
+    {
+        BITS_PARSE("XXX_reserved_zero_44bits[0..15]", value, ps_bitstrm, 16);
 
-    BITS_PARSE("XXX_reserved_zero_44bits[16..31]", value, ps_bitstrm, 16);
+        BITS_PARSE("XXX_reserved_zero_44bits[16..31]", value, ps_bitstrm, 16);
 
-    BITS_PARSE("XXX_reserved_zero_44bits[32..43]", value, ps_bitstrm, 12);
+        BITS_PARSE("XXX_reserved_zero_44bits[32..43]", value, ps_bitstrm, 12);
+    }
     return ret;
 }
 
@@ -990,17 +878,20 @@ static IHEVCD_ERROR_T ihevcd_parse_profile_tier_level_layer(bitstrm_t *ps_bitstr
 */
 
 static IHEVCD_ERROR_T ihevcd_profile_tier_level(bitstrm_t *ps_bitstrm,
-                                                profile_tier_lvl_info_t *ps_ptl,
-                                                WORD32 profile_present,
-                                                WORD32 max_num_sub_layers)
+                                profile_tier_lvl_info_t *ps_ptl,
+                                WORD32 profile_present,
+                                WORD32 max_num_sub_layers)
 {
     WORD32 value;
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 i;
 
     if(profile_present)
     {
         ret = ihevcd_parse_profile_tier_level_layer(ps_bitstrm, &ps_ptl->s_ptl_gen);
+        if (IHEVCD_SUCCESS != ret) {
+            return ret;
+        }
     }
 
     BITS_PARSE("general_level_idc", value, ps_bitstrm, 8);
@@ -1018,13 +909,13 @@ static IHEVCD_ERROR_T ihevcd_profile_tier_level(bitstrm_t *ps_bitstrm,
 
     if(max_num_sub_layers > 0)
     {
-        for(i = max_num_sub_layers; i < 8; i++)
+        for( i = max_num_sub_layers; i < 8; i++ )
         {
             BITS_PARSE("reserved_zero_2bits", value, ps_bitstrm, 2);
         }
     }
 
-    for(i = 0; i < max_num_sub_layers; i++)
+    for( i = 0; i < max_num_sub_layers; i++ )
     {
         if(ps_ptl->ai1_sub_layer_profile_present_flag[i])
         {
@@ -1038,8 +929,6 @@ static IHEVCD_ERROR_T ihevcd_profile_tier_level(bitstrm_t *ps_bitstrm,
 
         }
     }
-
-
 
     return ret;
 }
@@ -1065,7 +954,7 @@ static IHEVCD_ERROR_T ihevcd_profile_tier_level(bitstrm_t *ps_bitstrm,
 */
 IHEVCD_ERROR_T  ihevcd_scaling_list_data(codec_t *ps_codec, WORD16 *pi2_scaling_mat)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 size_id;
     WORD32 matrix_id;
     WORD32 value, dc_value = 0;
@@ -1074,12 +963,12 @@ IHEVCD_ERROR_T  ihevcd_scaling_list_data(codec_t *ps_codec, WORD16 *pi2_scaling_
     WORD32 i, j, offset;
     bitstrm_t *ps_bitstrm = &ps_codec->s_parse.s_bitstrm;
     WORD16 *pi2_scaling_mat_offset;
-    WORD32 scaling_mat_offset[] = { 0, 16, 32, 48, 64, 80, 96, 160, 224, 288, 352, 416, 480, 736, 992, 1248, 1504, 1760, 2016, 3040 };
+    WORD32 scaling_mat_offset[]={0, 16, 32, 48, 64, 80, 96, 160, 224, 288, 352, 416, 480, 736, 992, 1248, 1504, 1760, 2016, 3040};
     UWORD8 *scan_table;
 
     for(size_id = 0; size_id < 4; size_id++)
     {
-        for(matrix_id = 0; matrix_id < ((size_id == 3) ? 2 : 6); matrix_id++)
+        for(matrix_id = 0; matrix_id < ((size_id == 3 ) ? 2 : 6 );matrix_id++ )
         {
             WORD32 scaling_list_pred_mode_flag;
             WORD32 scaling_list_delta_coef;
@@ -1095,14 +984,14 @@ IHEVCD_ERROR_T  ihevcd_scaling_list_data(codec_t *ps_codec, WORD16 *pi2_scaling_
                           ps_bitstrm);
                 value = CLIP3(value, 0, matrix_id);
 
-                num_elements = (1 << (4 + (size_id << 1)));
+                num_elements = (1 << (4 + (size_id << 1))) ;
                 if(0 != value)
-                    memcpy(pi2_scaling_mat_offset, pi2_scaling_mat_offset - value * num_elements, num_elements * sizeof(WORD16));
+                    memcpy(pi2_scaling_mat_offset, pi2_scaling_mat_offset - value * num_elements , num_elements * sizeof(WORD16));
             }
             else
             {
                 next_coef = 8;
-                coef_num = MIN(64, (1 << (4 + (size_id << 1))));
+                coef_num = MIN(64, (1 << (4 + (size_id << 1)) ));
 
                 if(size_id > 1)
                 {
@@ -1137,7 +1026,7 @@ IHEVCD_ERROR_T  ihevcd_scaling_list_data(codec_t *ps_codec, WORD16 *pi2_scaling_
                                         % 256;
 
                         offset = scan_table[i];
-                        offset = (offset >> 3) * 16 * 2 + (offset & 0x7) * 2;
+                        offset = (offset>>3)*16*2 + (offset & 0x7) * 2;
                         pi2_scaling_mat_offset[offset] = next_coef;
                         pi2_scaling_mat_offset[offset + 1] = next_coef;
                         pi2_scaling_mat_offset[offset + 16] = next_coef;
@@ -1157,14 +1046,14 @@ IHEVCD_ERROR_T  ihevcd_scaling_list_data(codec_t *ps_codec, WORD16 *pi2_scaling_
                                         % 256;
 
                         offset = scan_table[i];
-                        offset = (offset >> 3) * 32 * 4 + (offset & 0x7) * 4;
+                        offset = (offset>>3)*32*4 + (offset & 0x7) * 4;
 
-                        for(j = 0; j < 4; j++)
+                        for(j=0; j<4; j++)
                         {
-                            pi2_scaling_mat_offset[offset + j * 32] = next_coef;
-                            pi2_scaling_mat_offset[offset + 1 + j * 32] = next_coef;
-                            pi2_scaling_mat_offset[offset + 2 + j * 32] = next_coef;
-                            pi2_scaling_mat_offset[offset + 3 + j * 32] = next_coef;
+                            pi2_scaling_mat_offset[offset + j*32] = next_coef;
+                            pi2_scaling_mat_offset[offset + 1 + j*32] = next_coef;
+                            pi2_scaling_mat_offset[offset + 2 + j*32] = next_coef;
+                            pi2_scaling_mat_offset[offset + 3 + j*32] = next_coef;
                         }
                         pi2_scaling_mat_offset[0] = dc_value;
                     }
@@ -1200,15 +1089,12 @@ IHEVCD_ERROR_T  ihevcd_scaling_list_data(codec_t *ps_codec, WORD16 *pi2_scaling_
 */
 IHEVCD_ERROR_T ihevcd_parse_vps(codec_t *ps_codec)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 i;
     WORD32 value;
     WORD32 vps_id;
     vps_t *ps_vps;
     bitstrm_t *ps_bitstrm = &ps_codec->s_parse.s_bitstrm;
-#if 0
-    WORD32 j;
-#endif
     BITS_PARSE("vps_video_parameter_set_id", value, ps_bitstrm, 4);
     vps_id = value;
 
@@ -1226,7 +1112,7 @@ IHEVCD_ERROR_T ihevcd_parse_vps(codec_t *ps_codec)
     BITS_PARSE("vps_reserved_three_2bits", value, ps_bitstrm, 2);
     ASSERT(value == 3);
 
-    BITS_PARSE("vps_max_layers_minus1", value, ps_bitstrm, 6);
+    BITS_PARSE("vps_max_layers_minus1", value, ps_bitstrm, 6 );
     //ps_vps->i1_vps_max_layers = value + 1;
 
 
@@ -1243,13 +1129,13 @@ IHEVCD_ERROR_T ihevcd_parse_vps(codec_t *ps_codec)
     ASSERT(value == 0xFFFF);
     // profile_and_level( 1, vps_max_sub_layers_minus1 )
     ret = ihevcd_profile_tier_level(ps_bitstrm, &(ps_vps->s_ptl),
-                                    1, (ps_vps->i1_vps_max_sub_layers - 1));
+                1, (ps_vps->i1_vps_max_sub_layers - 1));
 
     BITS_PARSE("vps_sub_layer_ordering_info_present_flag", value, ps_bitstrm, 1);
     ps_vps->i1_sub_layer_ordering_info_present_flag = value;
-    i = (ps_vps->i1_sub_layer_ordering_info_present_flag ?
-                    0 : (ps_vps->i1_vps_max_sub_layers - 1));
-    for(; i < ps_vps->i1_vps_max_sub_layers; i++)
+    i = ( ps_vps->i1_sub_layer_ordering_info_present_flag ?
+            0 : (ps_vps->i1_vps_max_sub_layers - 1) );
+    for(;i < ps_vps->i1_vps_max_sub_layers; i++)
     {
         UEV_PARSE("vps_max_dec_pic_buffering[i]", value, ps_bitstrm);
         ps_vps->ai1_vps_max_dec_pic_buffering[i] = value;
@@ -1302,7 +1188,7 @@ IHEVCD_ERROR_T ihevcd_parse_vps(codec_t *ps_codec)
 */
 IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 value;
 
     WORD32 i;
@@ -1310,6 +1196,8 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
     WORD32 sps_max_sub_layers;
     WORD32 sps_id;
     WORD32 sps_temporal_id_nesting_flag;
+    WORD32 i4_profile_idc;
+    WORD32 i4_extension_present_flag;
     sps_t *ps_sps;
     profile_tier_lvl_info_t s_ptl;
     bitstrm_t *ps_bitstrm = &ps_codec->s_parse.s_bitstrm;
@@ -1328,7 +1216,22 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
 
     //profile_and_level( 1, sps_max_sub_layers_minus1 )
     ret = ihevcd_profile_tier_level(ps_bitstrm, &(s_ptl), 1,
-                                    (sps_max_sub_layers - 1));
+                                     (sps_max_sub_layers - 1));
+    if (IHEVCD_SUCCESS != ret)
+    {
+        ps_codec->s_parse.i4_error_code = ret;
+        return ret;
+    }
+
+    i4_profile_idc = (WORD32)s_ptl.s_ptl_gen.i1_profile_idc;
+
+    if ( ((HEVC_MAIN == ps_codec->i4_profile) && (i4_profile_idc > 1)) ||
+         ((HEVC_MAIN_10 == ps_codec->i4_profile) && (i4_profile_idc > 2)) )
+    {
+        ps_codec->s_parse.i4_error_code = IHEVCD_GEN_PROFILE_HIGHER_THAN_INIT_PROFILE;
+        return IHEVCD_GEN_PROFILE_HIGHER_THAN_INIT_PROFILE;
+    }
+
 
     UEV_PARSE("seq_parameter_set_id", value, ps_bitstrm);
     sps_id = value;
@@ -1336,7 +1239,7 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
     if((sps_id >= MAX_SPS_CNT) || (sps_id < 0))
     {
         if(ps_codec->i4_sps_done)
-            return IHEVCD_UNSUPPORTED_SPS_ID;
+        return IHEVCD_UNSUPPORTED_SPS_ID;
         else
             sps_id = 0;
     }
@@ -1354,11 +1257,28 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
     UEV_PARSE("chroma_format_idc", value, ps_bitstrm);
     ps_sps->i1_chroma_format_idc = value;
 
-    if(ps_sps->i1_chroma_format_idc != CHROMA_FMT_IDC_YUV420)
+    if ( (HEVC_MAIN == ps_codec->i4_profile) || (HEVC_MAIN_10 == ps_codec->i4_profile) ||
+         (HEVC_MAIN_12 == ps_codec->i4_profile) )
     {
-        ps_codec->s_parse.i4_error_code = IHEVCD_UNSUPPORTED_CHROMA_FMT_IDC;
-        return (IHEVCD_ERROR_T)IHEVCD_UNSUPPORTED_CHROMA_FMT_IDC;
+        if(ps_sps->i1_chroma_format_idc != CHROMA_FMT_IDC_YUV420)
+        {
+            ps_codec->s_parse.i4_error_code = IHEVCD_UNSUPPORTED_CHROMA_FMT_IDC;
+            return IHEVCD_UNSUPPORTED_CHROMA_FMT_IDC;
+        }
     }
+    else
+    {
+        if ((ps_sps->i1_chroma_format_idc != CHROMA_FMT_IDC_YUV420) &&
+            (ps_sps->i1_chroma_format_idc != CHROMA_FMT_IDC_YUV422) )
+        {
+            ps_codec->s_parse.i4_error_code = IHEVCD_UNSUPPORTED_CHROMA_FMT_IDC;
+            return IHEVCD_UNSUPPORTED_CHROMA_FMT_IDC;
+        }
+    }
+    ps_codec->i4_chroma_array_type = ps_sps->i1_chroma_format_idc;
+    ps_codec->i4_sub_width_chroma  = 2;
+    ps_codec->i4_sub_height_chroma = 2;
+
 
     if(CHROMA_FMT_IDC_YUV444_PLANES == ps_sps->i1_chroma_format_idc)
     {
@@ -1381,10 +1301,10 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
 
     if((ps_sps->i2_pic_width_in_luma_samples > ps_codec->i4_max_wd) ||
        (ps_sps->i2_pic_width_in_luma_samples * ps_sps->i2_pic_height_in_luma_samples >
-                       ps_codec->i4_max_wd * ps_codec->i4_max_ht) ||
+                                ps_codec->i4_max_wd * ps_codec->i4_max_ht) ||
        (ps_sps->i2_pic_height_in_luma_samples > MAX(ps_codec->i4_max_wd, ps_codec->i4_max_ht)))
     {
-        return (IHEVCD_ERROR_T)IHEVCD_UNSUPPORTED_DIMENSIONS;
+        return IHEVCD_UNSUPPORTED_DIMENSIONS;
     }
 
     BITS_PARSE("pic_cropping_flag", value, ps_bitstrm, 1);
@@ -1415,12 +1335,22 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
 
 
     UEV_PARSE("bit_depth_luma_minus8", value, ps_bitstrm);
-    if(0 != value)
+    if ( ((1 == i4_profile_idc) && (0 != value)) || ((2 == i4_profile_idc) && (2 < value)) ||
+         ((4 == i4_profile_idc) && (4 < value)) )
         return IHEVCD_UNSUPPORTED_BIT_DEPTH;
+    ps_codec->i4_bit_depth_luma = value + 8;
+    ps_codec->i4_pixel_size_y   = 1 + (value > 0);
+    ps_codec->i4_qp_bd_offset_y = 6 * value;
+    ps_sps->i1_bit_depth_luma_minus8 = value;
 
     UEV_PARSE("bit_depth_chroma_minus8", value, ps_bitstrm);
-    if(0 != value)
+    if ( ((1 == i4_profile_idc) && (0 != value)) || ((2 == i4_profile_idc) && (2 < value)) ||
+         ((4 == i4_profile_idc) && (4 < value)) )
         return IHEVCD_UNSUPPORTED_BIT_DEPTH;
+    ps_codec->i4_bit_depth_chroma = value + 8;
+    ps_codec->i4_pixel_size_uv    = 1 + (value > 0);
+    ps_codec->i4_qp_bd_offset_uv  = 6 * value;
+    ps_sps->i1_bit_depth_chroma_minus8 = value;
 
     UEV_PARSE("log2_max_pic_order_cnt_lsb_minus4", value, ps_bitstrm);
     ps_sps->i1_log2_max_pic_order_cnt_lsb = value + 4;
@@ -1429,8 +1359,8 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
     ps_sps->i1_sps_sub_layer_ordering_info_present_flag = value;
 
 
-    i = (ps_sps->i1_sps_sub_layer_ordering_info_present_flag ? 0 : (ps_sps->i1_sps_max_sub_layers - 1));
-    for(; i < ps_sps->i1_sps_max_sub_layers; i++)
+    i = ( ps_sps->i1_sps_sub_layer_ordering_info_present_flag ? 0 : (ps_sps->i1_sps_max_sub_layers - 1) );
+    for(; i < ps_sps->i1_sps_max_sub_layers; i++ )
     {
         UEV_PARSE("max_dec_pic_buffering", value, ps_bitstrm);
         ps_sps->ai1_sps_max_dec_pic_buffering[i] = value + 1;
@@ -1457,7 +1387,7 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
                     ps_sps->i1_log2_diff_max_min_transform_block_size;
 
     ps_sps->i1_log2_ctb_size = ps_sps->i1_log2_min_coding_block_size +
-                    ps_sps->i1_log2_diff_max_min_coding_block_size;
+                            ps_sps->i1_log2_diff_max_min_coding_block_size;
 
     if((ps_sps->i1_log2_min_coding_block_size < 3) ||
                     (ps_sps->i1_log2_min_transform_block_size < 2) ||
@@ -1502,7 +1432,7 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
     BITS_PARSE("sample_adaptive_offset_enabled_flag", value, ps_bitstrm, 1);
     ps_sps->i1_sample_adaptive_offset_enabled_flag = value;
 
-    BITS_PARSE("pcm_enabled_flag", value, ps_bitstrm, 1);
+    BITS_PARSE("pcm_enabled_flag", value, ps_bitstrm,1);
     ps_sps->i1_pcm_enabled_flag = value;
 
     if(ps_sps->i1_pcm_enabled_flag)
@@ -1527,7 +1457,7 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
 
     ps_sps->i1_num_short_term_ref_pic_sets = CLIP3(ps_sps->i1_num_short_term_ref_pic_sets, 0, MAX_STREF_PICS_SPS);
 
-    for(i = 0; i < ps_sps->i1_num_short_term_ref_pic_sets; i++)
+    for( i = 0; i < ps_sps->i1_num_short_term_ref_pic_sets; i++)
         ihevcd_short_term_ref_pic_set(ps_bitstrm, &ps_sps->as_stref_picset[0], ps_sps->i1_num_short_term_ref_pic_sets, i, &ps_sps->as_stref_picset[i]);
 
     BITS_PARSE("long_term_ref_pics_present_flag", value, ps_bitstrm, 1);
@@ -1538,10 +1468,11 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
         UEV_PARSE("num_long_term_ref_pics_sps", value, ps_bitstrm);
         ps_sps->i1_num_long_term_ref_pics_sps = value;
 
-        for(i = 0; i < ps_sps->i1_num_long_term_ref_pics_sps; i++)
+        for( i = 0; i < ps_sps->i1_num_long_term_ref_pics_sps; i++ )
         {
             BITS_PARSE("lt_ref_pic_poc_lsb_sps[ i ]", value, ps_bitstrm, ps_sps->i1_log2_max_pic_order_cnt_lsb);
-            ps_sps->ai1_lt_ref_pic_poc_lsb_sps[i] = value;
+            //ps_sps->ai1_lt_ref_pic_poc_lsb_sps[i] = value;
+            ps_sps->au2_lt_ref_pic_poc_lsb_sps[i] = value;
 
             BITS_PARSE("used_by_curr_pic_lt_sps_flag[ i ]", value, ps_bitstrm, 1);
             ps_sps->ai1_used_by_curr_pic_lt_sps_flag[i] = value;
@@ -1563,7 +1494,8 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
                                     &ps_sps->s_vui_parameters,
                                     ps_sps->i1_sps_max_sub_layers - 1);
 
-    BITS_PARSE("sps_extension_flag", value, ps_bitstrm, 1);
+    BITS_PARSE("sps_extension_present_flag", value, ps_bitstrm, 1);
+    i4_extension_present_flag = value;
 
 
     {
@@ -1574,25 +1506,25 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
         numerator = ps_sps->i2_pic_width_in_luma_samples;
 
         ps_sps->i2_pic_wd_in_ctb = ((numerator + ceil_offset) /
-                        (1 << ps_sps->i1_log2_ctb_size));
+                                    (1 << ps_sps->i1_log2_ctb_size));
 
         numerator = ps_sps->i2_pic_height_in_luma_samples;
         ps_sps->i2_pic_ht_in_ctb = ((numerator + ceil_offset) /
-                        (1 << ps_sps->i1_log2_ctb_size));
+                                    (1 << ps_sps->i1_log2_ctb_size));
 
         ps_sps->i4_pic_size_in_ctb = ps_sps->i2_pic_ht_in_ctb *
-                        ps_sps->i2_pic_wd_in_ctb;
+                                     ps_sps->i2_pic_wd_in_ctb;
 
         if(0 == ps_codec->i4_sps_done)
             ps_codec->s_parse.i4_next_ctb_indx = ps_sps->i4_pic_size_in_ctb;
 
         numerator = ps_sps->i2_pic_width_in_luma_samples;
         ps_sps->i2_pic_wd_in_min_cb = numerator  /
-                        (1 << ps_sps->i1_log2_min_coding_block_size);
+                                 (1 << ps_sps->i1_log2_min_coding_block_size);
 
         numerator = ps_sps->i2_pic_height_in_luma_samples;
         ps_sps->i2_pic_ht_in_min_cb = numerator  /
-                        (1 << ps_sps->i1_log2_min_coding_block_size);
+                                 (1 << ps_sps->i1_log2_min_coding_block_size);
     }
     if((0 != ps_codec->i4_first_pic_done) &&
                     ((ps_codec->i4_wd != ps_sps->i2_pic_width_in_luma_samples) ||
@@ -1600,7 +1532,7 @@ IHEVCD_ERROR_T ihevcd_parse_sps(codec_t *ps_codec)
     {
         ps_codec->i4_reset_flag = 1;
         ps_codec->i4_error_code = IVD_RES_CHANGED;
-        return (IHEVCD_ERROR_T)IHEVCD_FAIL;
+        return IHEVCD_FAIL;
     }
 
     /* Update display width and display height */
@@ -1733,9 +1665,10 @@ void ihevcd_copy_sps(codec_t *ps_codec, WORD32 sps_id, WORD32 sps_id_ref)
 */
 IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 value;
     WORD32 pps_id;
+    WORD32 i4_pps_ext_present_flag;
 
     pps_t *ps_pps;
     sps_t *ps_sps;
@@ -1815,7 +1748,7 @@ IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
     BITS_PARSE("cu_qp_delta_enabled_flag", value, ps_bitstrm, 1);
     ps_pps->i1_cu_qp_delta_enabled_flag = value;
 
-    if(ps_pps->i1_cu_qp_delta_enabled_flag)
+    if (ps_pps->i1_cu_qp_delta_enabled_flag )
     {
         UEV_PARSE("diff_cu_qp_delta_depth", value, ps_bitstrm);
         ps_pps->i1_diff_cu_qp_delta_depth = value;
@@ -1878,10 +1811,10 @@ IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
 
 
             start = 0;
-            for(i = 0; i < ps_pps->i1_num_tile_columns; i++)
+            for( i = 0; i < ps_pps->i1_num_tile_columns ; i++ )
             {
                 tile_t *ps_tile;
-                if(!ps_pps->i1_uniform_spacing_flag)
+                if( !ps_pps->i1_uniform_spacing_flag )
                 {
                     if(i < (ps_pps->i1_num_tile_columns - 1))
                     {
@@ -1895,11 +1828,11 @@ IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
                 }
                 else
                 {
-                    value = ((i + 1) * ps_sps->i2_pic_wd_in_ctb) / ps_pps->i1_num_tile_columns -
-                                    (i * ps_sps->i2_pic_wd_in_ctb) / ps_pps->i1_num_tile_columns;
+                    value = ( ( i + 1 ) * ps_sps->i2_pic_wd_in_ctb ) / ps_pps->i1_num_tile_columns -
+                                    ( i * ps_sps->i2_pic_wd_in_ctb ) / ps_pps->i1_num_tile_columns;
                 }
 
-                for(j = 0; j < ps_pps->i1_num_tile_rows; j++)
+                for( j = 0; j < ps_pps->i1_num_tile_rows; j++ )
                 {
                     ps_tile = ps_pps->ps_tile + j * ps_pps->i1_num_tile_columns + i;
                     ps_tile->u1_pos_x = start;
@@ -1913,10 +1846,10 @@ IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
             }
 
             start = 0;
-            for(i = 0; i < (ps_pps->i1_num_tile_rows); i++)
+            for( i = 0; i < (ps_pps->i1_num_tile_rows); i++ )
             {
                 tile_t *ps_tile;
-                if(!ps_pps->i1_uniform_spacing_flag)
+                if( !ps_pps->i1_uniform_spacing_flag )
                 {
                     if(i < (ps_pps->i1_num_tile_rows - 1))
                     {
@@ -1931,11 +1864,11 @@ IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
                 }
                 else
                 {
-                    value = ((i + 1) * ps_sps->i2_pic_ht_in_ctb) / ps_pps->i1_num_tile_rows -
-                                    (i * ps_sps->i2_pic_ht_in_ctb) / ps_pps->i1_num_tile_rows;
+                    value = ( ( i + 1 ) * ps_sps->i2_pic_ht_in_ctb ) / ps_pps->i1_num_tile_rows -
+                                    ( i * ps_sps->i2_pic_ht_in_ctb ) / ps_pps->i1_num_tile_rows;
                 }
 
-                for(j = 0; j < ps_pps->i1_num_tile_columns; j++)
+                for( j = 0; j < ps_pps->i1_num_tile_columns; j++ )
                 {
                     ps_tile = ps_pps->ps_tile + i * ps_pps->i1_num_tile_columns + j;
                     ps_tile->u1_pos_y = start;
@@ -1980,7 +1913,7 @@ IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
     ps_pps->i1_beta_offset_div2 = 0;
     ps_pps->i1_tc_offset_div2 = 0;
 
-    if(ps_pps->i1_deblocking_filter_control_present_flag)
+    if(ps_pps->i1_deblocking_filter_control_present_flag )
     {
 
         BITS_PARSE("deblocking_filter_override_enabled_flag", value, ps_bitstrm, 1);
@@ -1989,7 +1922,7 @@ IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
         BITS_PARSE("pic_disable_deblocking_filter_flag", value, ps_bitstrm, 1);
         ps_pps->i1_pic_disable_deblocking_filter_flag = value;
 
-        if(!ps_pps->i1_pic_disable_deblocking_filter_flag)
+        if( !ps_pps->i1_pic_disable_deblocking_filter_flag )
         {
 
             SEV_PARSE("pps_beta_offset_div2", value, ps_bitstrm);
@@ -2004,7 +1937,7 @@ IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
     BITS_PARSE("pps_scaling_list_data_present_flag", value, ps_bitstrm, 1);
     ps_pps->i1_pps_scaling_list_data_present_flag = value;
 
-    if(ps_pps->i1_pps_scaling_list_data_present_flag)
+    if(ps_pps->i1_pps_scaling_list_data_present_flag )
     {
         COPY_DEFAULT_SCALING_LIST(ps_pps->pi2_scaling_mat);
         ihevcd_scaling_list_data(ps_codec, ps_pps->pi2_scaling_mat);
@@ -2018,11 +1951,9 @@ IHEVCD_ERROR_T ihevcd_parse_pps(codec_t *ps_codec)
     BITS_PARSE("slice_header_extension_present_flag", value, ps_bitstrm, 1);
     ps_pps->i1_slice_header_extension_present_flag = value;
     /* Not present in HM */
-#if 0
-    BITS_PARSE("slice_extension_present_flag", value, ps_bitstrm, 1);
-    ps_pps->i1_slice_extension_present_flag = value;
-#endif
-    BITS_PARSE("pps_extension_flag", value, ps_bitstrm, 1);
+    BITS_PARSE("pps_extension_present_flag", value, ps_bitstrm, 1);
+    i4_pps_ext_present_flag = value;
+
 
     ps_codec->i4_pps_done = 1;
     return ret;
@@ -2081,38 +2012,7 @@ void ihevcd_copy_pps(codec_t *ps_codec, WORD32 pps_id, WORD32 pps_id_ref)
 */
 IHEVCD_ERROR_T ihevcd_parse_sei(codec_t *ps_codec)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
-    UNUSED(ps_codec);
-#if 0
-
-    sei_message( )
-    {
-        payloadType = 0
-        while( next_bits(8) == 0xFF )
-        {
-            ff_byte  /* equal to 0xFF */
-            payloadType += 255
-        }
-
-        BITS_PARSE("last_payload_type_byte", value, ps_bitstrm, 1);
-        ps_sei->i1_last_payload_type_byte = value;
-
-        payloadType += last_payload_type_byte
-        payloadSize = 0
-        while(next_bits(8) == 0xFF)
-        {
-            ff_byte  /* equal to 0xFF */
-            payloadSize += 255
-        }
-
-        BITS_PARSE("last_payload_size_byte", value, ps_bitstrm, 1);
-        ps_sei->i1_last_payload_size_byte = value;
-
-        payloadSize += last_payload_size_byte
-        sei_payload( payloadType, payloadSize )
-    }
-
-#endif
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     return ret;
 }
 
@@ -2137,21 +2037,7 @@ IHEVCD_ERROR_T ihevcd_parse_sei(codec_t *ps_codec)
 */
 WORD32 ihevcd_parse_aud(codec_t *ps_codec)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
-    UNUSED(ps_codec);
-#if 0
-
-    access_unit_delimiter_rbsp( )
-    {
-
-        BITS_PARSE("pic_type", value, ps_bitstrm, 3);
-        ps_sei->i1_pic_type = value;
-
-        rbsp_trailing_bits( )
-    }
-
-
-#endif
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     return ret;
 }
 
@@ -2199,11 +2085,11 @@ WORD32 ihevcd_calc_poc(codec_t *ps_codec, nal_header_t *ps_nal, WORD8 i1_log2_ma
         ps_codec->i4_prev_poc_msb = -2 * max_poc_lsb;
 
     if(NAL_IDR_N_LP == i1_nal_unit_type
-                    || NAL_IDR_W_LP == i1_nal_unit_type
-                    || NAL_BLA_N_LP == i1_nal_unit_type
-                    || NAL_BLA_W_DLP == i1_nal_unit_type
-                    || NAL_BLA_W_LP == i1_nal_unit_type
-                    || (NAL_CRA == i1_nal_unit_type && !ps_codec->i4_first_pic_done))
+                || NAL_IDR_W_LP == i1_nal_unit_type
+                || NAL_BLA_N_LP == i1_nal_unit_type
+                || NAL_BLA_W_DLP == i1_nal_unit_type
+                || NAL_BLA_W_LP == i1_nal_unit_type
+                || (NAL_CRA == i1_nal_unit_type && !ps_codec->i4_first_pic_done))
     {
         i4_poc_msb = ps_codec->i4_prev_poc_msb + 2 * max_poc_lsb;
         ps_codec->i4_prev_poc_lsb = 0;
@@ -2214,12 +2100,12 @@ WORD32 ihevcd_calc_poc(codec_t *ps_codec, nal_header_t *ps_nal, WORD8 i1_log2_ma
     {
 
         if((i2_poc_lsb < ps_codec->i4_prev_poc_lsb)
-                        && ((ps_codec->i4_prev_poc_lsb - i2_poc_lsb) >= max_poc_lsb / 2))
+                    && ((ps_codec->i4_prev_poc_lsb - i2_poc_lsb) >= max_poc_lsb / 2))
         {
             i4_poc_msb = ps_codec->i4_prev_poc_msb + max_poc_lsb;
         }
         else if((i2_poc_lsb > ps_codec->i4_prev_poc_lsb)
-                        && ((i2_poc_lsb - ps_codec->i4_prev_poc_lsb) > max_poc_lsb / 2))
+                    && ((i2_poc_lsb - ps_codec->i4_prev_poc_lsb) > max_poc_lsb / 2))
         {
             i4_poc_msb = ps_codec->i4_prev_poc_msb - max_poc_lsb;
         }

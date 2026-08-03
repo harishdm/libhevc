@@ -44,7 +44,7 @@ WORD32  ithread_create(void *thread_handle, void *attribute, void *strt, void *a
 
 void    ithread_exit(void *val_ptr);
 
-WORD32  ithread_join(void *thread_id, void **val_ptr);
+WORD32  ithread_join(void *thread_id, void ** val_ptr);
 
 WORD32  ithread_get_mutex_struct_size(void);
 
@@ -66,7 +66,7 @@ void    ithread_usleep(UWORD32 u4_time_us);
 
 UWORD32 ithread_get_sem_struct_size(void);
 
-WORD32  ithread_sem_init(void *sem, WORD32 pshared, UWORD32 value);
+WORD32  ithread_sem_init(void *sem,WORD32 pshared,UWORD32 value);
 
 WORD32  ithread_sem_post(void *sem);
 

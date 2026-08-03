@@ -63,6 +63,8 @@
 #include "ihevc_disp_mgr.h"
 #include "ihevc_cabac_tables.h"
 
+#include "ihevc_mem_fns.h"
+
 #include "ihevcd_defs.h"
 
 #include "ihevcd_function_selector.h"
@@ -74,13 +76,14 @@
 #include "ihevcd_trace.h"
 #include "ihevcd_process_slice.h"
 #include "ihevcd_job_queue.h"
+#include "ihevcd_sao.h"
 #ifdef GPU_BUILD
 #include "ihevcd_opencl_mc_interface.h"
 #endif
 #define MAX_DPB_PIC_BUF 6
 
 /* Function declarations */
-mv_buf_t* ihevcd_mv_mgr_get_poc(buf_mgr_t *ps_mv_buf_mgr, UWORD32 abs_poc);
+mv_buf_t *ihevcd_mv_mgr_get_poc(buf_mgr_t *ps_mv_buf_mgr, UWORD32 abs_poc);
 
 /**
 *******************************************************************************
@@ -159,7 +162,7 @@ WORD32 ihevcd_get_lvl_idx(WORD32 level)
         lvl_idx = 12;
     }
 
-    return (lvl_idx);
+    return(lvl_idx);
 }
 
 /**
@@ -204,7 +207,7 @@ WORD32 ihevcd_get_dpb_size(WORD32 level, WORD32 pic_size)
     {
         max_dpb_size = MIN(2 * MAX_DPB_PIC_BUF, 16);
     }
-    else if(pic_size <= ((3 * max_luma_samples) >> 2))
+    else if(pic_size <= ((3 * max_luma_samples) >> 2 ))
     {
         max_dpb_size = MIN((4 * MAX_DPB_PIC_BUF) / 3, 16);
     }
@@ -238,6 +241,9 @@ WORD32 ihevcd_get_dpb_size(WORD32 level, WORD32 pic_size)
 * @param[in] vert_pad
 *  Total padding used in vertical direction
 *
+* @param[in] i4_pixel_size
+*  Size of luma and chroma pixels in bytes
+*
 * @returns  Total picture buffer size
 *
 * @remarks
@@ -247,10 +253,11 @@ WORD32 ihevcd_get_dpb_size(WORD32 level, WORD32 pic_size)
 */
 WORD32 ihevcd_get_total_pic_buf_size(WORD32 pic_size,
                                      WORD32 level,
-                                     WORD32 horz_pad,
-                                     WORD32 vert_pad,
-                                     WORD32 num_ref_frames,
-                                     WORD32 num_reorder_frames)
+                                    WORD32 horz_pad,
+                                    WORD32 vert_pad,
+                                    WORD32 num_ref_frames,
+                                    WORD32 num_reorder_frames,
+                                    WORD32 i4_pixel_size)
 {
     WORD32 size;
     WORD32 num_luma_samples;
@@ -306,7 +313,10 @@ WORD32 ihevcd_get_total_pic_buf_size(WORD32 pic_size,
     size = num_samples * max_num_bufs;
 
     /* Account for padding area */
-    size += ((pad * pad) + pad * (max_wd + max_wd)) * max_num_bufs;
+    size += ((pad * pad) + pad *(max_wd + max_wd)) * max_num_bufs;
+
+    /* Account for bit depth of pixels */
+    size *= i4_pixel_size;
 
     return size;
 }
@@ -385,7 +395,6 @@ WORD32 ihevcd_get_pic_mv_bank_size(WORD32 num_luma_samples)
 WORD32 ihevcd_get_tu_data_size(WORD32 num_luma_samples)
 {
 
-
     WORD32 tu_data_size;
     WORD32 num_ctb;
     WORD32 num_luma_tu, num_chroma_tu, num_tu;
@@ -421,7 +430,7 @@ WORD32 ihevcd_get_tu_data_size(WORD32 num_luma_samples)
 WORD32 ihevcd_nctb_cnt(codec_t *ps_codec, sps_t *ps_sps)
 {
     WORD32 nctb = 1;
-    UNUSED(ps_codec);
+
     //TODO: Currently set to 1
     /* If CTB size is less than 32 x 32 then set nCTB as 4 */
     if(ps_sps->i1_log2_ctb_size < 5)
@@ -449,7 +458,7 @@ IHEVCD_ERROR_T ihevcd_get_tile_pos(pps_t *ps_pps,
         *pi4_ctb_tile_y = 0;
         *pi4_tile_idx = 0;
 
-        return (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+        return IHEVCD_SUCCESS;
     }
 
     tile_row = 0;
@@ -466,8 +475,8 @@ IHEVCD_ERROR_T ihevcd_get_tile_pos(pps_t *ps_pps,
         for(i = 0; i < ps_pps->i1_num_tile_columns; i++)
         {
             WORD16 next_tile_ctb_x;
-            ps_tile_tmp = ps_pps->ps_tile + i; //* ps_pps->i1_num_tile_rows;
-            if((ps_pps->i1_num_tile_columns - 1) == i)
+            ps_tile_tmp = ps_pps->ps_tile + i ;//* ps_pps->i1_num_tile_rows;
+            if( (ps_pps->i1_num_tile_columns-1) == i)
             {
                 next_tile_ctb_x = ps_sps->i2_pic_wd_in_ctb;
             }
@@ -477,7 +486,7 @@ IHEVCD_ERROR_T ihevcd_get_tile_pos(pps_t *ps_pps,
                 ps_tile_next_tmp = ps_pps->ps_tile + i + 1;
                 next_tile_ctb_x = ps_tile_next_tmp->u1_pos_x;
             }
-            if((ctb_x >= ps_tile_tmp->u1_pos_x) && (ctb_x < next_tile_ctb_x))
+            if( (ctb_x >= ps_tile_tmp->u1_pos_x) && (ctb_x < next_tile_ctb_x ))
             {
                 tile_col = i;
                 break;
@@ -489,17 +498,17 @@ IHEVCD_ERROR_T ihevcd_get_tile_pos(pps_t *ps_pps,
         {
             WORD16 next_tile_ctb_y;
             ps_tile_tmp = ps_pps->ps_tile + i * ps_pps->i1_num_tile_columns;
-            if((ps_pps->i1_num_tile_rows - 1) == i)
+            if( (ps_pps->i1_num_tile_rows-1) == i)
             {
                 next_tile_ctb_y = ps_sps->i2_pic_ht_in_ctb;
             }
             else
             {
                 tile_t *ps_tile_next_tmp;
-                ps_tile_next_tmp = ps_pps->ps_tile + ((i + 1) * ps_pps->i1_num_tile_columns);
+                ps_tile_next_tmp = ps_pps->ps_tile + ((i+1) * ps_pps->i1_num_tile_columns);
                 next_tile_ctb_y = ps_tile_next_tmp->u1_pos_y;
             }
-            if((ctb_y >= ps_tile_tmp->u1_pos_y) && (ctb_y < next_tile_ctb_y))
+            if( (ctb_y >= ps_tile_tmp->u1_pos_y) && (ctb_y < next_tile_ctb_y ))
             {
                 tile_row = i;
                 break;
@@ -510,7 +519,7 @@ IHEVCD_ERROR_T ihevcd_get_tile_pos(pps_t *ps_pps,
         *pi4_tile_idx = tile_row * ps_pps->i1_num_tile_columns
                         + tile_col;
     }
-    return (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    return IHEVCD_SUCCESS;
 }
 /**
 *******************************************************************************
@@ -536,7 +545,7 @@ IHEVCD_ERROR_T ihevcd_get_tile_pos(pps_t *ps_pps,
 */
 IHEVCD_ERROR_T ihevcd_pic_buf_mgr_add_bufs(codec_t *ps_codec)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 i;
     WORD32 max_dpb_size;
     sps_t *ps_sps;
@@ -547,13 +556,19 @@ IHEVCD_ERROR_T ihevcd_pic_buf_mgr_add_bufs(codec_t *ps_codec)
     WORD32 max_num_bufs;
     WORD32 pic_size;
     WORD32 level;
+    WORD32 i4_pixel_size_y;
+    WORD32 i4_pixel_size_uv;
+
+    /* Derive the pixel size for luma and chroma */
+    i4_pixel_size_y  = ps_codec->i4_pixel_size_y;
+    i4_pixel_size_uv = ps_codec->i4_pixel_size_uv;
 
 
     /* Initialize MV Bank buffer manager */
     ps_sps = ps_codec->s_parse.ps_sps;
 
     pic_size = ps_sps->i2_pic_width_in_luma_samples *
-                    ps_sps->i2_pic_height_in_luma_samples;
+        ps_sps->i2_pic_height_in_luma_samples;
 
 
     /* Compute the number of MB Bank buffers needed */
@@ -590,12 +605,14 @@ IHEVCD_ERROR_T ihevcd_pic_buf_mgr_add_bufs(codec_t *ps_codec)
         WORD32 luma_samples;
         WORD32 chroma_samples;
         pic_buf_size_allocated = ps_codec->i4_total_pic_buf_size -
-                        BUF_MGR_MAX_CNT * sizeof(pic_buf_t);
+                            BUF_MGR_MAX_CNT * sizeof(pic_buf_t);
 
-        luma_samples = (ps_codec->i4_strd) *
-                        (ps_sps->i2_pic_height_in_luma_samples + PAD_HT);
+        luma_samples = (ps_codec->i4_strd * i4_pixel_size_y) *
+                       (ps_sps->i2_pic_height_in_luma_samples + PAD_HT);
 
-        chroma_samples = luma_samples / 2;
+        //chroma_samples = luma_samples / 2;
+        chroma_samples = ((ps_codec->i4_strd * i4_pixel_size_uv) *
+                         (ps_sps->i2_pic_height_in_luma_samples + PAD_HT)) >> 1; /* 420 */
 
         /* Try to add as many buffers as possible since memory is already allocated */
         /* If the number of buffers that can be added is less than max_num_bufs
@@ -615,10 +632,11 @@ IHEVCD_ERROR_T ihevcd_pic_buf_mgr_add_bufs(codec_t *ps_codec)
                 break;
             }
 
-            ps_pic_buf->pu1_luma = pu1_buf + ps_codec->i4_strd * PAD_TOP + PAD_LEFT;
+            ps_pic_buf->pu1_luma = pu1_buf + (ps_codec->i4_strd * PAD_TOP + PAD_LEFT) * i4_pixel_size_y;
             pu1_buf += luma_samples;
 
-            ps_pic_buf->pu1_chroma = pu1_buf + ps_codec->i4_strd * (PAD_TOP / 2) + PAD_LEFT;
+            ps_pic_buf->pu1_chroma = pu1_buf +
+                (ps_codec->i4_strd * (PAD_TOP / ps_codec->i4_sub_height_chroma) + PAD_LEFT) * i4_pixel_size_uv;
             pu1_buf += chroma_samples;
 
             buf_ret = ihevc_buf_mgr_add((buf_mgr_t *)ps_codec->pv_pic_buf_mgr, ps_pic_buf, i);
@@ -656,7 +674,7 @@ IHEVCD_ERROR_T ihevcd_pic_buf_mgr_add_bufs(codec_t *ps_codec)
 */
 IHEVCD_ERROR_T ihevcd_mv_buf_mgr_add_bufs(codec_t *ps_codec)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 i;
     WORD32 max_dpb_size;
     WORD32 mv_bank_size_allocated;
@@ -692,7 +710,7 @@ IHEVCD_ERROR_T ihevcd_mv_buf_mgr_add_bufs(codec_t *ps_codec)
 
     /* Compute MV bank size per picture */
     pic_mv_bank_size = ihevcd_get_pic_mv_bank_size(ps_sps->i2_pic_width_in_luma_samples *
-                                                   ps_sps->i2_pic_height_in_luma_samples);
+                                ps_sps->i2_pic_height_in_luma_samples);
 
     for(i = 0; i < max_dpb_size; i++)
     {
@@ -722,7 +740,7 @@ IHEVCD_ERROR_T ihevcd_mv_buf_mgr_add_bufs(codec_t *ps_codec)
         ps_mv_buf->pu1_pic_pu_map = pu1_buf;
         pu1_buf += num_pu;
 
-        ps_mv_buf->pu1_pic_slice_map = (UWORD16 *)pu1_buf;
+        ps_mv_buf->pu1_pic_slice_map = (UWORD16*)pu1_buf;
         pu1_buf += num_ctb * sizeof(UWORD16);
 
         ps_mv_buf->ps_pic_pu = (pu_t *)pu1_buf;
@@ -762,7 +780,7 @@ IHEVCD_ERROR_T ihevcd_mv_buf_mgr_add_bufs(codec_t *ps_codec)
 */
 IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     mv_buf_t *ps_mv_buf;
     sps_t *ps_sps;
     WORD32 num_min_cu;
@@ -776,7 +794,7 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
     ps_codec->s_parse.i4_error_code = IHEVCD_SUCCESS;
     ps_sps = ps_codec->s_parse.ps_sps;
 #ifdef GPU_BUILD
-    //TODO GPU : Later define it for ARM only version as well
+   //TODO GPU : Later define it for ARM only version as well
     ps_slice_hdr = ps_codec->s_parse.ps_slice_hdr_base + (ps_codec->s_parse.i4_cur_slice_idx & (MAX_SLICE_HDR_CNT - 1));
 #else
     ps_slice_hdr = ps_codec->s_parse.ps_slice_hdr;
@@ -798,10 +816,10 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
     if(0 == ps_codec->s_parse.i4_first_pic_init)
     {
         ret = ihevcd_mv_buf_mgr_add_bufs(ps_codec);
-        RETURN_IF((ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), ret);
+        RETURN_IF((ret != IHEVCD_SUCCESS), ret);
 
         ret = ihevcd_pic_buf_mgr_add_bufs(ps_codec);
-        RETURN_IF((ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), ret);
+        RETURN_IF((ret != IHEVCD_SUCCESS), ret);
 
         ps_codec->s_parse.i4_first_pic_init = 1;
     }
@@ -888,8 +906,26 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
 
     if(0 == ps_codec->u4_pic_cnt)
     {
-        memset(ps_cur_pic->pu1_luma, 128, (ps_sps->i2_pic_width_in_luma_samples + PAD_WD) * ps_sps->i2_pic_height_in_luma_samples);
-        memset(ps_cur_pic->pu1_chroma, 128, (ps_sps->i2_pic_width_in_luma_samples + PAD_WD) * ps_sps->i2_pic_height_in_luma_samples / 2);
+        if (BIT_DEPTH_LUMA == ps_codec->i4_bit_depth_luma)
+        {
+            memset(ps_cur_pic->pu1_luma, 128,
+                (ps_sps->i2_pic_width_in_luma_samples + PAD_WD) * ps_sps->i2_pic_height_in_luma_samples);
+        }
+        else
+        {
+            ihevc_memset_16bit((UWORD16 *)ps_cur_pic->pu1_luma, (1 << (ps_codec->i4_bit_depth_luma - 1)),
+                (ps_sps->i2_pic_width_in_luma_samples + PAD_WD) * ps_sps->i2_pic_height_in_luma_samples);
+        }
+        if (BIT_DEPTH_CHROMA == ps_codec->i4_bit_depth_chroma)
+        {
+            memset(ps_cur_pic->pu1_chroma, 128,
+                (ps_sps->i2_pic_width_in_luma_samples + PAD_WD) * ps_sps->i2_pic_height_in_luma_samples/ps_codec->i4_sub_height_chroma);
+        }
+        else
+        {
+            ihevc_memset_16bit((UWORD16 *)ps_cur_pic->pu1_chroma, (1 << (ps_codec->i4_bit_depth_chroma - 1)),
+                (ps_sps->i2_pic_width_in_luma_samples + PAD_WD) * ps_sps->i2_pic_height_in_luma_samples/ps_codec->i4_sub_height_chroma);
+        }
     }
 
     /* Fill the remaining entries of the reference lists with the nearest POC
@@ -899,7 +935,7 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
         mv_buf_t *ps_mv_buf_ref;
         WORD32 r_idx;
         dpb_mgr_t *ps_dpb_mgr = (dpb_mgr_t *)ps_codec->pv_dpb_mgr;
-        buf_mgr_t *ps_mv_buf_mgr = (buf_mgr_t *)ps_codec->pv_mv_buf_mgr;
+        buf_mgr_t *ps_mv_buf_mgr = (buf_mgr_t*)ps_codec->pv_mv_buf_mgr;
 
         ps_pic_buf_ref = ihevc_dpb_mgr_get_ref_by_nearest_poc(ps_dpb_mgr, ps_slice_hdr->i4_abs_pic_order_cnt);
         if(NULL == ps_pic_buf_ref)
@@ -914,32 +950,32 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
 
         for(r_idx = 0; r_idx < ps_slice_hdr->i1_num_ref_idx_l0_active; r_idx++)
         {
-            if(NULL == ps_slice_hdr->as_ref_pic_list0[r_idx].pv_pic_buf)
+            if(NULL == ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_pic_buf)
             {
-                ps_slice_hdr->as_ref_pic_list0[r_idx].pv_pic_buf = (void *)ps_pic_buf_ref;
-                ps_slice_hdr->as_ref_pic_list0[r_idx].pv_mv_buf = (void *)ps_mv_buf_ref;
+                ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_pic_buf = (void *)ps_pic_buf_ref;
+                ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_mv_buf = (void *)ps_mv_buf_ref;
             }
         }
 
         for(r_idx = ps_slice_hdr->i1_num_ref_idx_l0_active; r_idx < MAX_DPB_SIZE; r_idx++)
         {
-            ps_slice_hdr->as_ref_pic_list0[r_idx].pv_pic_buf = (void *)ps_pic_buf_ref;
-            ps_slice_hdr->as_ref_pic_list0[r_idx].pv_mv_buf = (void *)ps_mv_buf_ref;
+            ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_pic_buf = (void *)ps_pic_buf_ref;
+            ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_mv_buf = (void *)ps_mv_buf_ref;
         }
 
         for(r_idx = 0; r_idx < ps_slice_hdr->i1_num_ref_idx_l1_active; r_idx++)
         {
-            if(NULL == ps_slice_hdr->as_ref_pic_list1[r_idx].pv_pic_buf)
+            if(NULL == ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_pic_buf)
             {
-                ps_slice_hdr->as_ref_pic_list1[r_idx].pv_pic_buf = (void *)ps_pic_buf_ref;
-                ps_slice_hdr->as_ref_pic_list1[r_idx].pv_mv_buf = (void *)ps_mv_buf_ref;
+                ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_pic_buf = (void *)ps_pic_buf_ref;
+                ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_mv_buf = (void *)ps_mv_buf_ref;
             }
         }
 
         for(r_idx = ps_slice_hdr->i1_num_ref_idx_l1_active; r_idx < MAX_DPB_SIZE; r_idx++)
         {
-            ps_slice_hdr->as_ref_pic_list1[r_idx].pv_pic_buf = (void *)ps_pic_buf_ref;
-            ps_slice_hdr->as_ref_pic_list1[r_idx].pv_mv_buf = (void *)ps_mv_buf_ref;
+            ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_pic_buf = (void *)ps_pic_buf_ref;
+            ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_mv_buf = (void *)ps_mv_buf_ref;
         }
     }
 
@@ -970,7 +1006,7 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
         WORD32 num_ctb;
 
         pic_size = ps_sps->i2_pic_width_in_luma_samples *
-                        ps_sps->i2_pic_height_in_luma_samples;
+                   ps_sps->i2_pic_height_in_luma_samples;
 
         ctb_luma_min_tu_cnt = pic_size / (MIN_TU_SIZE * MIN_TU_SIZE);
 
@@ -1046,7 +1082,7 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
         switch(ps_codec->i4_degrade_pics)
         {
             case 4:
-            {
+        {
                 degrade_pic = 1;
                 break;
             }
@@ -1056,34 +1092,34 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
                     degrade_pic = 1;
 
                 break;
-            }
+        }
             case 2:
             {
 
                 /* If pic count hits non-degrade interval or it is an islice, then do not degrade */
                 if((ps_slice_hdr->i1_slice_type != ISLICE) &&
                    (ps_codec->i4_degrade_pic_cnt != ps_codec->i4_nondegrade_interval))
-                    degrade_pic = 1;
+                        degrade_pic = 1;
 
                 break;
             }
             case 1:
-            {
+        {
                 /* Check if the current picture is non-ref */
                 if((ps_slice_hdr->i1_nal_unit_type < NAL_BLA_W_LP) &&
                    (ps_slice_hdr->i1_nal_unit_type % 2 == 0))
-                {
+            {
                     degrade_pic = 1;
-                }
+        }
                 break;
-            }
+    }
 
 
         }
         if(degrade_pic)
-        {
+    {
             if(ps_codec->i4_degrade_type & 0x1)
-                ps_codec->i4_disable_sao_pic = 1;
+            ps_codec->i4_disable_sao_pic = 1;
 
             if(ps_codec->i4_degrade_type & 0x2)
                 ps_codec->i4_disable_deblk_pic = 1;
@@ -1137,8 +1173,18 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
             ps_codec->as_process[i].pu1_pic_tu_map = ps_codec->s_parse.pu1_pic_tu_map;
             ps_codec->as_process[i].pv_pic_tu_coeff_data = ps_codec->s_parse.pv_pic_tu_coeff_data;
             ps_codec->as_process[i].i4_cur_mv_bank_buf_id = cur_mv_bank_buf_id;
-            ps_codec->as_process[i].s_sao_ctxt.pu1_slice_idx = ps_codec->as_process[i].pu1_slice_idx;
-            ps_codec->as_process[i].s_sao_ctxt.pu1_tile_idx = ps_codec->as_process[i].pu1_tile_idx;
+            ps_codec->as_process[i].s_sao_ctxt.pu1_slice_idx = ps_codec->as_process[i].pu1_slice_idx ;
+            ps_codec->as_process[i].s_sao_ctxt.pu1_tile_idx = ps_codec->as_process[i].pu1_tile_idx ;
+            if ((BIT_DEPTH == ps_codec->i4_bit_depth_chroma) && (BIT_DEPTH == ps_codec->i4_bit_depth_luma))
+            {
+                ps_codec->as_process[i].s_sao_ctxt.pf_sao_ctb = (void *)&ihevcd_sao_ctb;
+                ps_codec->as_process[i].s_sao_ctxt.pf_sao_shift_ctb = (void *)&ihevcd_sao_shift_ctb;
+            }
+            else
+            {
+                ps_codec->as_process[i].s_sao_ctxt.pf_sao_ctb = (void *)&ihevcd_10bd_sao_ctb;
+                ps_codec->as_process[i].s_sao_ctxt.pf_sao_shift_ctb = (void *)&ihevcd_10bd_sao_shift_ctb;
+            }
 
             /* TODO: For asynchronous api the following initializations related to picture
              * buffer should be moved to processing side
@@ -1183,7 +1229,7 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
 
 #else
 #ifdef GPU_BUILD
-            //TODO GPU : Later define it for ARM only version as well
+   //TODO GPU : Later define it for ARM only version as well
             ps_codec->as_process[i].pu1_proc_map = ps_codec->pu1_proc_map;
 #endif
 #endif
@@ -1191,14 +1237,14 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
             ps_codec->as_process[i].s_deblk_ctxt.pu1_cur_pic_luma = pu1_cur_pic_luma;
             ps_codec->as_process[i].s_deblk_ctxt.pu1_cur_pic_chroma = pu1_cur_pic_chroma;
 #ifdef GPU_BUILD
-            //TODO GPU : Later define it for ARM only version as well
+   //TODO GPU : Later define it for ARM only version as well
             ps_codec->as_process[i].s_deblk_ctxt.ps_slice_hdr_base = ps_codec->s_parse.ps_slice_hdr_base;
 #endif
             ps_codec->as_process[i].s_sao_ctxt.pu1_pic_no_loop_filter_flag = ps_codec->s_parse.pu1_pic_no_loop_filter_flag;
             ps_codec->as_process[i].s_sao_ctxt.pu1_cur_pic_luma = pu1_cur_pic_luma;
             ps_codec->as_process[i].s_sao_ctxt.pu1_cur_pic_chroma = pu1_cur_pic_chroma;
 #ifdef GPU_BUILD
-            //TODO GPU : Later define it for ARM only version as well
+   //TODO GPU : Later define it for ARM only version as well
             ps_codec->as_process[i].s_sao_ctxt.ps_slice_hdr_base = ps_codec->s_parse.ps_slice_hdr_base;
             ps_codec->as_process[i].ps_slice_hdr_base = ps_codec->s_parse.ps_slice_hdr_base;
 
@@ -1207,8 +1253,8 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
             if(i < (ps_codec->i4_num_cores - 1))
             {
                 ithread_create(ps_codec->apv_process_thread_handle[i], NULL,
-                               (void *)ihevcd_process_thread,
-                               (void *)&ps_codec->as_process[i]);
+                                   (void *)ihevcd_process_thread,
+                                   (void *)&ps_codec->as_process[i]);
                 ps_codec->ai4_process_thread_created[i] = 1;
             }
             else
@@ -1221,8 +1267,8 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
         memset(ps_codec->apu1_proc_map[ps_codec->u4_parsing_view], 0, ps_sps->i4_pic_size_in_ctb);
 #else
 #ifdef GPU_BUILD
-        //TODO GPU : Later define it for ARM only version as well
-        // and remove from above.
+   //TODO GPU : Later define it for ARM only version as well
+   // and remove from above.
         memset(ps_codec->pu1_proc_map, 0, ps_sps->i4_pic_size_in_ctb);
 #endif
 #endif
@@ -1248,22 +1294,21 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
         ps_slice_hdr = ps_codec->s_parse.ps_slice_hdr;
         abs_poc = ps_slice_hdr->i4_abs_pic_order_cnt;
         ihevc_disp_mgr_add((disp_mgr_t *)ps_codec->pv_disp_buf_mgr,
-                           ps_codec->as_process[0].i4_cur_pic_buf_id,
-                           abs_poc,
-                           ps_codec->as_process[0].ps_cur_pic);
+                       ps_codec->as_process[0].i4_cur_pic_buf_id,
+                       abs_poc,
+                       ps_codec->as_process[0].ps_cur_pic);
     }
 #endif
-    ps_codec->ps_disp_buf = NULL;
     /* Get picture to be displayed if number of pictures decoded is more than max allowed reorder */
     /* Since the current will be decoded, check is fore >= instead of > */
 #ifdef GPU_BUILD
     //TODO OPENCL delay this by one frame
     //TODO GPU : Should it be just +1
-    if(((WORD32)(ps_codec->u4_pic_cnt - ps_codec->u4_disp_cnt) >= (ps_sps->ai1_sps_max_num_reorder_pics[ps_sps->i1_sps_max_sub_layers - 1]+2)) ||
+    if(((ps_codec->u4_pic_cnt - ps_codec->u4_disp_cnt) >= (ps_sps->ai1_sps_max_num_reorder_pics[ps_sps->i1_sps_max_sub_layers - 1]+2)) ||
 #else
-    if(((WORD32)(ps_codec->u4_pic_cnt - ps_codec->u4_disp_cnt) >= ps_sps->ai1_sps_max_num_reorder_pics[ps_sps->i1_sps_max_sub_layers - 1]) ||
+    if(((ps_codec->u4_pic_cnt - ps_codec->u4_disp_cnt) >= ps_sps->ai1_sps_max_num_reorder_pics[ps_sps->i1_sps_max_sub_layers - 1]) ||
 #endif
-       ((WORD32)(ps_codec->u4_pic_cnt - ps_codec->u4_disp_cnt) >= ps_codec->i4_init_num_reorder))
+       ((ps_codec->u4_pic_cnt - ps_codec->u4_disp_cnt) >= ps_codec->i4_init_num_reorder))
 
     {
         ps_codec->ps_disp_buf = (pic_buf_t *)ihevc_disp_mgr_get((disp_mgr_t *)ps_codec->pv_disp_buf_mgr, &ps_codec->i4_disp_buf_id);
@@ -1273,8 +1318,8 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
     ps_codec->s_fmt_conv.i4_cur_row = 0;
     /* Set number of rows to be processed at a time */
     ps_codec->s_fmt_conv.i4_num_rows = 4;
-
-    if(ps_codec->u4_enable_fmt_conv_ahead && (ps_codec->i4_num_cores > 1))
+#if ENABLE_FMT_CONV_AHEAD
+    if(ps_codec->i4_num_cores > 1)
     {
         process_ctxt_t *ps_proc;
 
@@ -1301,12 +1346,12 @@ IHEVCD_ERROR_T ihevcd_parse_pic_init(codec_t *ps_codec)
                 s_job.i4_tu_coeff_data_ofst = 0;
                 ret = ihevcd_jobq_queue((jobq_t *)ps_codec->s_parse.pv_proc_jobq,
                                         &s_job, sizeof(proc_job_t), 1);
-                if(ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS)
-                    return ret;
+                if(ret != IHEVC_SUCCESS)
+                      return (WORD32)ret;
             }
         }
     }
-
+#endif
 #ifdef GPU_BUILD
     /* Pic init for Opencl device */
     ihevcd_gpu_mc_pic_init(ps_codec);

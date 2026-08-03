@@ -1019,8 +1019,8 @@ void ihevc_itrans_recon_8x8_ssse3(WORD16 *pi2_src,
     __m128i m_temp_reg_77;
     __m128i m_coeff1, m_coeff2, m_coeff3, m_coeff4;
 
-    WORD32 check_row_stage_1;   /* Lokesh */
-    WORD32 check_row_stage_2;   /* Lokesh */
+    WORD32 check_row_stage_1;
+    WORD32 check_row_stage_2;
 
     __m128i m_rdng_factor;
     //__m128i m_count;
@@ -1056,7 +1056,7 @@ void ihevc_itrans_recon_8x8_ssse3(WORD16 *pi2_src,
             /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
             /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
             {
-                //Interleaving 0,4 row in 0 , 1 Rishab
+                //Interleaving 0,4 row in 0 , 1
                 /*coef2 for m_temp_reg_12 and m_temp_reg_13 , coef1 for m_temp_reg_10 and m_temp_reg_11*/
                 m_coeff2 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[3][0]);
                 m_coeff1 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[0][0]);
@@ -1077,8 +1077,8 @@ void ihevc_itrans_recon_8x8_ssse3(WORD16 *pi2_src,
                 m_coeff1 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]); //sub 2B*36-6B*83 ,2T*36-6T*83
                 m_coeff2 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]); //add 2B*83+6B*36 ,2T*83+6T*36
 
-                /* Combining instructions to eliminate them based on zero_rows : Lokesh */
-                //Interleaving 2,6 row in 4, 5 Rishab
+                /* Combining instructions to eliminate them based on zero_rows */
+                //Interleaving 2,6 row in 4, 5
                 m_temp_reg_4 = _mm_unpacklo_epi16(m_temp_reg_72, m_temp_reg_76);
 
                 m_temp_reg_16 = _mm_madd_epi16(m_temp_reg_4, m_coeff1);
@@ -1276,7 +1276,7 @@ void ihevc_itrans_recon_8x8_ssse3(WORD16 *pi2_src,
             /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
             /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
             {
-                //Interleaving 0,4 row in 0 , 1 Rishab
+                //Interleaving 0,4 row in 0 , 1
                 /*coef2 for m_temp_reg_12 and m_temp_reg_13 , coef1 for m_temp_reg_10 and m_temp_reg_11*/
                 m_coeff2 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[3][0]);
                 m_coeff1 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[0][0]);
@@ -1297,8 +1297,8 @@ void ihevc_itrans_recon_8x8_ssse3(WORD16 *pi2_src,
                 m_coeff1 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]); //sub 2B*36-6B*83 ,2T*36-6T*83
                 m_coeff2 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]); //add 2B*83+6B*36 ,2T*83+6T*36
 
-                /* Combining instructions to eliminate them based on zero_rows : Lokesh */
-                //Interleaving 2,6 row in 4, 5 Rishab
+                /* Combining instructions to eliminate them based on zero_rows */
+                //Interleaving 2,6 row in 4, 5
                 m_temp_reg_4 = _mm_unpacklo_epi16(m_temp_reg_72, m_temp_reg_76);
 
                 m_temp_reg_16 = _mm_madd_epi16(m_temp_reg_4, m_coeff1);
@@ -1822,13 +1822,12 @@ void ihevc_itrans_recon_8x8_ssse3(WORD16 *pi2_src,
 
         /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
         /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
-#if 1
         if(!check_row_stage_1)
         {
             /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
             /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
             {
-                //Interleaving 0,4 row in 0 , 1 Rishab
+                //Interleaving 0,4 row in 0 , 1
                 /*coef2 for m_temp_reg_12 and m_temp_reg_13 , coef1 for m_temp_reg_10 and m_temp_reg_11*/
                 m_coeff2 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[3][0]);
                 m_coeff1 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[0][0]);
@@ -1852,8 +1851,8 @@ void ihevc_itrans_recon_8x8_ssse3(WORD16 *pi2_src,
                 m_coeff1 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]); //sub 2B*36-6B*83 ,2T*36-6T*83
                 m_coeff2 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]); //add 2B*83+6B*36 ,2T*83+6T*36
 
-                /* Combining instructions to eliminate them based on zero_rows : Lokesh */
-                //Interleaving 2,6 row in 4, 5 Rishab
+                /* Combining instructions to eliminate them based on zero_rows */
+                //Interleaving 2,6 row in 4, 5
                 m_temp_reg_4 = _mm_unpacklo_epi16(m_temp_reg_72, m_temp_reg_76);
                 m_temp_reg_5 = _mm_unpackhi_epi16(m_temp_reg_72, m_temp_reg_76);
 
@@ -2098,12 +2097,11 @@ void ihevc_itrans_recon_8x8_ssse3(WORD16 *pi2_src,
         }
         else
         {
-#endif
 
             /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
             /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
             {
-                //Interleaving 0,4 row in 0 , 1 Rishab
+                //Interleaving 0,4 row in 0 , 1
                 /*coef2 for m_temp_reg_12 and m_temp_reg_13 , coef1 for m_temp_reg_10 and m_temp_reg_11*/
                 m_coeff2 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[3][0]);
                 m_coeff1 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[0][0]);
@@ -2127,8 +2125,8 @@ void ihevc_itrans_recon_8x8_ssse3(WORD16 *pi2_src,
                 m_coeff1 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]); //sub 2B*36-6B*83 ,2T*36-6T*83
                 m_coeff2 = _mm_load_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]); //add 2B*83+6B*36 ,2T*83+6T*36
 
-                /* Combining instructions to eliminate them based on zero_rows : Lokesh */
-                //Interleaving 2,6 row in 4, 5 Rishab
+                /* Combining instructions to eliminate them based on zero_rows */
+                //Interleaving 2,6 row in 4, 5
                 m_temp_reg_4 = _mm_unpacklo_epi16(m_temp_reg_72, m_temp_reg_76);
                 m_temp_reg_5 = _mm_unpackhi_epi16(m_temp_reg_72, m_temp_reg_76);
 

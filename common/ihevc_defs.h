@@ -210,6 +210,55 @@ enum
     VID_FMT_UNSPECIFIED
 };
 
+typedef enum {
+    USER_DATA_BAR_DATA       = 0,
+    USER_DATA_CC_DATA        = 1,
+    USER_DATA_AFD_DATA       = 2,
+
+    // do not add anything below
+    USER_DATA_MAX
+} USER_DATA_SEI_TYPE_T;
+
+/**
+ ****************************************************************************
+ * SEI payload type
+ ****************************************************************************
+ */
+enum
+{
+    SEI_BUFFERING_PERIOD                     = 0,
+    SEI_PICTURE_TIMING                       = 1,
+    SEI_PAN_SCAN_RECT                        = 2,
+    SEI_FILLER_PAYLOAD                       = 3,
+    SEI_USER_DATA_REGISTERED_ITU_T_T35       = 4,
+    SEI_USER_DATA_UNREGISTERED               = 5,
+    SEI_RECOVERY_POINT                       = 6,
+    SEI_SCENE_INFO                           = 9,
+    SEI_FULL_FRAME_SNAPSHOT                  = 15,
+    SEI_PROGRESSIVE_REFINEMENT_SEGMENT_START = 16,
+    SEI_PROGRESSIVE_REFINEMENT_SEGMENT_END   = 17,
+    SEI_FILM_GRAIN_CHARACTERISTICS           = 19,
+    SEI_POST_FILTER_HINT                     = 22,
+    SEI_TONE_MAPPING_INFO                    = 23,
+    SEI_FRAME_PACKING                        = 45,
+    SEI_DISPLAY_ORIENTATION                  = 47,
+    SEI_SOP_DESCRIPTION                      = 128,
+    SEI_ACTIVE_PARAMETER_SETS                = 129,
+    SEI_DECODING_UNIT_INFO                   = 130,
+    SEI_TEMPORAL_LEVEL0_INDEX                = 131,
+    SEI_DECODED_PICTURE_HASH                 = 132,
+    SEI_SCALABLE_NESTING                     = 133,
+    SEI_REGION_REFRESH_INFO                  = 134,
+    SEI_NO_DISPLAY                           = 135,
+    SEI_TIME_CODE                            = 136,
+    SEI_MASTERING_DISPLAY_COLOUR_VOLUME      = 137,
+    SEI_SEGM_RECT_FRAME_PACKING              = 138,
+    SEI_TEMP_MOTION_CONSTRAINED_TILE_SETS    = 139,
+    SEI_CHROMA_SAMPLING_FILTER_HINT          = 140,
+    SEI_KNEE_FUNCTION_INFO                   = 141
+};
+
+
 #define BIT_DEPTH           8
 #define BIT_DEPTH_LUMA      BIT_DEPTH
 #define BIT_DEPTH_CHROMA    BIT_DEPTH
@@ -246,10 +295,10 @@ enum
 /* Tile restrictions                                                         */
 /*****************************************************************************/
 /* Minimum tile width in Main Profile */
-#define MIN_TILE_WD  MIN_CTB_SIZE
+#define MIN_TILE_WD  MAX_CTB_SIZE
 
 /* Minimum tile height in Main Profile */
-#define MIN_TILE_HT  MIN_CTB_SIZE
+#define MIN_TILE_HT  MAX_CTB_SIZE
 
 /*****************************************************************************/
 /* SPS restrictions                                                          */
@@ -299,7 +348,7 @@ enum
 /* CU Size Range */
 #define MAX_CU_SIZE         64
 #define MIN_CU_SIZE         8
-
+#define LOG2_MIN_CU_SIZE    3
 
 /* Number of max TU in a CTB row */
 #define MAX_TU_IN_CTB_ROW   ((MAX_CTB_SIZE / MIN_TU_SIZE))
@@ -404,6 +453,8 @@ enum
 
 #define MAX_HEVC_QP_10bit 63  //FOR HBD Branch Encoder
 
+#define MAX_HEVC_QP_12bit 75  //FOR HBD Branch Encoder
+
 
 /**
  * @brief  Total number of transform sizes
@@ -453,5 +504,9 @@ enum
 #define INTRA_PRED_CHROMA_IDX_NONE  7
 
 
+#define MAX_NUM_CLOCK_TS    3
+#define MAX_USERDATA_PAYLOAD 256
+
+#define MAX_CPB_CNT 32
 
 #endif /*__IHEVC_DEFS_H_*/

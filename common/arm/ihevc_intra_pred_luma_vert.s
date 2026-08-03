@@ -101,8 +101,8 @@
 ihevc_intra_pred_luma_ver_a9q:
 
     stmfd       sp!, {r4-r12, r14}          @stack stores the values of the arguments
-
-    ldr         r4,[sp,#40]                 @loads nt
+    vpush       {d8 - d15}
+    ldr         r4,[sp,#104]                 @loads nt
 
     lsl         r5, r4, #1                  @2nt
 
@@ -417,5 +417,6 @@ blk_4:
 
 
 end_func:
+    vpop        {d8 - d15}
     ldmfd       sp!,{r4-r12,r15}            @reload the registers from sp
 

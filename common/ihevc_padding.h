@@ -24,7 +24,7 @@
 *  Declarations for the fucntions defined in  ihevc_padding.c
 *
 * @author
-*  Srinivas T
+*  Ittiam
 *
 * @remarks
 *  None
@@ -195,6 +195,12 @@ ihevc_pad_left_chroma_ft ihevc_pad_left_chroma_ssse3;
 ihevc_pad_right_luma_ft ihevc_pad_right_luma_ssse3;
 ihevc_pad_right_chroma_ft ihevc_pad_right_chroma_ssse3;
 
+/*AVX functions declarations */
+ihevc_pad_left_luma_ft ihevc_pad_left_luma_avx;
+ihevc_pad_left_chroma_ft ihevc_pad_left_chroma_avx;
+ihevc_pad_right_luma_ft ihevc_pad_right_luma_avx;
+ihevc_pad_right_chroma_ft ihevc_pad_right_chroma_avx;
+
 /* armv8 function declarations */
 ihevc_pad_horz_luma_ft ihevc_pad_horz_luma_av8;
 ihevc_pad_horz_chroma_ft ihevc_pad_horz_chroma_av8;
@@ -205,5 +211,15 @@ ihevc_pad_left_luma_ft ihevc_pad_left_luma_av8;
 ihevc_pad_left_chroma_ft ihevc_pad_left_chroma_av8;
 ihevc_pad_right_luma_ft ihevc_pad_right_luma_av8;
 ihevc_pad_right_chroma_ft ihevc_pad_right_chroma_av8;
+
+ihevc_hbd_pad_horz_luma_ft ihevc_hbd_pad_horz_luma_av8;
+ihevc_hbd_pad_horz_chroma_ft ihevc_hbd_pad_horz_chroma_av8;
+ihevc_hbd_pad_vert_ft ihevc_hbd_pad_vert_av8;
+ihevc_hbd_pad_top_ft ihevc_hbd_pad_top_av8;
+ihevc_hbd_pad_bottom_ft ihevc_hbd_pad_bottom_av8;
+ihevc_hbd_pad_left_luma_ft ihevc_hbd_pad_left_luma_av8;
+ihevc_hbd_pad_left_chroma_ft ihevc_hbd_pad_left_chroma_av8;
+ihevc_hbd_pad_right_luma_ft ihevc_hbd_pad_right_luma_av8;
+ihevc_hbd_pad_right_chroma_ft ihevc_hbd_pad_right_chroma_av8;
 
 #endif /*_IHEVC_PADDING_H_*/

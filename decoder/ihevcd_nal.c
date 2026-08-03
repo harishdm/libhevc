@@ -178,17 +178,17 @@ WORD32 ihevcd_nal_search_start_code(UWORD8 *pu1_buf, WORD32 bytes_remaining)
 *******************************************************************************
 */
 IHEVCD_ERROR_T ihevcd_nal_remv_emuln_bytes(UWORD8 *pu1_src,
-                                           UWORD8 *pu1_dst,
-                                           WORD32 bytes_remaining,
-                                           WORD32 *pi4_nal_len,
-                                           WORD32 *pi4_dst_len)
+                                   UWORD8 *pu1_dst,
+                                   WORD32 bytes_remaining,
+                                   WORD32 *pi4_nal_len,
+                                   WORD32 *pi4_dst_len)
 {
     WORD32 src_cnt;
     WORD32 dst_cnt;
     WORD32 zero_byte_cnt;
     WORD32 start_code_found;
     UWORD8 u1_src;
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
 
     src_cnt = 0;
     dst_cnt = 0;
@@ -288,7 +288,7 @@ IHEVCD_ERROR_T ihevcd_nal_remv_emuln_bytes(UWORD8 *pu1_src,
 IHEVCD_ERROR_T ihevcd_nal_unit_header(bitstrm_t *ps_bitstrm, nal_header_t *ps_nal)
 {
     WORD32 unused;
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     UNUSED(unused);
     /* Syntax : forbidden_zero_bit */
     unused = ihevcd_bits_get(ps_bitstrm, 1);
@@ -329,13 +329,13 @@ IHEVCD_ERROR_T ihevcd_nal_unit_header(bitstrm_t *ps_bitstrm, nal_header_t *ps_na
 */
 IHEVCD_ERROR_T ihevcd_nal_unit(codec_t *ps_codec)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
 
     /* NAL Header */
     nal_header_t s_nal;
 
     ret = ihevcd_nal_unit_header(&ps_codec->s_parse.s_bitstrm, &s_nal);
-    RETURN_IF((ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), ret);
+    RETURN_IF((ret != IHEVCD_SUCCESS), ret);
 
     if(ps_codec->i4_slice_error)
         s_nal.i1_nal_unit_type = ps_codec->s_parse.ps_slice_hdr->i1_nal_unit_type;
@@ -396,7 +396,8 @@ IHEVCD_ERROR_T ihevcd_nal_unit(codec_t *ps_codec)
 
             ret = ihevcd_parse_slice_header(ps_codec, &s_nal);
             DEBUG_PRINT_NAL_INFO(ps_codec, s_nal.i1_nal_unit_type);
-            if(ret == (IHEVCD_ERROR_T)IHEVCD_SUCCESS)
+
+            if(ret == IHEVCD_SUCCESS)
             {
                 if((s_nal.i1_nal_unit_type != NAL_RASL_N && s_nal.i1_nal_unit_type != NAL_RASL_R) ||
                                 ps_codec->i4_rasl_output_flag ||
@@ -420,7 +421,7 @@ IHEVCD_ERROR_T ihevcd_nal_unit(codec_t *ps_codec)
             }
 
             ret = ihevcd_parse_sps(ps_codec);
-            if(ret == (IHEVCD_ERROR_T)IHEVCD_SUCCESS)
+            if(ret == IHEVCD_SUCCESS)
             {
                 sps_t *ps_sps = ps_codec->ps_sps_base + MAX_SPS_CNT - 1;
                 ihevcd_copy_sps(ps_codec, ps_sps->i1_sps_id, MAX_SPS_CNT - 1);
@@ -439,7 +440,7 @@ IHEVCD_ERROR_T ihevcd_nal_unit(codec_t *ps_codec)
             }
 
             ret = ihevcd_parse_pps(ps_codec);
-            if(ret == (IHEVCD_ERROR_T)IHEVCD_SUCCESS)
+            if(ret == IHEVCD_SUCCESS)
             {
                 pps_t *ps_pps = ps_codec->ps_pps_base + MAX_PPS_CNT - 1;
                 ihevcd_copy_pps(ps_codec, ps_pps->i1_pps_id, MAX_PPS_CNT - 1);

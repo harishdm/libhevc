@@ -69,15 +69,16 @@ gu1_table_band_idx_addr:
 ihevc_sao_band_offset_luma_a9q:
 
     STMFD       sp!, {r4-r12, r14}          @stack stores the values of the arguments
+    vpush       {d8  -  d15}
 
-    LDR         r8,[sp,#56]                 @Loads ht
-    LDR         r7,[sp,#52]                 @Loads wd
+    LDR         r8,[sp,#120]                 @Loads ht
+    LDR         r7,[sp,#116]                 @Loads wd
 
     MOV         r9,r8                       @Move the ht to r9 for loop counter
-    LDR         r5,[sp,#44]                 @Loads sao_band_pos
+    LDR         r5,[sp,#108]                 @Loads sao_band_pos
     ADD         r10,r0,r7                   @pu1_src[row * src_strd + (wd)]
 
-    LDR         r4,[sp,#40]                 @Loads pu1_src_top_left
+    LDR         r4,[sp,#104]                 @Loads pu1_src_top_left
     SUB         r10,r10,#1                  @wd-1
     LDR         r14, gu1_table_band_idx_addr
 ulbl1:
@@ -91,7 +92,7 @@ SRC_LEFT_LOOP:
 
     ADD         r9,r3,r7                    @pu1_src_top[wd]
     VLD1.8      D1,[r14]!                   @band_table.val[0]
-    LDR         r6,[sp,#48]                 @Loads pi1_sao_offset
+    LDR         r6,[sp,#112]                 @Loads pi1_sao_offset
 
     LSL         r11,r5,#3
     VLD1.8      D2,[r14]!                   @band_table.val[1]
@@ -226,6 +227,7 @@ HEIGHT_LOOP:
     ADD         r0,r0,#8
     BNE         SWITCH_BREAK
 
+    vpop        {d8  -  d15}
     LDMFD       sp!,{r4-r12,r15}            @Reload the registers from SP
 
 

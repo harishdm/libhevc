@@ -51,18 +51,17 @@
 #include "ihevc_debug.h"
 #include "ihevc_structs.h"
 /**
- * Name of the codec
+ * Name of the codec and target platform (All Cortex A processors in this case)
  */
-#define CODEC_NAME              "HEVCDEC"
+#define CODEC_NAME              "HEVCDEC_CXA_HM-14.0+RExt-7.2"
 /**
  * Codec release type, production or evaluation
  */
 #define CODEC_RELEASE_TYPE      "production"
 /**
  * Version string. First two digits signify major version and last two minor
- * Increment major version for API change or major feature update
  */
-#define CODEC_RELEASE_VER       "04.01"
+#define CODEC_RELEASE_VER       "03.00"
 /**
  * Vendor name
  */
@@ -84,7 +83,7 @@
     strcat(version_string,codec_vendor);                                                            \
     strcat(version_string," Build: ");                                                              \
     strcat(version_string,__DATE__);                                                                \
-    strcat(version_string," @ ");                                                                   \
+    strcat(version_string," @ ");                                                                       \
     strcat(version_string,__TIME__);
 
 

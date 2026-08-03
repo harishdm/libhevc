@@ -40,7 +40,7 @@
 typedef enum
 {
     INIT_DONE, HEADER_DONE, FIRST_FRAME_DONE,
-}CODEC_STATE_T;
+} CODEC_STATE_T;
 
 
 
@@ -90,7 +90,7 @@ typedef struct
      * Max address for bitstream
      */
     UWORD8 *pu1_buf_max;
-}bitstrm_t;
+} bitstrm_t;
 
 /**
 ******************************************************************************
@@ -119,7 +119,7 @@ typedef struct cab_ctxt
      */
     UWORD8 au1_ctxt_models_sync[IHEVC_CAB_CTXT_END];
 
-}cab_ctxt_t;
+} cab_ctxt_t;
 
 typedef enum
 {
@@ -178,7 +178,7 @@ typedef struct
      */
     WORD16 i2_wait;
 #endif
-}proc_job_t;
+} proc_job_t;
 /**
  * Structure to represent a MV Bank buffer
  */
@@ -228,7 +228,7 @@ typedef struct
      */
     WORD32 u1_l1_collocated_poc_lt[MAX_SLICE_SEGMENTS_IN_FRAME][MAX_DPB_SIZE];
 
-}mv_buf_t;
+} mv_buf_t;
 
 typedef struct
 {
@@ -296,35 +296,35 @@ typedef struct
       * Pointer to pu_map for the current frame being parsed
       * where MVs and Intra pred modes will be updated
       */
-    UWORD8 *pu1_pic_pu_map;
+     UWORD8 *pu1_pic_pu_map;
 
-    /**
-     *  PU count in current CTB
-     */
-    WORD32 i4_ctb_pu_cnt;
+     /**
+      *  PU count in current CTB
+      */
+     WORD32 i4_ctb_pu_cnt;
 
-    /**
-     *  PU count in current CTB
-     */
-    WORD32 i4_ctb_start_pu_idx;
+     /**
+      *  PU count in current CTB
+      */
+     WORD32 i4_ctb_start_pu_idx;
 
-    /**
-     *  Top availability for current CTB level
-     */
-    UWORD8 u1_top_ctb_avail;
+     /**
+      *  Top availability for current CTB level
+      */
+     UWORD8 u1_top_ctb_avail;
 
-    /**
-     *  Top right availability for current CTB level
-     */
-    UWORD8 u1_top_rt_ctb_avail;
-    /**
-     *  Top left availability for current CTB level
-     */
-    UWORD8 u1_top_lt_ctb_avail;
-    /**
-     *  left availability for current CTB level
-     */
-    UWORD8 u1_left_ctb_avail;
+     /**
+      *  Top right availability for current CTB level
+      */
+     UWORD8 u1_top_rt_ctb_avail;
+     /**
+      *  Top left availability for current CTB level
+      */
+     UWORD8 u1_top_lt_ctb_avail;
+     /**
+      *  left availability for current CTB level
+      */
+     UWORD8 u1_left_ctb_avail;
 
 }mv_ctxt_t;
 
@@ -539,17 +539,17 @@ typedef struct
     /* Points to the array of slice indices which is used to identify the slice
     *  to which each CTB in a frame belongs.
     */
-    UWORD16 *pu1_slice_idx;
+   UWORD16 *pu1_slice_idx;
 
-    /* Specifies if the chroma format is yuv420sp_vu */
-    WORD32 is_chroma_yuv420sp_vu;
+   /* Specifies if the chroma format is yuv420sp_vu */
+   WORD32 is_chroma_yuv420sp_vu;
 
 #ifdef GPU_BUILD
-    //TODO GPU : Later define it for ARM only version as well
-    /**
-     * Pointer to base slice header structure
-     */
-    slice_header_t *ps_slice_hdr_base;
+   //TODO GPU : Later define it for ARM only version as well
+   /**
+    * Pointer to base slice header structure
+    */
+   slice_header_t *ps_slice_hdr_base;
 #endif
 }deblk_ctxt_t;
 
@@ -678,7 +678,7 @@ typedef struct
     /**
      * Bottom-left luma pixel - used by SAO
      */
-    UWORD8 u1_sao_src_top_left_luma_bot_left;
+    UWORD16 u2_sao_src_top_left_luma_bot_left;
     /**
      *  Pointer to array that stores bottom left luma pixel per row(interleaved) - used by SAO
      */
@@ -687,7 +687,7 @@ typedef struct
     /**
      * Bottom left chroma pixel(interleaved) - used by SAO
      */
-    UWORD8 au1_sao_src_top_left_chroma_bot_left[2];
+    UWORD16 au2_sao_src_top_left_chroma_bot_left[2];
     /**
      *  Pointer to array that stores bottom left chroma pixel per row(interleaved) - used by SAO
      */
@@ -710,6 +710,10 @@ typedef struct
 
     /* Specifies if the chroma format is yuv420sp_vu */
     WORD32 is_chroma_yuv420sp_vu;
+
+    /* Function pointer for the CTB level functions */
+    void                *pf_sao_ctb;
+    void                *pf_sao_shift_ctb;
 
 }sao_ctxt_t;
 
@@ -800,7 +804,7 @@ typedef struct
      */
     WORD32 i4_cu_qp_delta;
 
-}parse_cu_t;
+} parse_cu_t;
 /**
  * Structure contains few common state variables such as CTB positions, current SPS, PPS ids etc which are to be
  * used in the parsing thread. By keeping it a different structure it is being explicitly signalled that these
@@ -1167,25 +1171,25 @@ typedef struct
     /**
      * Abs POC count of the frame
      */
-    WORD32 i4_abs_pic_order_cnt;
+     WORD32 i4_abs_pic_order_cnt;
 
-    /**
-     * Pointer points to mv_buffer of current frame
-     */
-    mv_buf_t *ps_cur_mv_buf;
+     /**
+      * Pointer points to mv_buffer of current frame
+      */
+     mv_buf_t *ps_cur_mv_buf;
 
-    /**
-     * Variable to store the next ctb count to compute pu idx
-     */
-    WORD32 i4_next_pu_ctb_cnt;
+     /**
+      * Variable to store the next ctb count to compute pu idx
+      */
+     WORD32 i4_next_pu_ctb_cnt;
 
-    /**
-     * Variable to store the next ctb count to compute tu idx
-     */
-    WORD32 i4_next_tu_ctb_cnt;
+     /**
+      * Variable to store the next ctb count to compute tu idx
+      */
+     WORD32 i4_next_tu_ctb_cnt;
 
 
-}parse_ctxt_t;
+} parse_ctxt_t;
 
 /**
  * Pixel processing thread context
@@ -1326,13 +1330,13 @@ typedef struct
       * Pointer to pu_map for the current frame being parsed
       * where MVs and Intra pred modes will be updated
       */
-    UWORD8 *pu1_pic_pu_map;
+     UWORD8 *pu1_pic_pu_map;
 
-    /**
-     * Pointer to frame level pu_t for the current frame being parsed
-     * where MVs and Intra pred modes will be updated
-     */
-    pu_t *ps_pic_pu;
+     /**
+      * Pointer to frame level pu_t for the current frame being parsed
+      * where MVs and Intra pred modes will be updated
+      */
+     pu_t *ps_pic_pu;
 
     /** PU Index map per CTB. The indices in this map are w.r.t picture pu array and not
      * w.r.t CTB pu array.
@@ -1360,16 +1364,16 @@ typedef struct
      */
     UWORD32 u4_ctb_top_left_pu_idx;
 
-    /**
-     * Pointer to frame level tu_t for the current frame being parsed
-     * where transform unit related info will be updated
+     /**
+      * Pointer to frame level tu_t for the current frame being parsed
+      * where transform unit related info will be updated
+      */
+     tu_t *ps_pic_tu;
+
+
+     /**
+     * Current PU structure - set to CTB pu_map pointer at the start of CTB parsing
      */
-    tu_t *ps_pic_tu;
-
-
-    /**
-    * Current PU structure - set to CTB pu_map pointer at the start of CTB parsing
-    */
     UWORD8 *pu1_pu_map;
 
     /** Current MV Bank's buffer ID */
@@ -1571,7 +1575,7 @@ typedef struct
      */
     WORD32 i4_next_tu_ctb_cnt;
 #ifdef GPU_BUILD
-    //TODO GPU : Later define it for ARM only version as well
+   //TODO GPU : Later define it for ARM only version as well
     /** Process status: one byte per CTB */
     UWORD8 *pu1_proc_map;
 #endif
@@ -1579,7 +1583,7 @@ typedef struct
     UWORD32 u4_gpu_inter_flag;
 #endif
 #ifdef GPU_BUILD
-    //TODO GPU : Later define it for ARM only version as well
+   //TODO GPU : Later define it for ARM only version as well
     /**
      * Pointer to base slice header structure
      */
@@ -1589,12 +1593,12 @@ typedef struct
      * Number of ctb's to process in one loop
      */
     WORD32 i4_nctb;
-}process_ctxt_t;
+} process_ctxt_t;
 #ifdef GPU_BUILD
 typedef struct
 {
     /** Pointer to private GPU memory */
-    void *pv_gpu_priv;
+    void* pv_gpu_priv;
 
     /**
      * Array that contains the no of ctbs in each grain of the frame.
@@ -1679,37 +1683,115 @@ typedef void (*pf_recon)(WORD16 *pi2_src,
                          WORD32 zero_cols);
 
 typedef void (*pf_itrans_recon_dc)(UWORD8 *pu1_pred,
-                                   UWORD8 *pu1_dst,
-                                   WORD32 pred_strd,
-                                   WORD32 dst_strd,
-                                   WORD32 log2_trans_size,
-                                   WORD16 i2_coeff_value);
+                                    UWORD8 *pu1_dst,
+                                    WORD32 pred_strd,
+                                    WORD32 dst_strd,
+                                    WORD32 log2_trans_size,
+                                    WORD16 i2_coeff_value);
 
+typedef void (*pf_hbd_itrans_recon_dc)(UWORD16 *pu2_pred,
+                                       UWORD16 *pu2_dst,
+                                       WORD32 pred_strd,
+                                       WORD32 dst_strd,
+                                       WORD32 log2_trans_size,
+                                       WORD16 i2_coeff_value,
+                                       WORD32 i4_bit_depth);
+
+typedef void (*pf_hbd_itrans_recon)(WORD16 *pi2_src,
+                                    WORD16 *pi2_tmp,
+                                    UWORD16 *pu2_pred,
+                                    UWORD16 *pu2_dst,
+                                    WORD32 i4_src_strd,
+                                    WORD32 i4_pred_strd,
+                                    WORD32 i4_dst_strd,
+                                    WORD32 i4_zero_cols,
+                                    WORD32 i4_zero_rows,
+                                    UWORD8 u1_bit_depth);
+
+typedef void (*pf_hbd_recon)(WORD16 *pi2_src,
+                             UWORD16 *pu2_pred,
+                             UWORD16 *pu2_dst,
+                             WORD32 i4_src_strd,
+                             WORD32 i4_pred_strd,
+                             WORD32 i4_dst_strd,
+                             WORD32 i4_zero_cols,
+                             UWORD8 u1_bit_depth);
+
+typedef void (*pf_hbd_intra_pred_luma)(UWORD16 *pu2_ref,
+                                       WORD32 src_strd,
+                                       UWORD16 *pu2_dst,
+                                       WORD32 dst_strd,
+                                       WORD32 nt,
+                                       WORD32 mode,
+                                       UWORD8 bit_depth);
+
+typedef void (*pf_hbd_intra_pred_chroma)(UWORD16 *pu2_ref,
+                                         WORD32 src_strd,
+                                         UWORD16 *pu2_dst,
+                                         WORD32 dst_strd,
+                                         WORD32 nt,
+                                         WORD32 mode);
 
 typedef void (*pf_sao_luma)(UWORD8 *,
-                            WORD32,
-                            UWORD8 *,
-                            UWORD8 *,
-                            UWORD8 *,
-                            UWORD8 *,
-                            UWORD8 *,
-                            UWORD8 *,
-                            WORD8 *,
-                            WORD32,
-                            WORD32);
+        WORD32,
+        UWORD8 *,
+        UWORD8 *,
+        UWORD8 *,
+        UWORD8 *,
+        UWORD8 *,
+        UWORD8 *,
+        WORD8 *,
+        WORD32,
+        WORD32);
 
 typedef void (*pf_sao_chroma)(UWORD8 *,
-                              WORD32,
-                              UWORD8 *,
-                              UWORD8 *,
-                              UWORD8 *,
-                              UWORD8 *,
-                              UWORD8 *,
-                              UWORD8 *,
-                              WORD8 *,
-                              WORD8 *,
-                              WORD32,
-                              WORD32);
+        WORD32,
+        UWORD8 *,
+        UWORD8 *,
+        UWORD8 *,
+        UWORD8 *,
+        UWORD8 *,
+        UWORD8 *,
+        WORD8 *,
+        WORD8 *,
+        WORD32,
+        WORD32);
+
+typedef void (*pf_hbd_sao_luma)(UWORD16 *,
+        WORD32,
+        UWORD16 *,
+        UWORD16 *,
+        UWORD16 *,
+        UWORD16 *,
+        UWORD16 *,
+        UWORD8 *,
+        WORD8 *,
+        WORD32,
+        WORD32,
+        UWORD32);
+
+typedef void (*pf_hbd_sao_chroma)(UWORD16 *,
+        WORD32,
+        UWORD16 *,
+        UWORD16 *,
+        UWORD16 *,
+        UWORD16 *,
+        UWORD16 *,
+        UWORD8 *,
+        WORD8 *,
+        WORD8 *,
+        WORD32,
+        WORD32,
+        UWORD32);
+
+typedef void (*pf_hbd_inter_pred)(void *,
+                                  void *,
+                                  WORD32,
+                                  WORD32,
+                                  WORD8 *,
+                                  WORD32,
+                                  WORD32,
+                                  UWORD8);
 
 /**
  * Codec context
@@ -1762,6 +1844,11 @@ struct _codec_t
      * Level specified during init
      */
     WORD32 i4_init_level;
+
+    /**
+     * Profile specified during init
+     */
+    WORD32 i4_profile;
 
     /**
      * number of reference frames specified during init
@@ -1840,6 +1927,51 @@ struct _codec_t
      * In shared mode only 420SP_UV and 420SP_VU are supported
      */
     IV_COLOR_FORMAT_T e_ref_chroma_fmt;
+
+    /**
+     * ChromaArrayType
+     */
+    WORD32  i4_chroma_array_type;
+
+    /**
+     * Luma bit depth - 8 and 10 bits are supported
+     */
+    WORD32  i4_bit_depth_luma;
+
+    /**
+     * Chroma bit depth - 8 and 10 bits are supported
+     */
+    WORD32  i4_bit_depth_chroma;
+
+    /**
+     * Luma sample size in bytes - 1 for 8 bit, 2 for hbd
+     */
+    WORD32  i4_pixel_size_y;
+
+    /**
+     * Chroma sample size in bytes - 1 for 8 bit, 2 for hbd
+     */
+    WORD32  i4_pixel_size_uv;
+
+    /**
+     * SubWidthC
+     */
+    WORD32  i4_sub_width_chroma;
+
+    /**
+     * SubHeightC
+     */
+    WORD32  i4_sub_height_chroma;
+
+    /**
+     * QP bit depth Offset luma
+     */
+    WORD32  i4_qp_bd_offset_y;
+
+    /**
+     * QP bit depth Offset chroma
+     */
+    WORD32  i4_qp_bd_offset_uv;
 
     /**
      * Frame skip mode
@@ -2071,7 +2203,7 @@ struct _codec_t
     /**
      * Picture buffer manager
      */
-    void *pv_disp_buf_mgr;
+     void *pv_disp_buf_mgr;
 
     /**
      * Current display buffer's buffer ID
@@ -2200,9 +2332,6 @@ struct _codec_t
     /**  Number of ctbs to be decoded in one process call */
     UWORD32 u4_nctb;
 
-    /** Flag to enable scheduling of format conversion jobs ahead of processing jobs */
-    UWORD32 u4_enable_fmt_conv_ahead;
-
     /** Mask used to change MVs to full pel when configured to run in reduced complexity mode */
     WORD32 i4_mv_frac_mask;
 #ifdef GPU_BUILD
@@ -2274,6 +2403,22 @@ struct _codec_t
 
     /**  Funtion pointers for sao_chroma leaf level functions */
     pf_sao_chroma apf_sao_chroma[4];
+
+    /* HBD function pointers */
+    pf_hbd_intra_pred_luma          *ppf_hbd_intra_pred_luma;
+    pf_hbd_intra_pred_chroma        *ppf_hbd_intra_pred_chroma;
+    pf_hbd_itrans_recon             *ppf_hbd_itrans_recon;
+    pf_hbd_itrans_recon_dc          *ppf_hbd_itrans_recon_dc;
+    pf_hbd_recon                    *ppf_hbd_recon;
+    pf_hbd_sao_luma                 *ppf_hbd_sao_luma;
+    pf_hbd_sao_chroma               *ppf_hbd_sao_chroma;
+    pf_hbd_inter_pred               *ppf_hbd_inter_pred;
+
+    /* Function pointer for parse residual coding */
+    void        *pv_parse_residual_coding;
+
+    /* Function pointer for IQ, IT, recon CTB */
+    void        *pv_iquant_itrans_recon_ctb;
 
     /**  Funtion pointers for all the leaf level functions */
     func_selector_t s_func_selector;

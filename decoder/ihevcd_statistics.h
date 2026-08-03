@@ -98,13 +98,13 @@ typedef struct
     stat_sblk_histogram_t stat_num_coded_sblk_histogram; /* Y + UV */
     stat_coeff_histogram_t stat_num_coded_coeff_histogram; /* Y + UV */
     UWORD32   stat_pu_all_size_hist[16][16]; /* PU Sizes [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
-    UWORD32   stat_pu_skip_size_hist[16][16]; /* PU sizes for skip [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
-    UWORD32   stat_pu_inter_size_hist[16][16]; /* PU sizes for inter [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
-    UWORD32   stat_pu_intra_size_hist[16][16]; /* PU sizes for intra [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
-    UWORD32   stat_pu_bipred_size_hist[16][16]; /* PU sizes for bipred [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
-    UWORD32   stat_pu_merge_size_hist[16][16]; /* PU sizes for merge [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
-    UWORD32   stat_pu_zeromv_size_hist[16][16]; /* PU sizes for Zero MV [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
-    UWORD32   stat_pu_zeromvfpel_size_hist[16][16]; /* PU sizes for Zero MV (includes subpel less than +/- 1 full pel units [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
+    UWORD32   stat_pu_skip_size_hist[16][16];/* PU sizes for skip [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
+    UWORD32   stat_pu_inter_size_hist[16][16];/* PU sizes for inter [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
+    UWORD32   stat_pu_intra_size_hist[16][16];/* PU sizes for intra [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
+    UWORD32   stat_pu_bipred_size_hist[16][16];/* PU sizes for bipred [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
+    UWORD32   stat_pu_merge_size_hist[16][16];/* PU sizes for merge [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
+    UWORD32   stat_pu_zeromv_size_hist[16][16];/* PU sizes for Zero MV [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
+    UWORD32   stat_pu_zeromvfpel_size_hist[16][16];/* PU sizes for Zero MV (includes subpel less than +/- 1 full pel units [Width from 4 to 64 in steps of 4] [Height from 4 to 64 in steps of 4]*/
     UWORD32 last_sblk_pos_x; /* Last sblk pos of transform block in processing */
     UWORD32 last_sblk_pos_y;
     UWORD32 num_coded_sblk;

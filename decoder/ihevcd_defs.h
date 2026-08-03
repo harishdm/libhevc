@@ -200,7 +200,7 @@
 
 /** If num_cores is greater than MV_PRED_NUM_CORES_THRESHOLD, then mv pred and
     boundary strength computation is done in process side instead of parse side */
-#define MV_PRED_NUM_CORES_THRESHOLD 4
+#define MV_PRED_NUM_CORES_THRESHOLD 2
 
 /**
  ***************************************************************************
@@ -463,6 +463,8 @@ enum
 #define MIN_OUT_BUFS_RGB565     1
 #define MIN_OUT_BUFS_RGBA8888   1
 #define MIN_OUT_BUFS_420SP      2
+#define MIN_OUT_BUFS_422        3
+#define MIN_OUT_BUFS_422SP      2
 
 /**
  ****************************************************************************

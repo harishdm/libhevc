@@ -25,7 +25,7 @@
 * filtering
 *
 * @author
-* 100592
+* Ittiam
 *
 * @par List of Functions:
 *   - ihevc_sao_band_offset_luma_ssse3()
@@ -155,7 +155,6 @@ void ihevc_sao_band_offset_luma_ssse3(UWORD8 *pu1_src,
 
     //replicating sao_band_pos as 8 bit value 16 times
 
-
     band_pos_16x8b = _mm_set1_epi16((WORD16)(sao_band_pos << 3));
     //value set for sao_offset extraction
     tmp_set_128i_1  = _mm_set_epi8(128, 1, 128, 1, 128, 1, 128, 1, 128, 1, 128, 1, 128, 1, 128, 1);
@@ -256,14 +255,10 @@ void ihevc_sao_band_offset_luma_ssse3(UWORD8 *pu1_src,
         pu1_src_cpy = pu1_src;
         for(row = ht; row > 0; row -= 2)
         {
-
-
             //row = 0 load 8 pixel values from 7:0 pos. relative to cur. pos.
             src_temp0_8x16b = _mm_loadu_si128((__m128i *)(pu1_src_cpy));
             // row = 1
             src_temp2_8x16b = _mm_loadu_si128((__m128i *)(pu1_src_cpy + src_strd));
-
-
 
             //saturated substract 8 bit
             tmp_set_128i_1 = _mm_sub_epi8(src_temp0_8x16b, band_pos_16x8b);
@@ -278,7 +273,6 @@ void ihevc_sao_band_offset_luma_ssse3(UWORD8 *pu1_src,
             tmp_set_128i_4 = _mm_cmpgt_epi8(tmp_set_128i_3, band_table3_8x16b);
             tmp_set_128i_1 = _mm_or_si128(tmp_set_128i_1, tmp_set_128i_2);
             tmp_set_128i_3 = _mm_or_si128(tmp_set_128i_3, tmp_set_128i_4);
-
 
             //row 0 and row1
             //if the values >16 then put ff ,cmp_mask = dup16(15)
@@ -323,7 +317,6 @@ void ihevc_sao_band_offset_luma_ssse3(UWORD8 *pu1_src,
             src_temp0_8x16b = _mm_or_si128(src_temp0_8x16b, tmp_set_128i_1);
             src_temp2_8x16b = _mm_or_si128(src_temp2_8x16b, tmp_set_128i_3);
 
-
             //row = 0 store 8 pixel values from 7:0 pos. relative to cur. pos.
             _mm_storeu_si128((__m128i *)(pu1_src_cpy), src_temp0_8x16b);
             // row = 1
@@ -335,11 +328,10 @@ void ihevc_sao_band_offset_luma_ssse3(UWORD8 *pu1_src,
     }
     wd_rem = wd & 0xF;
     if(wd_rem)
-    {pu1_src_cpy = pu1_src;
+    {
+        pu1_src_cpy = pu1_src;
         for(row = ht; row > 0; row -= 4)
         {
-
-
             //row = 0 load 8 pixel values from 7:0 pos. relative to cur. pos.
             src_temp0_8x16b = _mm_loadl_epi64((__m128i *)(pu1_src_cpy));
             // row = 1
@@ -366,8 +358,6 @@ void ihevc_sao_band_offset_luma_ssse3(UWORD8 *pu1_src,
             tmp_set_128i_4 = _mm_cmpgt_epi8(tmp_set_128i_3, band_table3_8x16b);
             tmp_set_128i_1 = _mm_or_si128(tmp_set_128i_1, tmp_set_128i_2);
             tmp_set_128i_3 = _mm_or_si128(tmp_set_128i_3, tmp_set_128i_4);
-
-
 
             //row 0 and row1
             //if the values >16 then put ff ,cmp_mask = dup16(15)
@@ -427,12 +417,9 @@ void ihevc_sao_band_offset_luma_ssse3(UWORD8 *pu1_src,
             _mm_storel_epi64((__m128i *)(pu1_src_cpy + 3 * src_strd), src_temp3_8x16b);
 
             pu1_src_cpy += (src_strd << 2);
-
         }
         pu1_src += 8;
     }
-
-
 }
 
 void ihevc_sao_band_offset_chroma_ssse3(UWORD8 *pu1_src,
@@ -449,8 +436,6 @@ void ihevc_sao_band_offset_chroma_ssse3(UWORD8 *pu1_src,
 {
     WORD32 row, col;
     WORD8 offset = 0;
-
-
     __m128i src_temp0_8x16b, src_temp1_8x16b, src_temp2_8x16b, src_temp3_8x16b;
     __m128i cmp_msk2;
     __m128i band_table0_16x8b, band_table1_16x8b, band_table2_16x8b, band_table3_16x8b;
@@ -458,7 +443,6 @@ void ihevc_sao_band_offset_chroma_ssse3(UWORD8 *pu1_src,
     __m128i band_pos_u_16x8b, band_pos_v_16x8b;
     __m128i sao_offset;
     __m128i cmp_mask;
-
 
     /* Updating left and top and top-left */
     for(row = 0; row < ht; row++)
@@ -475,7 +459,8 @@ void ihevc_sao_band_offset_chroma_ssse3(UWORD8 *pu1_src,
         offset += 8;
     }
 
-    { // band _table creation
+    {
+        // band _table creation
         __m128i temp0_8x16b, temp1_8x16b, temp2_8x16b, temp3_8x16b;
         // Band table for U component : band_table0_16x8b and band_table2_16x8b
         //replicating sao_band_pos as 8 bit value 16 times
@@ -646,7 +631,6 @@ void ihevc_sao_band_offset_chroma_ssse3(UWORD8 *pu1_src,
         UWORD8 *pu1_src_cpy;
         WORD32 wd_rem;
 
-
         //sao_offset is reused for zero cmp mask.
         sao_offset = _mm_setzero_si128();
         tmp_set_128i_1 = _mm_set1_epi8(1);
@@ -745,15 +729,12 @@ void ihevc_sao_band_offset_chroma_ssse3(UWORD8 *pu1_src,
                 src_temp1_8x16b = _mm_unpacklo_epi8(src_temp0_8x16b, src_temp2_8x16b);
                 src_temp3_8x16b = _mm_unpackhi_epi8(src_temp0_8x16b, src_temp2_8x16b);
 
-
                 //row = 0 store 8 pixel values from 7:0 pos. relative to cur. pos.
                 _mm_storeu_si128((__m128i *)(pu1_src_cpy), src_temp1_8x16b);
                 // row = 1
                 _mm_storeu_si128((__m128i *)(pu1_src_cpy + src_strd), src_temp3_8x16b);
 
-
                 pu1_src_cpy += (src_strd << 1);
-
             }
             pu1_src += 16;
         }
@@ -863,12 +844,9 @@ void ihevc_sao_band_offset_chroma_ssse3(UWORD8 *pu1_src,
                 _mm_storel_epi64((__m128i *)(pu1_src_cpy + 3 * src_strd), src_temp2_8x16b);
 
                 pu1_src_cpy += (src_strd << 2);
-
             }
             pu1_src += 16;
         }
-
-
     }
 }
 
@@ -947,7 +925,6 @@ void ihevc_sao_edge_offset_class0_ssse3(UWORD8 *pu1_src,
             //pu1_src_left_cpy =au1_src_left_tmp;
             for(row = ht; row > 0; row -= 2)
             {
-
                 left_store_16x8b = _mm_loadl_epi64((__m128i *)(pu1_src_left_cpy));
                 //row = 0 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_temp0_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy));
@@ -961,7 +938,6 @@ void ihevc_sao_edge_offset_class0_ssse3(UWORD8 *pu1_src,
                 //row 0 left
                 left0_16x8b = _mm_alignr_epi8(src_temp0_16x8b, left_store_16x8b, 15);
                 left_store_16x8b = _mm_alignr_epi8(left_store_16x8b, src_temp0_16x8b, 15);
-
 
                 //separating +ve and and -ve values.
                 cmp_gt0_16x8b = _mm_subs_epu8(src_temp0_16x8b, left0_16x8b);
@@ -1030,7 +1006,6 @@ void ihevc_sao_edge_offset_class0_ssse3(UWORD8 *pu1_src,
                 src_temp1_16x8b = _mm_add_epi16(src_temp1_16x8b, cmp_lt0_16x8b);
                 src_temp1_16x8b = _mm_packus_epi16(cmp_gt0_16x8b, src_temp1_16x8b);
 
-
                 _mm_storel_epi64((__m128i *)(pu1_src_left_str), left_store_16x8b);
                 //row = 0 store 8 pixel values from 7:0 pos. relative to cur. pos.
                 _mm_storeu_si128((__m128i *)(pu1_src_cpy), src_temp0_16x8b);
@@ -1054,7 +1029,6 @@ void ihevc_sao_edge_offset_class0_ssse3(UWORD8 *pu1_src,
         wd_rem = wd & 0xF;
         if(wd_rem)
         {
-
             cmp_gt1_16x8b = _mm_loadu_si128((__m128i *)(pu1_src + (ht - 1) * src_strd));
             _mm_storel_epi64((__m128i *)(pu1_src_top + offset), cmp_gt1_16x8b);
 
@@ -1073,7 +1047,6 @@ void ihevc_sao_edge_offset_class0_ssse3(UWORD8 *pu1_src,
                 src_temp1_16x8b = _mm_loadl_epi64((__m128i *)(pu1_src_cpy + 2 * src_strd));
                 // row = 3
                 cmp_gt1_16x8b =  _mm_loadl_epi64((__m128i *)(pu1_src_cpy + 3 * src_strd));
-
 
                 left_store_16x8b = _mm_alignr_epi8(left_store_16x8b, left_store_16x8b, 4);
                 //row 3 left
@@ -1288,7 +1261,6 @@ void ihevc_sao_edge_offset_class0_chroma_ssse3(UWORD8 *pu1_src,
 
             for(row = ht; row > 0; row -= 2)
             {
-
                 left_store_16x8b = _mm_loadl_epi64((__m128i *)(pu1_src_left_cpy));
                 //row = 0 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_temp0_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy));
@@ -1302,7 +1274,6 @@ void ihevc_sao_edge_offset_class0_chroma_ssse3(UWORD8 *pu1_src,
                 //row 0 left
                 left0_16x8b = _mm_alignr_epi8(src_temp0_16x8b, left_store_16x8b, 14);
                 left_store_16x8b = _mm_alignr_epi8(left_store_16x8b, src_temp0_16x8b, 14);
-
 
                 //separating +ve and and -ve values.row 0 left
                 cmp_gt0_16x8b = _mm_subs_epu8(src_temp0_16x8b, left0_16x8b);
@@ -1321,7 +1292,6 @@ void ihevc_sao_edge_offset_class0_chroma_ssse3(UWORD8 *pu1_src,
                 cmp_lt0_16x8b = _mm_cmpeq_epi8(cmp_lt0_16x8b, const0_16x8b);
                 //combining the appropriate sign change
                 left1_16x8b = _mm_sub_epi8(cmp_gt0_16x8b, cmp_lt0_16x8b);
-
 
                 //row = 0 right
                 edge0_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy + 2));
@@ -1406,7 +1376,6 @@ void ihevc_sao_edge_offset_class0_chroma_ssse3(UWORD8 *pu1_src,
         wd_rem = wd & 0xF;
         if(wd_rem)
         {
-
             cmp_gt0_16x8b = _mm_loadu_si128((__m128i *)(pu1_src + (ht - 1) * src_strd));
             _mm_storel_epi64((__m128i *)(pu1_src_top + offset), cmp_gt0_16x8b);
 
@@ -1426,7 +1395,6 @@ void ihevc_sao_edge_offset_class0_chroma_ssse3(UWORD8 *pu1_src,
                 // row = 3
                 cmp_lt0_16x8b =  _mm_loadl_epi64((__m128i *)(pu1_src_cpy + 3 * src_strd));
 
-
                 left_store_16x8b = _mm_alignr_epi8(left_store_16x8b, left_store_16x8b, 8);
                 //row 3 left
                 edge0_16x8b = _mm_slli_si128(cmp_lt0_16x8b, 8);
@@ -1436,7 +1404,6 @@ void ihevc_sao_edge_offset_class0_chroma_ssse3(UWORD8 *pu1_src,
                 edge0_16x8b = _mm_slli_si128(src_temp1_16x8b, 8);
                 left1_16x8b = _mm_alignr_epi8(src_temp1_16x8b, left_store_16x8b, 14);
                 left_store_16x8b = _mm_alignr_epi8(left_store_16x8b, edge0_16x8b, 14);
-
 
                 // packing rows together for 16 SIMD operations
                 src_temp1_16x8b = _mm_unpacklo_epi64(src_temp1_16x8b, cmp_lt0_16x8b);
@@ -1463,10 +1430,6 @@ void ihevc_sao_edge_offset_class0_chroma_ssse3(UWORD8 *pu1_src,
                 //combining the appropriate sign change
                 left1_16x8b = _mm_sub_epi8(cmp_gt0_16x8b, cmp_lt0_16x8b);
 
-
-
-
-
                 //separating +ve and and -ve values.
                 cmp_gt0_16x8b = _mm_subs_epu8(src_temp0_16x8b, left0_16x8b);
                 cmp_lt0_16x8b = _mm_subs_epu8(left0_16x8b, src_temp0_16x8b);
@@ -1475,7 +1438,6 @@ void ihevc_sao_edge_offset_class0_chroma_ssse3(UWORD8 *pu1_src,
                 cmp_lt0_16x8b = _mm_cmpeq_epi8(cmp_lt0_16x8b, const0_16x8b);
                 //combining the appropriate sign change
                 left0_16x8b = _mm_sub_epi8(cmp_gt0_16x8b, cmp_lt0_16x8b);
-
 
                 //row = 0 right
                 edge0_16x8b = _mm_loadl_epi64((__m128i *)(pu1_src_cpy + 2));
@@ -1575,7 +1537,6 @@ void ihevc_sao_edge_offset_class0_chroma_ssse3(UWORD8 *pu1_src,
             pu1_src_left[row] = pu1_src_left_cpy[row];
         }
     }
-
 }
 
 
@@ -1596,7 +1557,6 @@ void ihevc_sao_edge_offset_class1_ssse3(UWORD8 *pu1_src,
     UWORD8 *pu1_src_cpy;
     WORD32 wd_rem;
 
-
     __m128i src_top_16x8b, src_bottom_16x8b;
     __m128i src_temp0_16x8b, src_temp1_16x8b;
     __m128i signup0_16x8b, signdwn1_16x8b;
@@ -1608,15 +1568,12 @@ void ihevc_sao_edge_offset_class1_ssse3(UWORD8 *pu1_src,
     UNUSED(pu1_src_top_right);
     UNUSED(pu1_src_bot_left);
 
-
     /* Updating left and top-left  */
     for(row = 0; row < ht; row++)
     {
         pu1_src_left[row] = pu1_src[row * src_strd + (wd - 1)];
     }
     *pu1_src_top_left = pu1_src_top[wd - 1];
-
-
 
     pu1_src_top_cpy = pu1_src_top;
     edge_idx_8x16b   = _mm_loadl_epi64((__m128i *)gi1_table_edge_idx);
@@ -1656,12 +1613,10 @@ void ihevc_sao_edge_offset_class1_ssse3(UWORD8 *pu1_src,
 
             for(row = ht; row >= 2; row -= 2)
             {
-
                 //row = 1 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_temp1_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy + src_strd));
                 // row = 2
                 src_bottom_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy + 2 * src_strd));
-
 
                 //row 0 -row1
                 //separating +ve and and -ve values.
@@ -1898,12 +1853,10 @@ void ihevc_sao_edge_offset_class1_ssse3(UWORD8 *pu1_src,
                 src_temp0_16x8b = src_temp1_16x8b;
                 signup0_16x8b = _mm_slli_si128(signup0_16x8b, 8);
                 pu1_src_cpy += (src_strd << 2);
-
             }
             ht_rem = ht & 0x2;
             if(ht_rem)
             {
-
                 //row = 1 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_temp1_16x8b = _mm_loadl_epi64((__m128i *)(pu1_src_cpy + src_strd));
                 // row = 2
@@ -1964,12 +1917,10 @@ void ihevc_sao_edge_offset_class1_ssse3(UWORD8 *pu1_src,
                 _mm_storel_epi64((__m128i *)(pu1_src_cpy + src_strd), cmp_gt0_16x8b);
                 src_temp0_16x8b = src_bottom_16x8b;
                 pu1_src_cpy += (src_strd << 1);
-
             }
             ht_rem = ht & 0x1;
             if(ht_rem)
             {
-
                 //row = 1 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_bottom_16x8b = _mm_loadl_epi64((__m128i *)(pu1_src_cpy + src_strd));
 
@@ -2002,7 +1953,6 @@ void ihevc_sao_edge_offset_class1_ssse3(UWORD8 *pu1_src,
                 //row = 0 store 8 pixel values from 7:0 pos. relative to cur. pos.
                 _mm_storel_epi64((__m128i *)(pu1_src_cpy), src_temp0_16x8b);
                 pu1_src_cpy += (src_strd);
-
             }
             if(0 == pu1_avail[3])
             {
@@ -2032,7 +1982,6 @@ void ihevc_sao_edge_offset_class1_chroma_ssse3(UWORD8 *pu1_src,
     UWORD8 *pu1_src_cpy;
     WORD32 wd_rem;
 
-
     __m128i src_top_16x8b, src_bottom_16x8b;
     __m128i src_temp0_16x8b, src_temp1_16x8b;
     __m128i signup0_16x8b, signdwn1_16x8b;
@@ -2054,8 +2003,6 @@ void ihevc_sao_edge_offset_class1_chroma_ssse3(UWORD8 *pu1_src,
     pu1_src_top_left[0] = pu1_src_top[wd - 2];
     pu1_src_top_left[1] = pu1_src_top[wd - 1];
 
-
-
     pu1_src_top_cpy = pu1_src_top;
     edge_idx_8x16b   = _mm_loadl_epi64((__m128i *)gi1_table_edge_idx);
     sao_offset_8x16b = _mm_loadl_epi64((__m128i *)pi1_sao_offset_u);
@@ -2076,11 +2023,8 @@ void ihevc_sao_edge_offset_class1_chroma_ssse3(UWORD8 *pu1_src,
     const2_16x8b = _mm_set1_epi8(2);
     const0_16x8b = _mm_setzero_si128();
 
-
     {
         WORD32 ht_rem;
-
-
 
         for(col = wd; col >= 16; col -= 16)
         {
@@ -2099,12 +2043,10 @@ void ihevc_sao_edge_offset_class1_chroma_ssse3(UWORD8 *pu1_src,
 
             for(row = ht; row >= 2; row -= 2)
             {
-
                 //row = 1 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_temp1_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy + src_strd));
                 // row = 2
                 src_bottom_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy + 2 * src_strd));
-
 
                 //row 0 -row1
                 //separating +ve and and -ve values.
@@ -2138,7 +2080,6 @@ void ihevc_sao_edge_offset_class1_chroma_ssse3(UWORD8 *pu1_src,
                 edge1_16x8b = _mm_add_epi8(edge1_16x8b, const2_16x8b);
                 //copying the next top
                 src_top_16x8b = src_temp1_16x8b;
-
 
                 //shuffle to get sao index
                 edge0_16x8b = _mm_shuffle_epi8(edge_idx_8x16b, edge0_16x8b);
@@ -2351,12 +2292,10 @@ void ihevc_sao_edge_offset_class1_chroma_ssse3(UWORD8 *pu1_src,
                 src_temp0_16x8b = src_temp1_16x8b;
                 signup0_16x8b = _mm_slli_si128(signup0_16x8b, 8);
                 pu1_src_cpy += (src_strd << 2);
-
             }
             ht_rem = ht & 0x2;
             if(ht_rem)
             {
-
                 //row = 1 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_temp1_16x8b = _mm_loadl_epi64((__m128i *)(pu1_src_cpy + src_strd));
                 // row = 2
@@ -2419,12 +2358,10 @@ void ihevc_sao_edge_offset_class1_chroma_ssse3(UWORD8 *pu1_src,
                 _mm_storel_epi64((__m128i *)(pu1_src_cpy + src_strd), cmp_gt0_16x8b);
                 src_temp0_16x8b = src_bottom_16x8b;
                 pu1_src_cpy += (src_strd << 1);
-
             }
             ht_rem = ht & 0x1;
             if(ht_rem)
             {
-
                 //row = 1 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_bottom_16x8b = _mm_loadl_epi64((__m128i *)(pu1_src_cpy + src_strd));
 
@@ -2461,7 +2398,6 @@ void ihevc_sao_edge_offset_class1_chroma_ssse3(UWORD8 *pu1_src,
                 //row = 0 store 8 pixel values from 7:0 pos. relative to cur. pos.
                 _mm_storel_epi64((__m128i *)(pu1_src_cpy), src_temp0_16x8b);
                 pu1_src_cpy += (src_strd);
-
             }
             if(0 == pu1_avail[3])
             {
@@ -2613,7 +2549,6 @@ void ihevc_sao_edge_offset_class2_ssse3(UWORD8 *pu1_src,
     {
         WORD32 ht_rem;
 
-
         pu1_src_left_cpy = pu1_src_left_cpy2;
         pu1_src_left_str = pu1_src_left_str2;
         au1_mask_cpy = au1_mask;
@@ -2634,7 +2569,6 @@ void ihevc_sao_edge_offset_class2_ssse3(UWORD8 *pu1_src,
             cmp_lt0_16x8b = _mm_cmpeq_epi8(cmp_lt0_16x8b, const0_16x8b);
             //combining the appropriate sign change
             signup0_16x8b = _mm_sub_epi8(cmp_gt0_16x8b, cmp_lt0_16x8b);
-
 
             for(row = ht; row >= 2; row -= 2)
             {
@@ -2813,7 +2747,6 @@ void ihevc_sao_edge_offset_class2_ssse3(UWORD8 *pu1_src,
             _mm_storeu_si128((__m128i *)(pu1_src_top + wd - col), src_top_16x8b);
             pu1_src += 16;
             au1_mask_cpy += 16;
-
 
             pu1_left_tmp = pu1_src_left_cpy2;
             pu1_src_left_cpy2 = pu1_src_left_str2;
@@ -3229,7 +3162,6 @@ void ihevc_sao_edge_offset_class2_ssse3(UWORD8 *pu1_src,
             pu1_src_left[row] = pu1_src_left_cpy[row];
         }
     }
-
 }
 
 /* 135 degree filtering */
@@ -3438,7 +3370,6 @@ void ihevc_sao_edge_offset_class2_chroma_ssse3(UWORD8 *pu1_src,
             //combining the appropriate sign change
             signup0_16x8b = _mm_sub_epi8(cmp_gt0_16x8b, cmp_lt0_16x8b);
 
-
             for(row = ht; row >= 2; row -= 2)
             {
                 left_store_16x8b = _mm_loadl_epi64((__m128i *)pu1_src_left_cpy);
@@ -3470,7 +3401,6 @@ void ihevc_sao_edge_offset_class2_chroma_ssse3(UWORD8 *pu1_src,
                  // row = 2 right
                 src_bottom_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy + 2 * src_strd + 2));
                 edge1_16x8b = _mm_sub_epi8(cmp_gt0_16x8b, cmp_lt0_16x8b); //(1-0)
-
 
                 //row1 -bottom
                 cmp_gt0_16x8b = _mm_subs_epu8(src_temp1_16x8b, src_bottom_16x8b);
@@ -3510,7 +3440,6 @@ void ihevc_sao_edge_offset_class2_chroma_ssse3(UWORD8 *pu1_src,
                 //row0  getting its right for left of next iteration.
                 left_store_16x8b = _mm_alignr_epi8(left_store_16x8b, src_temp0_16x8b, 14);
 
-
                 //adding constant 2
                 edge0_16x8b = _mm_add_epi8(edge0_16x8b, const2_16x8b);
                 edge1_16x8b = _mm_add_epi8(edge1_16x8b, const2_16x8b);
@@ -3523,7 +3452,6 @@ void ihevc_sao_edge_offset_class2_chroma_ssse3(UWORD8 *pu1_src,
                 //adding chroma offset to access U and V
                 edge0_16x8b = _mm_add_epi8(edge0_16x8b, chroma_offset_8x16b);
                 edge1_16x8b = _mm_add_epi8(edge1_16x8b, chroma_offset_8x16b);
-
 
                 //shuffle to get sao offset
                 edge0_16x8b = _mm_shuffle_epi8(sao_offset_8x16b, edge0_16x8b);
@@ -3842,7 +3770,6 @@ void ihevc_sao_edge_offset_class2_chroma_ssse3(UWORD8 *pu1_src,
                 cmp_gt0_16x8b = _mm_srli_si128(src_temp0_16x8b, 8);
                 cmp_lt0_16x8b = _mm_srli_si128(src_bottom_16x8b, 8);
 
-
                 _mm_storel_epi64((__m128i *)(pu1_src_left_str), left_store_16x8b);
                 //row = 0 store 8 pixel values from 7:0 pos. relative to cur. pos.
                 _mm_storel_epi64((__m128i *)(pu1_src_cpy), src_temp0_16x8b);
@@ -3935,7 +3862,6 @@ void ihevc_sao_edge_offset_class2_chroma_ssse3(UWORD8 *pu1_src,
                 //storing right of row 0 into left
                 left_store_16x8b = _mm_alignr_epi8(left_store_16x8b, signdwn1_16x8b, 14);
 
-
                 //adding constant 2
                 edge0_16x8b = _mm_add_epi8(edge0_16x8b, const2_16x8b);
 
@@ -4005,7 +3931,6 @@ void ihevc_sao_edge_offset_class2_chroma_ssse3(UWORD8 *pu1_src,
                 edge0_16x8b = _mm_slli_si128(edge0_16x8b, 8);
                 edge0_16x8b = _mm_srli_si128(edge0_16x8b, 8);
 
-
                 //shuffle to get sao index
                 edge0_16x8b = _mm_shuffle_epi8(edge_idx_8x16b, edge0_16x8b);
                 //using availability mask
@@ -4063,7 +3988,6 @@ void ihevc_sao_edge_offset_class2_chroma_ssse3(UWORD8 *pu1_src,
             pu1_src_left[row] = pu1_src_left_cpy[row];
         }
     }
-
 }
 
 void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
@@ -4174,8 +4098,6 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
         u1_pos_0_ht_tmp = pu1_src[(ht - 1) * src_strd];
     }
 
-
-
     /* Update height and source pointers based on the availability flags */
     if(0 == pu1_avail[2])
     {
@@ -4190,10 +4112,8 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
         ht--;
     }
 
-
     const2_16x8b = _mm_set1_epi8(2);
     const0_16x8b = _mm_setzero_si128();
-
 
     //availability mask creation
     u1_avail0 = pu1_avail[0];
@@ -4560,7 +4480,6 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
                 signdwn1_16x8b = _mm_sub_epi8(cmp_gt0_16x8b, cmp_lt0_16x8b); //(3-bottom)
                 edge1_16x8b = _mm_alignr_epi8(signdwn1_16x8b, edge1_16x8b, 8); //(3-bottom),(2-3)
 
-
                 //eliminating old left for row 0,1,2,3
                 left_store_16x8b = _mm_srli_si128(left_store_16x8b, 4);
                 //packing row 2 n row 3
@@ -4760,7 +4679,6 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
                 //row = 1 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_bottom_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy + src_strd));
 
-
                 //manipulation for row 0 -bottom
                 signdwn1_16x8b =  _mm_slli_si128(left_store_16x8b, 14);
                 //bottom left
@@ -4828,7 +4746,6 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
 
             pu1_src_left_cpy = pu1_src_left_cpy2;
             pu1_src_left_str = pu1_src_left_str2;
-
         }
         pu1_src_org[wd - 1] = u1_pos_wd_0_tmp;
         pu1_src_org[(ht_tmp - 1) * src_strd] = u1_pos_0_ht_tmp;
@@ -4839,7 +4756,6 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
             pu1_src_left[row] = pu1_src_left_cpy[row];
         }
     }
-
 }
 
 void ihevc_sao_edge_offset_class3_chroma_ssse3(UWORD8 *pu1_src,
@@ -4879,7 +4795,6 @@ void ihevc_sao_edge_offset_class3_chroma_ssse3(UWORD8 *pu1_src,
 
     ht_tmp = ht;
     au1_mask8x16b = _mm_set1_epi8(0xff);
-
 
     au1_src_left_tmp[0] = pu1_src[(wd - 2)];
     au1_src_left_tmp[1] = pu1_src[(wd - 1)];
@@ -4987,8 +4902,6 @@ void ihevc_sao_edge_offset_class3_chroma_ssse3(UWORD8 *pu1_src,
         u1_pos_0_ht_tmp_v = pu1_src[(ht - 1) * src_strd + 1];
     }
 
-
-
     /* Update height and source pointers based on the availability flags */
     if(0 == pu1_avail[2])
     {
@@ -5005,7 +4918,6 @@ void ihevc_sao_edge_offset_class3_chroma_ssse3(UWORD8 *pu1_src,
     sao_offset_8x16b = _mm_unpacklo_epi64(sao_offset_8x16b, const0_16x8b);
     const2_16x8b = _mm_set1_epi8(2);
     const0_16x8b = _mm_setzero_si128();
-
 
     //availability mask creation
     u1_avail0 = pu1_avail[0];
@@ -5575,7 +5487,6 @@ void ihevc_sao_edge_offset_class3_chroma_ssse3(UWORD8 *pu1_src,
                 //row = 1 load 8 pixel values from 7:0 pos. relative to cur. pos.
                 src_bottom_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_cpy + src_strd));
 
-
                 //manipulation for row 0 -bottom
                 signdwn1_16x8b =  _mm_slli_si128(left_store_16x8b, 12);
                 //bottom left
@@ -5649,5 +5560,4 @@ void ihevc_sao_edge_offset_class3_chroma_ssse3(UWORD8 *pu1_src,
             pu1_src_left[row] = au1_src_left_tmp[row];
         }
     }
-
 }

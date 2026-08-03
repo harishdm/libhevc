@@ -15,37 +15,10 @@
 @* limitations under the License.
 @*
 @*****************************************************************************/
-@/**
-@/*******************************************************************************
-@* @file
-@*  ihevcd_fmt_conv_420sp_to_420p.s
-@*
-@* @brief
-@*  contains function definitions for format conversions
-@*
-@* @author
-@*  ittiam
-@*
-@* @par list of functions:
-@*
-@*
-@* @remarks
-@*  none
-@*
-@*******************************************************************************/
-
-
-
-
-
-
-
 
 .text
 
-
-
-
+     .include       "ihevcd_func_selector.s"
 
 @/*****************************************************************************
 @*                                                                            *
@@ -91,45 +64,45 @@
 .type ihevcd_fmt_conv_420sp_to_420p_a9q, %function
 
 ihevcd_fmt_conv_420sp_to_420p_a9q:
-    STMFD       sp!,{r4-r12, lr}
+    STMFD   sp!,{r4-r12, lr}
 
-    LDR         r5,[sp,#60]                 @//Load u2_dest_stridey
+    LDR     r5,[sp,#60]             @//Load u2_dest_stridey
 @   LDR     r6,[sp,#56]             @//Load u2_strideuv
-    LDR         r7,[sp,#52]                 @//Load u2_stridey
-    LDR         r8,[sp,#44]                 @//Load u2_width
-    LDR         r9,[sp,#48]                 @//Load u2_height
+    LDR     r7,[sp,#52]             @//Load u2_stridey
+    LDR     r8,[sp,#44]             @//Load u2_width
+    LDR     r9,[sp,#48]             @//Load u2_height
 
-    SUB         r10,r7,r8                   @// Src Y increment
-    SUB         r11,r5,r8                   @// Dst Y increment
+    SUB     r10,r7,r8               @// Src Y increment
+    SUB     r11,r5,r8               @// Dst Y increment
 
-    LDR         r5,[sp,#72]                 @//Load disable_luma_copy flag
-    CMP         r5,#0                       @//skip luma if disable_luma_copy is non-zero
-    BNE         uv_copy_start
+    LDR     r5,[sp,#72]             @//Load disable_luma_copy flag
+    CMP     r5,#0                   @//skip luma if disable_luma_copy is non-zero
+    BNE     uv_copy_start
 
     @/* Copy Y */
 
-    MOV         r4,r9                       @// Copying height
+    MOV     r4,r9                   @// Copying height
 y_row_loop:
-    MOV         r6,r8                       @// Copying width
+    MOV     r6,r8                   @// Copying width
 
 y_col_loop:
 
-    SUB         r6,r6,#16
-    vld1.8      {d0,d1},[r0]!
-    vst1.8      {d0,d1},[r2]!
-    CMP         r6,#16
-    BGE         y_col_loop
-    CMP         r6,#0
-    BEQ         y_col_loop_end
+    SUB     r6,r6,#16
+    vld1.8  {d0,d1},[r0]!
+    vst1.8  {d0,d1},[r2]!
+    CMP     r6,#16
+    BGE     y_col_loop
+    CMP     r6,#0
+    BEQ     y_col_loop_end
     @//If non-multiple of 16, then go back by few bytes to ensure 16 bytes can be read
     @//Ex if width is 162, above loop will process 160 pixels. And
     @//Both source and destination will point to 146th pixel and then 16 bytes will be read
     @// and written using VLD1 and VST1
-    RSB         r6,r6,#16
-    SUB         r0,r0,r6
-    SUB         r2,r2,r6
-    vld1.8      {d0,d1}, [r0]!
-    vst1.8      {d0,d1}, [r2]!
+    RSB     r6,r6,#16
+    SUB     r0,r0,r6
+    SUB     r2,r2,r6
+    vld1.8          {d0,d1}, [r0]!
+    vst1.8          {d0,d1}, [r2]!
 
 y_col_loop_end:
     ADD         r0, r0, r10
@@ -141,51 +114,51 @@ y_col_loop_end:
     @/* Copy UV */
 uv_copy_start:
 
-    LDR         r5,[sp,#64]                 @//Load u2_dest_strideuv
-    LDR         r7,[sp,#56]                 @//Load u2_strideuv
+    LDR     r5,[sp,#64]             @//Load u2_dest_strideuv
+    LDR     r7,[sp,#56]             @//Load u2_strideuv
 
-    MOV         r9,r9,LSR #1                @// height/2
+    MOV     r9,r9,LSR #1            @// height/2
 @   MOV     r8,r8,LSR #1            @// Width/2
 
-    SUB         r10,r7,r8                   @// Src UV increment
-    MOV         r11,r8,LSR #1
-    SUB         r11,r5,r11                  @// Dst U and V increment
+    SUB     r10,r7,r8               @// Src UV increment
+    MOV     r11,r8,LSR #1
+    SUB     r11,r5,r11              @// Dst U and V increment
 
-    LDR         r5,[sp,#40]                 @//Load pu1_dest_v
+    LDR     r5,[sp,#40]             @//Load pu1_dest_v
 
-    LDR         r4,[sp,#68]                 @//Load is_u_first_flag
-    CMP         r4,#0                       @//Swap U and V dest if is_u_first_flag is zero
-    MOVEQ       r4,r5
-    MOVEQ       r5,r3
-    MOVEQ       r3,r4
+    LDR     r4,[sp,#68]             @//Load is_u_first_flag
+    CMP     r4,#0                   @//Swap U and V dest if is_u_first_flag is zero
+    MOVEQ   r4,r5
+    MOVEQ   r5,r3
+    MOVEQ   r3,r4
 
-    MOV         r4,r9                       @// Copying height
+    MOV     r4,r9                   @// Copying height
 uv_row_loop:
-    MOV         r6,r8                       @// Copying width
+    MOV     r6,r8                   @// Copying width
 
 uv_col_loop:
 
-    SUB         r6,r6,#16
+    SUB     r6,r6,#16
 
-    PLD         [r1,#128]
-    vld2.8      {d0,d1},[r1]!
-    VST1.8      D0,[r3]!
-    VST1.8      D1,[r5]!
-    CMP         r6,#16
-    BGE         uv_col_loop
-    CMP         r6,#0
-    BEQ         uv_col_loop_end
+    PLD     [r1,#128]
+    vld2.8  {d0,d1},[r1]!
+    VST1.8  D0,[r3]!
+    VST1.8  D1,[r5]!
+    CMP     r6,#16
+    BGE     uv_col_loop
+    CMP     r6,#0
+    BEQ     uv_col_loop_end
     @//If non-multiple of 16, then go back by few bytes to ensure 16 bytes can be read
     @//Ex if width is 162, above loop will process 160 pixels. And
     @//Both source and destination will point to 146th pixel and then 16 bytes will be read
     @// and written using VLD1 and VST1
-    RSB         r6,r6,#16
-    SUB         r1,r1,r6
-    SUB         r3,r3,r6,LSR #1
-    SUB         r5,r5,r6,LSR #1
-    vld2.8      {d0,d1}, [r1]!
-    VST1.8      D0, [r3]!
-    VST1.8      D1, [r5]!
+    RSB     r6,r6,#16
+    SUB     r1,r1,r6
+    SUB     r3,r3,r6,LSR #1
+    SUB     r5,r5,r6,LSR #1
+    vld2.8          {d0,d1}, [r1]!
+    VST1.8          D0, [r3]!
+    VST1.8          D1, [r5]!
 uv_col_loop_end:
     ADD         r1, r1, r10
     ADD         r3, r3, r11
@@ -194,8 +167,7 @@ uv_col_loop_end:
     BGT         uv_row_loop
 
 exit:
-    LDMFD       sp!,{r4-r12, pc}
-
+    LDMFD    sp!,{r4-r12, pc}
 
 
 

@@ -129,15 +129,16 @@ g_ai2_ihevc_trans_16_transpose_addr:
 ihevc_itrans_recon_16x16_a9q:
 
     stmfd       sp!,{r4-r12,lr}
+    vpush       {d8  -  d15}
 @   add             sp,sp,#40
 
 
 
 @   ldr         r8,[sp,#4]  @ prediction stride
 @   ldr         r7,[sp,#8]  @ destination stride
-    ldr         r6,[sp,#40]                 @ src stride
-    ldr         r12,[sp,#52]
-    ldr         r11,[sp,#56]
+    ldr         r6,[sp,#104]                 @ src stride
+    ldr         r12,[sp,#116]
+    ldr         r11,[sp,#120]
 
 
 
@@ -661,8 +662,8 @@ skip_last12rows_kernel2:
 
     mov         r6,r7
 
-    ldr         r8,[sp,#44]                 @ prediction stride
-    ldr         r7,[sp,#48]                 @ destination stride
+    ldr         r8,[sp,#108]                 @ prediction stride
+    ldr         r7,[sp,#112]                 @ destination stride
 
     mov         r10,#16
 
@@ -1127,6 +1128,7 @@ skip_last8rows_stage2_kernel2:
 
 
 @   sub         sp,sp,#40
+    vpop        {d8  -  d15}
     ldmfd       sp!,{r4-r12,pc}
 
 

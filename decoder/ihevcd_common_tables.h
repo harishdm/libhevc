@@ -36,6 +36,8 @@
 
 extern WORD16 gai2_ihevcd_chroma_qp[];
 
+extern WORD16 gai2_ihevcd_chroma_qp_420[];
+
 extern const UWORD8 gau1_intra_pred_chroma_modes[];
 
 

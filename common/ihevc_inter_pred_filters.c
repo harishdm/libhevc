@@ -25,7 +25,7 @@
 *
 *
 * @author
-*  Srinivas T
+*  Ittiam
 *
 * @par List of Functions:
 *  - ihevc_inter_pred_luma_copy()
@@ -195,7 +195,6 @@ void ihevc_inter_pred_luma_horz(UWORD8 *pu1_src,
         pu1_src += src_strd;
         pu1_dst += dst_strd;
     }
-
 }
 
 
@@ -268,7 +267,6 @@ void ihevc_inter_pred_luma_vert(UWORD8 *pu1_src,
         pu1_src += src_strd;
         pu1_dst += dst_strd;
     }
-
 }
 
 
@@ -333,7 +331,6 @@ void ihevc_inter_pred_luma_copy_w16out(UWORD8 *pu1_src,
         pu1_src += src_strd;
         pi2_dst += dst_strd;
     }
-
 }
 
 
@@ -404,7 +401,6 @@ void ihevc_inter_pred_luma_horz_w16out(UWORD8 *pu1_src,
         pu1_src += src_strd;
         pi2_dst += dst_strd;
     }
-
 }
 
 
@@ -475,7 +471,6 @@ void ihevc_inter_pred_luma_vert_w16out(UWORD8 *pu1_src,
         pu1_src += src_strd;
         pi2_dst += dst_strd;
     }
-
 }
 
 /**
@@ -548,7 +543,6 @@ void ihevc_inter_pred_luma_vert_w16inp(WORD16 *pi2_src,
         pi2_src += src_strd;
         pu1_dst += dst_strd;
     }
-
 }
 
 
@@ -622,7 +616,6 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out(WORD16 *pi2_src,
         pi2_src += src_strd;
         pi2_dst += dst_strd;
     }
-
 }
 
 
@@ -1132,7 +1125,6 @@ void ihevc_inter_pred_chroma_vert_w16inp(WORD16 *pi2_src,
         pi2_src += src_strd;
         pu1_dst += dst_strd;
     }
-
 }
 
 
@@ -1208,7 +1200,61 @@ void ihevc_inter_pred_chroma_vert_w16inp_w16out(WORD16 *pi2_src,
         pi2_src += src_strd;
         pi2_dst += dst_strd;
     }
-
 }
 
 
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* *                                                                         */
+/* Function Name    : ihevc_inter_pred_luma_uni                              */
+/*                                                                           */
+/* Description      : This function does the luma interpolation of           */
+/*                    uni direction for reference data using biliner filter. */
+/*                                                                           */
+/*  Inputs        : pu1_src  : UWORD8 pointer to the source containing       */
+/*                            alternate U and V samples                      */
+/*                  pu1_dst  : UWORD8 pointer to the destination             */
+/*                  src_strd : integer source stride                         */
+/*                  dst_strd : integer destination stride                    */
+/*                  dx       : dx value where the sample is to be produced   */
+/*                  dy       : dy value where the sample is to be produced   */
+/*                  blk_ht   : block height to be predicted                  */
+/*                  blk_wd   : block width to be predicted                   */
+/* \Assumptions: Data Alignment : not used alligned instructions             */
+/* Revision History :                                                        */
+/*          DD MM YYYY  Author(s) Changes (Describe the changes made)        */
+/*          11 08 2016                                                       */
+/*                                                                           */
+/*****************************************************************************/
+void ihevc_inter_pred_luma_uni( UWORD8 *pu1_src,
+                             WORD32 src_strd,
+                             UWORD8 *pu1_dst,
+                             WORD32 dst_strd,
+                             WORD16 dx,
+                             WORD16 dy,
+                             WORD32 blk_ht,
+                             WORD32 blk_wd)
+{
+    WORD32 row, col;
+    WORD16 i2_tmp;
+
+    for(row = 0; row < blk_ht; row++)
+    {
+        for(col = 0; col < blk_wd; col++)
+        {
+            i2_tmp = 0;
+            i2_tmp = (4 - dx) * (4 - dy) * pu1_src[col]
+                     + (dx) * (4 - dy) * pu1_src[col + 1]
+                     + (4 - dx) * (dy) * (pu1_src + src_strd)[col]
+                     + (dx) * (dy) * (pu1_src + src_strd)[col + 1];
+
+            i2_tmp       = (i2_tmp + 8) >> 4;
+            pu1_dst[col] = CLIP_U8(i2_tmp);
+        }
+
+        pu1_src += src_strd;
+        pu1_dst += dst_strd;
+
+}
+}

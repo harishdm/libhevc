@@ -68,7 +68,6 @@
 #define NUM_DISPLAY_BUFFERS 4
 #define DEFAULT_FPS         30
 
-
 #define ENABLE_DEGRADE 0
 #define MAX_DISP_BUFFERS    64
 #define EXTRA_DISP_BUFFERS  0
@@ -84,56 +83,56 @@ char filename_with_path[PATHLENMAX];
 #endif
 
 #ifdef PROFILE_ENABLE
-#ifdef X86_MSVC
-typedef  LARGE_INTEGER TIMER;
+    #ifdef X86_MSVC
+        typedef  LARGE_INTEGER TIMER;
+    #else
+        //#ifdef X86_MINGW
+        typedef struct timeval TIMER;
+        //#endif
+    #endif
 #else
-//#ifdef X86_MINGW
-typedef struct timeval TIMER;
-//#endif
-#endif
-#else
-typedef WORD32 TIMER;
+        typedef WORD32 TIMER;
 #endif
 
 #ifdef PROFILE_ENABLE
-#ifdef X86_MSVC
-#define GETTIME(timer) QueryPerformanceCounter(timer);
-#else
-//#ifdef X86_MINGW
-#define GETTIME(timer) gettimeofday(timer,NULL);
-//#endif
-#endif
+    #ifdef X86_MSVC
+        #define GETTIME(timer) QueryPerformanceCounter(timer);
+    #else
+    //#ifdef X86_MINGW
+        #define GETTIME(timer) gettimeofday(timer,NULL);
+    //#endif
+    #endif
 
-#ifdef X86_MSVC
-#define ELAPSEDTIME(s_start_timer,s_end_timer, s_elapsed_time, frequency) \
+    #ifdef X86_MSVC
+        #define ELAPSEDTIME(s_start_timer,s_end_timer, s_elapsed_time, frequency) \
                   { \
                    TIMER s_temp_time;   \
                    s_temp_time.LowPart = s_end_timer.LowPart - s_start_timer.LowPart ; \
                    s_elapsed_time = (UWORD32) ( ((DOUBLE)s_temp_time.LowPart / (DOUBLE)frequency.LowPart )  * 1000000); \
                 }
-#else
-//#ifdef X86_MINGW
-#define ELAPSEDTIME(s_start_timer,s_end_timer, s_elapsed_time, frequency) \
+    #else
+    //#ifdef X86_MINGW
+        #define ELAPSEDTIME(s_start_timer,s_end_timer, s_elapsed_time, frequency) \
                    s_elapsed_time = ((s_end_timer.tv_sec - s_start_timer.tv_sec) * 1000000) + (s_end_timer.tv_usec - s_start_timer.tv_usec);
-//#endif
-#endif
+    //#endif
+    #endif
 
 #else
-#define GETTIME(timer)
-#define ELAPSEDTIME(s_start_timer,s_end_timer, s_elapsed_time, frequency)
+    #define GETTIME(timer)
+    #define ELAPSEDTIME(s_start_timer,s_end_timer, s_elapsed_time, frequency)
 #endif
 
 
 /* Function declarations */
 #ifndef MD5_DISABLE
-void calc_md5_cksum(UWORD8 *pu1_inbuf, UWORD32 u4_stride, UWORD32 u4_width, UWORD32 u4_height, UWORD8 *pu1_cksum_p);
+void calc_md5_cksum(UWORD8 *pu1_inbuf,UWORD32 u4_stride,UWORD32 u4_width,UWORD32 u4_height,UWORD8 *pu1_cksum_p );
 #else
 #define calc_md5_cksum(a, b, c, d, e)
 #endif
 #ifdef SDL_DISPLAY
 void* sdl_disp_init(UWORD32, UWORD32, WORD32, WORD32, WORD32, WORD32, WORD32, WORD32 *, WORD32 *);
 void sdl_alloc_disp_buffers(void *);
-void sdl_display(void *, WORD32);
+void sdl_display(void *, WORD32 );
 void sdl_set_disp_buffers(void *, WORD32, UWORD8 **, UWORD8 **, UWORD8 **);
 void sdl_disp_deinit(void *);
 void sdl_disp_usleep(UWORD32);
@@ -144,7 +143,7 @@ UWORD32 sdl_get_stride(void);
 #ifdef INTEL_CE5300
 void* gdl_disp_init(UWORD32, UWORD32, WORD32, WORD32, WORD32, WORD32, WORD32, WORD32 *, WORD32 *);
 void gdl_alloc_disp_buffers(void *);
-void gdl_display(void *, WORD32);
+void gdl_display(void *, WORD32 );
 void gdl_set_disp_buffers(void *, WORD32, UWORD8 **, UWORD8 **, UWORD8 **);
 void gdl_disp_deinit(void *);
 void gdl_disp_usleep(UWORD32);
@@ -155,7 +154,7 @@ UWORD32 gdl_get_stride(void);
 #ifdef FBDEV_DISPLAY
 void* fbd_disp_init(UWORD32, UWORD32, WORD32, WORD32, WORD32, WORD32, WORD32, WORD32 *, WORD32 *);
 void fbd_alloc_disp_buffers(void *);
-void fbd_display(void *, WORD32);
+void fbd_display(void *, WORD32 );
 void fbd_set_disp_buffers(void *, WORD32, UWORD8 **, UWORD8 **, UWORD8 **);
 void fbd_disp_deinit(void *);
 void fbd_disp_usleep(UWORD32);
@@ -166,7 +165,7 @@ UWORD32 fbd_get_stride(void);
 #ifdef IOS_DISPLAY
 void* ios_disp_init(UWORD32, UWORD32, WORD32, WORD32, WORD32, WORD32, WORD32, WORD32 *, WORD32 *);
 void ios_alloc_disp_buffers(void *);
-void ios_display(void *, WORD32);
+void ios_display(void *, WORD32 );
 void ios_set_disp_buffers(void *, WORD32, UWORD8 **, UWORD8 **, UWORD8 **);
 void ios_disp_deinit(void *);
 void ios_disp_usleep(UWORD32);
@@ -183,6 +182,7 @@ typedef struct
     IV_COLOR_FORMAT_T e_output_chroma_format;
     IVD_ARCH_T e_arch;
     IVD_SOC_T e_soc;
+    UWORD32 e_profile;
     UWORD32 dump_q_rd_idx;
     UWORD32 dump_q_wr_idx;
     WORD32  disp_q_wr_idx;
@@ -237,15 +237,15 @@ typedef struct
     volatile WORD32 display_init_done;
     volatile WORD32 display_deinit_flag;
 
-    void* (*disp_init)(UWORD32, UWORD32, WORD32, WORD32, WORD32, WORD32, WORD32, WORD32 *, WORD32 *);
+    void *(*disp_init)(UWORD32, UWORD32, WORD32, WORD32, WORD32, WORD32, WORD32, WORD32 *, WORD32 *);
     void (*alloc_disp_buffers)(void *);
     void (*display_buffer)(void *, WORD32);
     void (*set_disp_buffers)(void *, WORD32, UWORD8 **, UWORD8 **, UWORD8 **);
     void (*disp_deinit)(void *);
     void (*disp_usleep)(UWORD32);
-    IV_COLOR_FORMAT_T(*get_color_fmt)(void);
-    UWORD32(*get_stride)(void);
-}vid_dec_ctx_t;
+    IV_COLOR_FORMAT_T (*get_color_fmt)(void);
+    UWORD32 (*get_stride)(void);
+} vid_dec_ctx_t;
 
 
 
@@ -260,6 +260,7 @@ typedef enum
     SAVE_OUTPUT,
     SAVE_CHKSUM,
     CHROMA_FORMAT,
+    PROFILE,
     NUM_FRAMES,
     NUM_CORES,
 
@@ -283,7 +284,7 @@ typedef enum
     SOC,
     PICLEN,
     PICLEN_FILE,
-}ARGUMENT_T;
+} ARGUMENT_T;
 
 typedef struct
 {
@@ -291,67 +292,69 @@ typedef struct
     CHAR argument_name[128];
     ARGUMENT_T argument;
     CHAR description[512];
-}argument_t;
+} argument_t;
 
 static const argument_t argument_mapping[] =
 {
-    { "-h",  "--help",                   HELP,
-        "Print this help\n" },
+    {"-h",  "--help",                   HELP,
+         "Print this help\n"},
     { "-c", "--config",      CONFIG,
-        "config file (Default: test.cfg)\n" },
+         "config file (Default: test.cfg)\n" },
 
-    { "-v",  "--version",                VERSION,
-        "Version information\n" },
-    { "-i",  "--input",                  INPUT_FILE,
-        "Input file\n" },
-    { "-o",  "--output",                 OUTPUT,
-        "Output file\n" },
-    { "--",  "--piclen",                 PICLEN,
-        "Flag to signal if the decoder has to use a file containing number of bytes in each picture to be fed in each call\n" },
-    { "--",  "--piclen_file",                 PICLEN_FILE,
-        "File containing number of bytes in each picture - each line containing one size\n" },
-    { "--",  "--chksum",          CHKSUM,
-        "Output MD5 Checksum file\n" },
+    {"-v",  "--version",                VERSION,
+         "Version information\n"},
+    {"-i",  "--input",                  INPUT_FILE,
+         "Input file\n"},
+    {"-o",  "--output",                 OUTPUT,
+         "Output file\n"},
+    {"--",  "--piclen",                 PICLEN,
+          "Flag to signal if the decoder has to use a file containing number of bytes in each picture to be fed in each call\n"},
+    {"--",  "--piclen_file",                 PICLEN_FILE,
+            "File containing number of bytes in each picture - each line containing one size\n"},
+    {"--",  "--chksum",          CHKSUM,
+         "Output MD5 Checksum file\n"},
     { "-s", "--save_output",            SAVE_OUTPUT,
-        "Save Output file\n" },
+          "Save Output file\n" },
     { "--", "--save_chksum",            SAVE_CHKSUM,
-        "Save Check sum file\n" },
-    { "--",  "--chroma_format",          CHROMA_FORMAT,
-        "Output Chroma format Supported values YUV_420P, YUV_422ILE, RGB_565, YUV_420SP_UV, YUV_420SP_VU\n" },
+          "Save Check sum file\n" },
+    {"--",  "--chroma_format",          CHROMA_FORMAT,
+         "Output Chroma format Supported values YUV_420P, YUV_422ILE, RGB_565, YUV_420SP_UV, YUV_420SP_VU\n" },
+    {"--",  "--profile",                PROFILE,
+         "Decoder profile Supported profiles MAIN, MAIN_10, MAIN_422, MAIN_422_10\n"},
     { "-n", "--num_frames",             NUM_FRAMES,
-        "Number of frames to be decoded\n" },
+         "Number of frames to be decoded\n" },
     { "--", "--num_cores",              NUM_CORES,
-        "Number of cores to be used\n" },
-    { "--",  "--degrade_type",  DEGRADE_TYPE,
-        "Degrade type : 0: No degrade 0th bit set : Disable SAO 1st bit set : Disable deblocking 2nd bit set : Faster inter prediction filters 3rd bit set : Fastest inter prediction filters\n" },
-    { "--",  "--degrade_pics",  DEGRADE_PICS,
-        "Degrade pics : 0 : No degrade  1 : Only on non-reference frames  2 : Do not degrade every 4th or key frames  3 : All non-key frames  4 : All frames" },
+          "Number of cores to be used\n" },
+    {"--",  "--degrade_type",  DEGRADE_TYPE,
+         "Degrade type : 0: No degrade 0th bit set : Disable SAO 1st bit set : Disable deblocking 2nd bit set : Faster inter prediction filters 3rd bit set : Fastest inter prediction filters\n" },
+    {"--",  "--degrade_pics",  DEGRADE_PICS,
+         "Degrade pics : 0 : No degrade  1 : Only on non-reference frames  2 : Do not degrade every 4th or key frames  3 : All non-key frames  4 : All frames"},
     { "--", "--share_display_buf",      SHARE_DISPLAY_BUF,
-        "Enable shared display buffer mode\n" },
+          "Enable shared display buffer mode\n" },
     { "--", "--loopback",      LOOPBACK,
         "Enable playback in a loop\n" },
     { "--", "--display",      DISPLAY,
         "Enable display (uses SDL)\n" },
-    { "--", "--fullscreen",      FULLSCREEN,
+     { "--", "--fullscreen",      FULLSCREEN,
         "Enable full screen (Only for GDL and SDL)\n" },
     { "--", "--fps",      FPS,
         "FPS to be used for display \n" },
 #ifdef GPU_BUILD
-    { "--",  "--enable_gpu",       ENABLE_GPU,
-        "Enable shared display buffer mode\n" },
+    {"--",  "--enable_gpu",       ENABLE_GPU,
+            "Enable shared display buffer mode\n"},
 #endif
-    { "-i",  "--trace",                   TRACE,
-        "Trace file\n" },
+    {"-i",  "--trace",                   TRACE,
+         "Trace file\n"},
     { "--", "--max_wd",      MAX_WD,
         "Maximum width (Default: 2560) \n" },
     { "--", "--max_ht",      MAX_HT,
         "Maximum height (Default: 1600)\n" },
     { "--", "--max_level",      MAX_LEVEL,
         "Maximum Decoder Level (Default: 50)\n" },
-    { "--",  "--arch", ARCH,
-        "Set Architecture. Supported values  ARM_NONEON, ARM_A9Q, ARM_A7, ARM_A5, ARM_NEONINTR, X86_GENERIC, X86_SSSE3, X86_SSE4 \n" },
-    { "--",  "--soc", SOC,
-        "Set SOC. Supported values  GENERIC, HISI_37X \n" },
+    {"--",  "--arch", ARCH,
+         "Set Architecture. Supported values  ARM_NONEON, ARM_A9Q, ARM_A7, ARM_A5, ARM_NEONINTR, X86_GENERIC, X86_SSSE3, X86_SSE4 \n" },
+    {"--",  "--soc", SOC,
+         "Set SOC. Supported values  GENERIC, HISI_37X \n" },
 };
 
 #define PEAK_WINDOW_SIZE            8
@@ -432,21 +435,21 @@ int raise(int a)
 /*                                                                           */
 /*****************************************************************************/
 
-void* ihevca_aligned_malloc(WORD32 alignment, WORD32 size)
+void * ihevca_aligned_malloc(WORD32 alignment, WORD32 size)
 {
     return (void *)_aligned_malloc(size, alignment);
 }
 
 void ihevca_aligned_free(void *pv_buf)
-{
+    {
     _aligned_free(pv_buf);
     return;
 }
 #endif
 
 #if IOS
-void* ihevca_aligned_malloc(WORD32 alignment, WORD32 size)
-{
+void * ihevca_aligned_malloc(WORD32 alignment, WORD32 size)
+    {
     return malloc(size);
 }
 
@@ -458,10 +461,10 @@ void ihevca_aligned_free(void *pv_buf)
 #endif
 
 #if (!defined(IOS)) && (!defined(_WIN32))
-void* ihevca_aligned_malloc(WORD32 alignment, WORD32 size)
-{
+void * ihevca_aligned_malloc(WORD32 alignment, WORD32 size)
+    {
     return memalign(alignment, size);
-}
+    }
 
 void ihevca_aligned_free(void *pv_buf)
 {
@@ -522,7 +525,7 @@ IV_API_CALL_STATUS_T set_degrade(void *codec_obj, UWORD32 type, WORD32 pics)
     pv_api_op = (void *)&s_ctl_op;
 
     s_ctl_ip.e_cmd = IVD_CMD_VIDEO_CTL;
-    s_ctl_ip.e_sub_cmd = (IVD_CONTROL_API_COMMAND_TYPE_T)IHEVCD_CXA_CMD_CTL_DEGRADE;
+    s_ctl_ip.e_sub_cmd = (IVD_CONTROL_API_COMMAND_TYPE_T) IHEVCD_CXA_CMD_CTL_DEGRADE;
 
     e_dec_status = ivd_cxa_api_function((iv_obj_t *)codec_obj, pv_api_ip, pv_api_op);
 
@@ -533,6 +536,7 @@ IV_API_CALL_STATUS_T set_degrade(void *codec_obj, UWORD32 type, WORD32 pics)
     return (e_dec_status);
 
 }
+
 
 /*****************************************************************************/
 /*                                                                           */
@@ -822,18 +826,18 @@ IV_API_CALL_STATUS_T get_version(void *codec_obj)
     s_ctl_dec_ip.u4_version_buffer_size = sizeof(au1_buf);
 
     status = ivd_cxa_api_function((iv_obj_t *)codec_obj,
-                                  (void *)&(s_ctl_dec_ip),
-                                  (void *)&(s_ctl_dec_op));
+                                     (void *)&(s_ctl_dec_ip),
+                                     (void *)&(s_ctl_dec_op));
 
     if(status != IV_SUCCESS)
     {
         printf("Error in Getting Version number e_dec_status = %d u4_error_code = %x\n",
-               status, s_ctl_dec_op.u4_error_code);
+                     status, s_ctl_dec_op.u4_error_code);
     }
     else
     {
         printf("Ittiam Decoder Version number: %s\n",
-               (char *)s_ctl_dec_ip.pv_version_buffer);
+              (char *)s_ctl_dec_ip.pv_version_buffer);
     }
     return status;
 }
@@ -900,11 +904,11 @@ void dump_output(vid_dec_ctx_t *ps_app_ctx,
     if(ps_app_ctx->share_disp_buf)
     {
         if(ps_app_ctx->dump_q_wr_idx == MAX_DISP_BUFFERS
-                        )
+        )
             ps_app_ctx->dump_q_wr_idx = 0;
 
         if(ps_app_ctx->dump_q_rd_idx == MAX_DISP_BUFFERS
-                        )
+        )
             ps_app_ctx->dump_q_rd_idx = 0;
 
         ps_app_ctx->s_disp_frm_queue[ps_app_ctx->dump_q_wr_idx] =
@@ -940,39 +944,43 @@ void dump_output(vid_dec_ctx_t *ps_app_ctx,
     if(NULL == s_dump_disp_frm_buf.pv_y_buf)
         return;
 
-    if(ps_app_ctx->e_output_chroma_format == IV_YUV_420P)
+    if ((ps_app_ctx->e_output_chroma_format == IV_YUV_420P) ||
+        (ps_app_ctx->e_output_chroma_format == IV_YUV_422P))
     {
 #if DUMP_SINGLE_BUF
         {
             UWORD8 *buf = s_dump_disp_frm_buf.pv_y_buf - 24 - (s_dump_disp_frm_buf.u4_y_strd * 40);
 
             UWORD32 size = s_dump_disp_frm_buf.u4_y_strd * ((s_dump_disp_frm_buf.u4_y_ht + 80) + (s_dump_disp_frm_buf.u4_u_ht + 40));
-            fwrite(buf, 1, size, ps_op_file);
+            fwrite(buf, 1, size ,ps_op_file);
 
         }
 #else
         if(0 != file_save)
         {
             UWORD8 *buf;
+            WORD32 i4_pixel_size;
 
             buf = (UWORD8 *)s_dump_disp_frm_buf.pv_y_buf;
+            i4_pixel_size = 1 + (s_dump_disp_frm_buf.u4_y_bit_depth > 8);
             for(i = 0; i < s_dump_disp_frm_buf.u4_y_ht; i++)
             {
-                fwrite(buf, 1, s_dump_disp_frm_buf.u4_y_wd, ps_op_file);
-                buf += s_dump_disp_frm_buf.u4_y_strd;
+                fwrite(buf, 1, (s_dump_disp_frm_buf.u4_y_wd * i4_pixel_size), ps_op_file);
+                buf += s_dump_disp_frm_buf.u4_y_strd * i4_pixel_size;
             }
 
             buf = (UWORD8 *)s_dump_disp_frm_buf.pv_u_buf;
+            i4_pixel_size = 1 + (s_dump_disp_frm_buf.u4_uv_bit_depth > 8);
             for(i = 0; i < s_dump_disp_frm_buf.u4_u_ht; i++)
             {
-                fwrite(buf, 1, s_dump_disp_frm_buf.u4_u_wd, ps_op_file);
-                buf += s_dump_disp_frm_buf.u4_u_strd;
+                fwrite(buf, 1, (s_dump_disp_frm_buf.u4_u_wd * i4_pixel_size), ps_op_file);
+                buf += s_dump_disp_frm_buf.u4_u_strd * i4_pixel_size;
             }
             buf = (UWORD8 *)s_dump_disp_frm_buf.pv_v_buf;
             for(i = 0; i < s_dump_disp_frm_buf.u4_v_ht; i++)
             {
-                fwrite(buf, 1, s_dump_disp_frm_buf.u4_v_wd, ps_op_file);
-                buf += s_dump_disp_frm_buf.u4_v_strd;
+                fwrite(buf, 1, (s_dump_disp_frm_buf.u4_v_wd * i4_pixel_size), ps_op_file);
+                buf += s_dump_disp_frm_buf.u4_v_strd * i4_pixel_size;
             }
 
         }
@@ -982,19 +990,23 @@ void dump_output(vid_dec_ctx_t *ps_app_ctx,
             UWORD8 au1_y_chksum[16];
             UWORD8 au1_u_chksum[16];
             UWORD8 au1_v_chksum[16];
+            WORD32 i4_pixel_size;
+
+            i4_pixel_size = 1 + (s_dump_disp_frm_buf.u4_y_bit_depth > 8);
             calc_md5_cksum((UWORD8 *)s_dump_disp_frm_buf.pv_y_buf,
-                           s_dump_disp_frm_buf.u4_y_strd,
-                           s_dump_disp_frm_buf.u4_y_wd,
+                           s_dump_disp_frm_buf.u4_y_strd * i4_pixel_size,
+                           s_dump_disp_frm_buf.u4_y_wd * i4_pixel_size,
                            s_dump_disp_frm_buf.u4_y_ht,
                            au1_y_chksum);
+            i4_pixel_size = 1 + (s_dump_disp_frm_buf.u4_uv_bit_depth > 8);
             calc_md5_cksum((UWORD8 *)s_dump_disp_frm_buf.pv_u_buf,
-                           s_dump_disp_frm_buf.u4_u_strd,
-                           s_dump_disp_frm_buf.u4_u_wd,
+                           s_dump_disp_frm_buf.u4_u_strd * i4_pixel_size,
+                           s_dump_disp_frm_buf.u4_u_wd * i4_pixel_size,
                            s_dump_disp_frm_buf.u4_u_ht,
                            au1_u_chksum);
             calc_md5_cksum((UWORD8 *)s_dump_disp_frm_buf.pv_v_buf,
-                           s_dump_disp_frm_buf.u4_v_strd,
-                           s_dump_disp_frm_buf.u4_v_wd,
+                           s_dump_disp_frm_buf.u4_v_strd * i4_pixel_size,
+                           s_dump_disp_frm_buf.u4_v_wd * i4_pixel_size,
                            s_dump_disp_frm_buf.u4_v_ht,
                            au1_v_chksum);
 
@@ -1005,7 +1017,9 @@ void dump_output(vid_dec_ctx_t *ps_app_ctx,
 #endif
     }
     else if((ps_app_ctx->e_output_chroma_format == IV_YUV_420SP_UV)
-                    || (ps_app_ctx->e_output_chroma_format == IV_YUV_420SP_VU))
+                    || (ps_app_ctx->e_output_chroma_format == IV_YUV_420SP_VU)
+                    || (ps_app_ctx->e_output_chroma_format == IV_YUV_422SP_UV)
+                    || (ps_app_ctx->e_output_chroma_format == IV_YUV_422SP_VU))
     {
 #if DUMP_SINGLE_BUF
         {
@@ -1013,24 +1027,27 @@ void dump_output(vid_dec_ctx_t *ps_app_ctx,
             UWORD8 *buf = s_dump_disp_frm_buf.pv_y_buf - 24 - (s_dump_disp_frm_buf.u4_y_strd * 40);
 
             UWORD32 size = s_dump_disp_frm_buf.u4_y_strd * ((s_dump_disp_frm_buf.u4_y_ht + 80) + (s_dump_disp_frm_buf.u4_u_ht + 40));
-            fwrite(buf, 1, size, ps_op_file);
+            fwrite(buf, 1, size ,ps_op_file);
         }
 #else
         {
             UWORD8 *buf;
+            WORD32 i4_pixel_size;
 
             buf = (UWORD8 *)s_dump_disp_frm_buf.pv_y_buf;
+            i4_pixel_size = 1 + (s_dump_disp_frm_buf.u4_y_bit_depth > 8);
             for(i = 0; i < s_dump_disp_frm_buf.u4_y_ht; i++)
             {
-                fwrite(buf, 1, s_dump_disp_frm_buf.u4_y_wd, ps_op_file);
-                buf += s_dump_disp_frm_buf.u4_y_strd;
+                fwrite(buf, 1, (s_dump_disp_frm_buf.u4_y_wd * i4_pixel_size), ps_op_file);
+                buf += s_dump_disp_frm_buf.u4_y_strd * i4_pixel_size;
             }
 
             buf = (UWORD8 *)s_dump_disp_frm_buf.pv_u_buf;
+            i4_pixel_size = 1 + (s_dump_disp_frm_buf.u4_uv_bit_depth > 8);
             for(i = 0; i < s_dump_disp_frm_buf.u4_u_ht; i++)
             {
-                fwrite(buf, 1, s_dump_disp_frm_buf.u4_u_wd, ps_op_file);
-                buf += s_dump_disp_frm_buf.u4_u_strd;
+                fwrite(buf, 1, (s_dump_disp_frm_buf.u4_u_wd * i4_pixel_size), ps_op_file);
+                buf += s_dump_disp_frm_buf.u4_u_strd * i4_pixel_size;
             }
         }
 #endif
@@ -1049,12 +1066,14 @@ void dump_output(vid_dec_ctx_t *ps_app_ctx,
     else
     {
         UWORD8 *buf;
+        WORD32 i4_pixel_size;
 
         buf = (UWORD8 *)s_dump_disp_frm_buf.pv_y_buf;
+        i4_pixel_size = 1 + (s_dump_disp_frm_buf.u4_y_bit_depth > 8);
         for(i = 0; i < s_dump_disp_frm_buf.u4_y_ht; i++)
         {
-            fwrite(buf, 1, s_dump_disp_frm_buf.u4_y_strd * 2, ps_op_file);
-            buf += s_dump_disp_frm_buf.u4_y_strd * 2;
+            fwrite(buf, 1, (s_dump_disp_frm_buf.u4_y_strd * 2 * i4_pixel_size), ps_op_file);
+            buf += s_dump_disp_frm_buf.u4_y_strd * 2 * i4_pixel_size;
         }
     }
 
@@ -1130,9 +1149,9 @@ ARGUMENT_T get_argument(CHAR *name)
     WORD32 num_entries = sizeof(argument_mapping) / sizeof(argument_t);
     while(i < num_entries)
     {
-        if((0 == strcmp(argument_mapping[i].argument_name, name)) ||
-                        ((0 == strcmp(argument_mapping[i].argument_shortname, name)) &&
-                                        (0 != strcmp(argument_mapping[i].argument_shortname, "--"))))
+        if((0 == strcmp(argument_mapping[i].argument_name, name))       ||
+          ((0 == strcmp(argument_mapping[i].argument_shortname, name))  &&
+           (0 != strcmp(argument_mapping[i].argument_shortname, "--"))))
         {
             return argument_mapping[i].argument;
         }
@@ -1211,12 +1230,37 @@ void parse_argument(vid_dec_ctx_t *ps_app_ctx, CHAR *argument, CHAR *value)
                 ps_app_ctx->e_output_chroma_format = IV_YUV_420SP_UV;
             else if((strcmp(value, "YUV_420SP_VU")) == 0)
                 ps_app_ctx->e_output_chroma_format = IV_YUV_420SP_VU;
+            else if((strcmp(value, "YUV_422SP_UV")) == 0)
+                ps_app_ctx->e_output_chroma_format = IV_YUV_422SP_UV;
+            else if((strcmp(value, "YUV_422SP_VU")) == 0)
+                ps_app_ctx->e_output_chroma_format = IV_YUV_422SP_VU;
+            else if((strcmp(value, "YUV_422P")) == 0)
+                ps_app_ctx->e_output_chroma_format = IV_YUV_422P;
             else
             {
                 printf("\nInvalid colour format setting it to IV_YUV_420P\n");
                 ps_app_ctx->e_output_chroma_format = IV_YUV_420P;
             }
 
+            break;
+        case PROFILE:
+            if ((strcmp(value, "MAIN")) == 0)
+                ps_app_ctx->e_profile = HEVC_MAIN;
+            else if ((strcmp(value, "MAIN_10")) == 0)
+                ps_app_ctx->e_profile = HEVC_MAIN_10;
+            else if ((strcmp(value, "MAIN_12")) == 0)
+                ps_app_ctx->e_profile = HEVC_MAIN_12;
+            else if ((strcmp(value, "MAIN_422")) == 0)
+                ps_app_ctx->e_profile = HEVC_MAIN_422;
+            else if ((strcmp(value, "MAIN_422_10")) == 0)
+                ps_app_ctx->e_profile = HEVC_MAIN_422_10;
+            else if ((strcmp(value, "MAIN_422_12")) == 0)
+                ps_app_ctx->e_profile = HEVC_MAIN_422_12;
+            else
+            {
+                printf("\nUnsupported profile, setting it to MAIN_422_12\n");
+                ps_app_ctx->e_profile = HEVC_MAIN_12;//HEVC_MAIN_422_12; /* Nithya: update after 422 support added */
+            }
             break;
         case NUM_FRAMES:
             sscanf(value, "%d", &ps_app_ctx->u4_max_frm_ts);
@@ -1284,6 +1328,8 @@ void parse_argument(vid_dec_ctx_t *ps_app_ctx, CHAR *argument, CHAR *value)
                 ps_app_ctx->e_arch = ARCH_MIPS_GENERIC;
             else if((strcmp(value, "MIPS_32")) == 0)
                 ps_app_ctx->e_arch = ARCH_MIPS_32;
+            else if((strcmp(value, "ARMV8_GENERIC")) == 0)
+                ps_app_ctx->e_arch = ARCH_ARMV8_GENERIC;
             else
             {
                 printf("\nInvalid Arch. Setting it to ARM_A9Q\n");
@@ -1406,7 +1452,7 @@ WORD32 dispq_producer_dequeue(vid_dec_ctx_t *ps_app_ctx)
         ithread_msleep(1);
 
         if(ps_app_ctx->quit)
-            return (-1);
+            return(-1);
     }
 
     idx = ps_app_ctx->disp_q_wr_idx;
@@ -1469,7 +1515,7 @@ WORD32 dispq_consumer_dequeue(vid_dec_ctx_t *ps_app_ctx)
         ithread_msleep(1);
 
         if(ps_app_ctx->quit)
-            return (-1);
+            return(-1);
     }
 
     idx = ps_app_ctx->disp_q_rd_idx;
@@ -1532,7 +1578,7 @@ WORD32 dispq_consumer_queue(vid_dec_ctx_t *ps_app_ctx)
 
 WORD32 display_thread(void *pv_ctx)
 {
-    vid_dec_ctx_t *ps_app_ctx = (vid_dec_ctx_t *)pv_ctx;
+    vid_dec_ctx_t *ps_app_ctx = (vid_dec_ctx_t *) pv_ctx;
 
 
     UWORD32 frm_duration; /* in us */
@@ -1550,11 +1596,11 @@ WORD32 display_thread(void *pv_ctx)
 #endif
 
 #ifdef X86_MSVC
-    QueryPerformanceFrequency(&frequency);
+        QueryPerformanceFrequency ( &frequency);
 #endif
     first_frame_displayed = 0;
     expected_time = 0;
-    frm_duration = 1000000 / ps_app_ctx->fps;
+    frm_duration = 1000000/ps_app_ctx->fps;
 
     /* Init display and allocate display buffers */
     ps_app_ctx->pv_disp_ctx = (void *)ps_app_ctx->disp_init(ps_app_ctx->u4_pic_wd,
@@ -1575,8 +1621,8 @@ WORD32 display_thread(void *pv_ctx)
         WORD32 rd_idx;
 
         rd_idx = dispq_consumer_dequeue(ps_app_ctx);
-        if(ps_app_ctx->quit)
-            break;
+        if (ps_app_ctx->quit)
+                break;
 
         ps_app_ctx->display_buffer(ps_app_ctx->pv_disp_ctx, rd_idx);
 
@@ -1592,7 +1638,7 @@ WORD32 display_thread(void *pv_ctx)
         /*********************************************************************/
 
         GETTIME(&s_end_timer);
-        ELAPSEDTIME(s_first_frame_time, s_end_timer, current_time, frequency);
+        ELAPSEDTIME(s_first_frame_time,s_end_timer,current_time,frequency);
 
         /* time in micro second */
         expected_time += frm_duration;
@@ -1619,6 +1665,30 @@ WORD32 display_thread(void *pv_ctx)
     ithread_exit(ps_app_ctx->display_thread_handle);
 
     return 0;
+}
+
+void output_write_stall(CHAR *fname, UWORD32 cur_frm_idx)
+{
+    const UWORD8 threshold = 64;
+    CHAR past_fname[1000];
+    FILE *fp_fast_file = NULL;
+
+    if (cur_frm_idx >= threshold)
+    {
+        sprintf(past_fname, fname, cur_frm_idx - threshold);
+        do
+        {
+            fp_fast_file = fopen(past_fname,"rb");
+            if (fp_fast_file != NULL)
+            {
+                fclose(fp_fast_file);
+                /* Wait until the resource is released by a third party app*/
+                ithread_msleep(5);
+            }
+            else
+                break;
+        } while(1);
+    }
 }
 
 void flush_output(iv_obj_t *codec_obj,
@@ -1690,16 +1760,46 @@ void flush_output(iv_obj_t *codec_obj,
 
             if(1 == s_video_decode_op.u4_output_present)
             {
+                CHAR cur_fname[1000];
+                CHAR *extn = NULL;
+                /* The objective is to dump the decoded frames into separate files instead of
+                 * dumping all the frames in one common file. Also, the number of dumped frames
+                 * at any given instance of time cannot exceed 'frame_memory'
+                 */
+                if(ps_app_ctx->u4_file_save_flag)
+                {
+                    /* Locate the position of extension yuv */
+                    extn = strstr(ps_app_ctx->ac_op_fname,"%d");
+                    if (extn != NULL)
+                    {
+                        output_write_stall(ps_app_ctx->ac_op_fname,*pu4_op_frm_ts);
+                        /* Generate output file names */
+                        sprintf(cur_fname,ps_app_ctx->ac_op_fname,*pu4_op_frm_ts);
+                        /* Open Output file */
+                        ps_op_file = fopen(cur_fname,"wb");
+                        if (NULL == ps_op_file)
+                        {
+                            CHAR ac_error_str[STRLENGTH];
+                            sprintf(ac_error_str, "Could not open output file %s",
+                                    cur_fname);
+
+                            codec_exit(ac_error_str);
+                        }
+                    }
+                }
+
                 dump_output(ps_app_ctx, &(s_video_decode_op.s_disp_frm_buf),
                             s_video_decode_op.u4_disp_buf_id, ps_op_file,
                             ps_op_chksum_file,
                             *pu4_op_frm_ts, ps_app_ctx->u4_file_save_flag,
                             ps_app_ctx->u4_chksum_save_flag);
-
+                if (extn != NULL)
+                    fclose(ps_op_file);
                 (*pu4_op_frm_ts)++;
             }
         }
-    }while(IV_SUCCESS == ret);
+    }
+    while(IV_SUCCESS == ret);
 
 }
 
@@ -1746,7 +1846,7 @@ IV_COLOR_FORMAT_T default_get_color_fmt(void)
 /*         09 05 2013   100578          Multithread decode-display           */
 /*****************************************************************************/
 #ifdef IOS
-int hevcdec_main(char *homedir, char *documentdir, int screen_wd, int screen_ht)
+int hevcdec_main(char * homedir,char *documentdir, int screen_wd, int screen_ht)
 #else
 int main(WORD32 argc, CHAR *argv[])
 #endif
@@ -1807,8 +1907,8 @@ int main(WORD32 argc, CHAR *argv[])
     setvbuf(stderr, NULL, _IONBF, 0);
 #endif
 #ifdef IOS
-    sprintf(filename_trace, "%s/iostrace.txt", homedir);
-    printf("\ntrace file name = %s", filename_trace);
+        sprintf(filename_trace, "%s/iostrace.txt", homedir );
+        printf("\ntrace file name = %s",filename_trace);
 #endif
 
 #ifdef X86_MINGW
@@ -2007,12 +2107,13 @@ int main(WORD32 argc, CHAR *argv[])
     }
 
 
+
     /***********************************************************************/
     /*          create the file object for input file                      */
     /***********************************************************************/
 #ifdef IOS
-    sprintf(filename_with_path, "%s/%s", homedir, s_app_ctx.ac_ip_fname);
-    ps_ip_file = fopen(filename_with_path, "rb");
+  sprintf(filename_with_path, "%s/%s", homedir, s_app_ctx.ac_ip_fname);
+   ps_ip_file = fopen(filename_with_path, "rb");
 #else
     ps_ip_file = fopen(s_app_ctx.ac_ip_fname, "rb");
 #endif
@@ -2036,7 +2137,7 @@ int main(WORD32 argc, CHAR *argv[])
         if(NULL == ps_piclen_file)
         {
             sprintf(ac_error_str, "Could not open piclen file %s",
-                    s_app_ctx.ac_piclen_fname);
+                s_app_ctx.ac_piclen_fname);
             codec_exit(ac_error_str);
         }
     }
@@ -2044,11 +2145,14 @@ int main(WORD32 argc, CHAR *argv[])
     /***********************************************************************/
     /*          create the file object for output file                     */
     /***********************************************************************/
-    if(1 == s_app_ctx.u4_file_save_flag)
+
+    /* If the filename does not contain %d, then output will be dumped to
+       a single file and it is opened here */
+    if((1 == s_app_ctx.u4_file_save_flag) && (strstr(s_app_ctx.ac_op_fname,"%d") == NULL))
     {
 #ifdef IOS
-        sprintf(filename_with_path, "%s/%s", documentdir, s_app_ctx.ac_op_fname);
-        ps_op_file = fopen(filename_with_path, "wb");
+    sprintf(filename_with_path, "%s/%s", documentdir, s_app_ctx.ac_op_fname);
+    ps_op_file = fopen(filename_with_path,"wb");
 #else
         ps_op_file = fopen(s_app_ctx.ac_op_fname, "wb");
 #endif
@@ -2068,7 +2172,7 @@ int main(WORD32 argc, CHAR *argv[])
     {
 #if IOS
         sprintf(filename_with_path, "%s/%s", documentdir, s_app_ctx.ac_op_chksum_fname);
-        ps_op_chksum_file = fopen(filename_with_path, "wb");
+        ps_op_chksum_file = fopen(filename_with_path,"wb");
 #else
         ps_op_chksum_file = fopen(s_app_ctx.ac_op_chksum_fname, "wb");
 #endif
@@ -2098,8 +2202,8 @@ int main(WORD32 argc, CHAR *argv[])
             /*   API Call: Get Number of Mem Records                                     */
             /*****************************************************************************/
             e_dec_status = ivd_cxa_api_function(
-                            NULL, (void *)&s_no_of_mem_rec_query_ip,
-                            (void *)&s_no_of_mem_rec_query_op);
+                            NULL, (void*)&s_no_of_mem_rec_query_ip,
+                            (void*)&s_no_of_mem_rec_query_op);
             if(IV_SUCCESS != e_dec_status)
             {
                 sprintf(ac_error_str, "Error in get mem records");
@@ -2137,6 +2241,7 @@ int main(WORD32 argc, CHAR *argv[])
             s_fill_mem_rec_ip.u4_share_disp_buf = s_app_ctx.share_disp_buf;
             s_fill_mem_rec_ip.e_output_format =
                             (IV_COLOR_FORMAT_T)s_app_ctx.e_output_chroma_format;
+            s_fill_mem_rec_ip.e_profile = (HEVC_DEC_PROFILE_T)s_app_ctx.e_profile;
             s_fill_mem_rec_ip.u4_num_extra_disp_buf = EXTRA_DISP_BUFFERS;
 
             s_fill_mem_rec_ip.s_ivd_fill_mem_rec_ip_t.u4_size =
@@ -2161,7 +2266,7 @@ int main(WORD32 argc, CHAR *argv[])
 
             if(IV_SUCCESS != e_dec_status)
             {
-                sprintf(ac_error_str, "Error in fill mem records: %x", s_fill_mem_rec_op.s_ivd_fill_mem_rec_op_t.u4_error_code);
+                sprintf(ac_error_str, "Error in fill mem records: %x",s_fill_mem_rec_op.s_ivd_fill_mem_rec_op_t.u4_error_code);
                 codec_exit(ac_error_str);
             }
 
@@ -2170,7 +2275,7 @@ int main(WORD32 argc, CHAR *argv[])
             for(i = 0; i < u4_num_mem_recs; i++)
             {
                 ps_mem_rec->pv_base = ihevca_aligned_malloc(ps_mem_rec->u4_mem_alignment,
-                                                            ps_mem_rec->u4_mem_size);
+                                               ps_mem_rec->u4_mem_size);
                 if(ps_mem_rec->pv_base == NULL)
                 {
                     sprintf(ac_error_str,
@@ -2194,7 +2299,7 @@ int main(WORD32 argc, CHAR *argv[])
             void *fxns = &ivd_cxa_api_function;
             iv_mem_rec_t *mem_tab;
 
-            mem_tab = (iv_mem_rec_t *)pv_mem_rec_location;
+            mem_tab = (iv_mem_rec_t*)pv_mem_rec_location;
             s_init_ip.s_ivd_init_ip_t.e_cmd = (IVD_API_COMMAND_TYPE_T)IV_CMD_INIT;
             s_init_ip.s_ivd_init_ip_t.pv_mem_rec_location = mem_tab;
             s_init_ip.s_ivd_init_ip_t.u4_frm_max_wd = (s_app_ctx.max_wd == 0) ? MAX_FRAME_WIDTH : s_app_ctx.max_wd;
@@ -2204,19 +2309,21 @@ int main(WORD32 argc, CHAR *argv[])
             s_init_ip.u4_num_reorder_frames = MAX_REORDER_FRAMES;
             s_init_ip.u4_share_disp_buf = s_app_ctx.share_disp_buf;
             s_init_ip.u4_num_extra_disp_buf = EXTRA_DISP_BUFFERS;
+            s_init_ip.e_profile = (HEVC_DEC_PROFILE_T)s_app_ctx.e_profile;
+
             s_init_ip.s_ivd_init_ip_t.u4_num_mem_rec = u4_num_mem_recs;
             s_init_ip.s_ivd_init_ip_t.e_output_format =
                             (IV_COLOR_FORMAT_T)s_app_ctx.e_output_chroma_format;
             s_init_ip.s_ivd_init_ip_t.u4_size = sizeof(ihevcd_cxa_init_ip_t);
             s_init_op.s_ivd_init_op_t.u4_size = sizeof(ihevcd_cxa_init_op_t);
 
-            codec_obj = (iv_obj_t *)mem_tab[0].pv_base;
+            codec_obj = (iv_obj_t*)mem_tab[0].pv_base;
             codec_obj->pv_fxns = fxns;
             codec_obj->u4_size = sizeof(iv_obj_t);
 
             s_app_ctx.cocodec_obj = codec_obj;
 
-            ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_init_ip,
+            ret = ivd_cxa_api_function((iv_obj_t*)codec_obj, (void *)&s_init_ip,
                                        (void *)&s_init_op);
             if(ret != IV_SUCCESS)
             {
@@ -2237,7 +2344,7 @@ int main(WORD32 argc, CHAR *argv[])
                 s_ctl_ip.e_sub_cmd = IVD_CMD_CTL_GETBUFINFO;
                 s_ctl_ip.u4_size = sizeof(ivd_ctl_getbufinfo_ip_t);
                 s_ctl_op.u4_size = sizeof(ivd_ctl_getbufinfo_op_t);
-                ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_ctl_ip,
+                ret = ivd_cxa_api_function((iv_obj_t*)codec_obj, (void *)&s_ctl_ip,
                                            (void *)&s_ctl_op);
                 if(ret != IV_SUCCESS)
                 {
@@ -2311,12 +2418,12 @@ int main(WORD32 argc, CHAR *argv[])
         ihevcd_cxa_ctl_set_num_cores_op_t s_ctl_set_cores_op;
 
         s_ctl_set_cores_ip.e_cmd = IVD_CMD_VIDEO_CTL;
-        s_ctl_set_cores_ip.e_sub_cmd = (IVD_CONTROL_API_COMMAND_TYPE_T)IHEVCD_CXA_CMD_CTL_SET_NUM_CORES;
+        s_ctl_set_cores_ip.e_sub_cmd =(IVD_CONTROL_API_COMMAND_TYPE_T) IHEVCD_CXA_CMD_CTL_SET_NUM_CORES;
         s_ctl_set_cores_ip.u4_num_cores = s_app_ctx.u4_num_cores;
         s_ctl_set_cores_ip.u4_size = sizeof(ihevcd_cxa_ctl_set_num_cores_ip_t);
         s_ctl_set_cores_op.u4_size = sizeof(ihevcd_cxa_ctl_set_num_cores_op_t);
 
-        ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_ctl_set_cores_ip,
+        ret = ivd_cxa_api_function((iv_obj_t*)codec_obj, (void *)&s_ctl_set_cores_ip,
                                    (void *)&s_ctl_set_cores_op);
         if(ret != IV_SUCCESS)
         {
@@ -2334,13 +2441,13 @@ int main(WORD32 argc, CHAR *argv[])
         ihevcd_cxa_ctl_set_processor_op_t s_ctl_set_num_processor_op;
 
         s_ctl_set_num_processor_ip.e_cmd = IVD_CMD_VIDEO_CTL;
-        s_ctl_set_num_processor_ip.e_sub_cmd = (IVD_CONTROL_API_COMMAND_TYPE_T)IHEVCD_CXA_CMD_CTL_SET_PROCESSOR;
+        s_ctl_set_num_processor_ip.e_sub_cmd =(IVD_CONTROL_API_COMMAND_TYPE_T) IHEVCD_CXA_CMD_CTL_SET_PROCESSOR;
         s_ctl_set_num_processor_ip.u4_arch = s_app_ctx.e_arch;
         s_ctl_set_num_processor_ip.u4_soc = s_app_ctx.e_soc;
         s_ctl_set_num_processor_ip.u4_size = sizeof(ihevcd_cxa_ctl_set_processor_ip_t);
         s_ctl_set_num_processor_op.u4_size = sizeof(ihevcd_cxa_ctl_set_processor_op_t);
 
-        ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_ctl_set_num_processor_ip,
+        ret = ivd_cxa_api_function((iv_obj_t*)codec_obj, (void *)&s_ctl_set_num_processor_ip,
                                    (void *)&s_ctl_set_num_processor_op);
         if(ret != IV_SUCCESS)
         {
@@ -2402,7 +2509,7 @@ int main(WORD32 argc, CHAR *argv[])
         s_ctl_ip.u4_size = sizeof(ivd_ctl_set_config_ip_t);
         s_ctl_op.u4_size = sizeof(ivd_ctl_set_config_op_t);
 
-        ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_ctl_ip,
+        ret = ivd_cxa_api_function((iv_obj_t*)codec_obj, (void *)&s_ctl_ip,
                                    (void *)&s_ctl_op);
         if(ret != IV_SUCCESS)
         {
@@ -2416,7 +2523,7 @@ int main(WORD32 argc, CHAR *argv[])
             WORD32 numbytes;
             if(0 == s_app_ctx.u4_piclen_flag)
             {
-                fseek(ps_ip_file, file_pos, SEEK_SET);
+            fseek(ps_ip_file, file_pos, SEEK_SET);
                 numbytes = u4_ip_buf_len;
             }
             else
@@ -2458,7 +2565,7 @@ int main(WORD32 argc, CHAR *argv[])
 
             u4_num_bytes_dec = s_video_decode_op.u4_num_bytes_consumed;
 #ifndef PROFILE_ENABLE
-            printf("%d\n", s_video_decode_op.u4_num_bytes_consumed);
+            printf("%d\n",s_video_decode_op.u4_num_bytes_consumed);
 #endif
             file_pos += u4_num_bytes_dec;
             total_bytes_comsumed += u4_num_bytes_dec;
@@ -2480,7 +2587,7 @@ int main(WORD32 argc, CHAR *argv[])
             {
                 s_app_ctx.display_init_done = 0;
                 ithread_create(s_app_ctx.display_thread_handle, NULL,
-                               (void *)&display_thread, (void *)&s_app_ctx);
+                                                    (void *) &display_thread, (void *) &s_app_ctx);
                 s_app_ctx.display_thread_created = 1;
 
                 while(1)
@@ -2620,7 +2727,7 @@ int main(WORD32 argc, CHAR *argv[])
                         sizeof(ihevcd_cxa_ctl_get_frame_dimensions_op_t);
 
         ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_ctl_get_frame_dimensions_ip,
-                                   (void *)&s_ctl_get_frame_dimensions_op);
+                             (void *)&s_ctl_get_frame_dimensions_op);
         if(IV_SUCCESS != ret)
         {
             sprintf(ac_error_str, "Error in Get buffer Dimensions");
@@ -2653,7 +2760,7 @@ int main(WORD32 argc, CHAR *argv[])
                         sizeof(ihevcd_cxa_ctl_get_vui_params_op_t);
 
         ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_ctl_get_vui_params_ip,
-                                   (void *)&s_ctl_get_vui_params_op);
+                             (void *)&s_ctl_get_vui_params_op);
         if(IV_SUCCESS != ret)
         {
             sprintf(ac_error_str, "Error in Get VUI params");
@@ -2699,7 +2806,7 @@ int main(WORD32 argc, CHAR *argv[])
     /*************************************************************************/
     set_degrade(codec_obj, s_app_ctx.i4_degrade_type, s_app_ctx.i4_degrade_pics);
 #ifdef X86_MSVC
-    QueryPerformanceFrequency(&frequency);
+        QueryPerformanceFrequency ( &frequency);
 #endif
 #ifndef PRINT_PICSIZE
     get_version(codec_obj);
@@ -2770,7 +2877,7 @@ int main(WORD32 argc, CHAR *argv[])
 
             if(0 == s_app_ctx.u4_piclen_flag)
             {
-                fseek(ps_ip_file, file_pos, SEEK_SET);
+            fseek(ps_ip_file, file_pos, SEEK_SET);
                 numbytes = u4_ip_buf_len;
             }
             else
@@ -2791,7 +2898,7 @@ int main(WORD32 argc, CHAR *argv[])
                     file_pos = 0;
                     if(0 == s_app_ctx.u4_piclen_flag)
                     {
-                        fseek(ps_ip_file, file_pos, SEEK_SET);
+                    fseek(ps_ip_file, file_pos, SEEK_SET);
                         numbytes = u4_ip_buf_len;
                     }
                     else
@@ -2878,9 +2985,9 @@ int main(WORD32 argc, CHAR *argv[])
                     break;
 
                 s_app_ctx.set_disp_buffers(s_app_ctx.pv_disp_ctx, wr_idx,
-                                           &s_video_decode_ip.s_out_buffer.pu1_bufs[0],
-                                           &s_video_decode_ip.s_out_buffer.pu1_bufs[1],
-                                           &s_video_decode_ip.s_out_buffer.pu1_bufs[2]);
+                                     &s_video_decode_ip.s_out_buffer.pu1_bufs[0],
+                                     &s_video_decode_ip.s_out_buffer.pu1_bufs[1],
+                                     &s_video_decode_ip.s_out_buffer.pu1_bufs[2]);
             }
 
             /*****************************************************************************/
@@ -2894,43 +3001,43 @@ int main(WORD32 argc, CHAR *argv[])
 
 
             GETTIME(&s_end_timer);
-            ELAPSEDTIME(s_start_timer, s_end_timer, s_elapsed_time, frequency);
+            ELAPSEDTIME(s_start_timer,s_end_timer,s_elapsed_time,frequency);
 #ifdef PROFILE_ENABLE
             {
-                UWORD32 peak_avg, id;
-                u4_tot_cycles += s_elapsed_time;
-                peak_window[peak_window_idx++] = s_elapsed_time;
-                if(peak_window_idx == PEAK_WINDOW_SIZE)
+                    UWORD32 peak_avg, id;
+                    u4_tot_cycles += s_elapsed_time;
+                    peak_window[peak_window_idx++] = s_elapsed_time;
+                    if(peak_window_idx == PEAK_WINDOW_SIZE)
                     peak_window_idx = 0;
-                peak_avg = 0;
-                for(id = 0; id < PEAK_WINDOW_SIZE; id++)
-                {
-                    peak_avg += peak_window[id];
-                }
-                peak_avg /= PEAK_WINDOW_SIZE;
-                if(peak_avg > peak_avg_max)
+                    peak_avg = 0;
+                    for(id = 0; id < PEAK_WINDOW_SIZE; id++)
+                    {
+                            peak_avg += peak_window[id];
+                    }
+                    peak_avg /= PEAK_WINDOW_SIZE;
+                    if(peak_avg > peak_avg_max)
                     peak_avg_max = peak_avg;
-                frm_cnt++;
+                    frm_cnt++;
 
-                printf("FrameNum: %4d TimeTaken(microsec): %6d AvgTime: %6d PeakAvgTimeMax: %6d Output: %2d NumBytes: %6d \n",
-                       frm_cnt, s_elapsed_time, u4_tot_cycles / frm_cnt, peak_avg_max, s_video_decode_op.u4_output_present, s_video_decode_op.u4_num_bytes_consumed);
+                    printf("FrameNum: %4d TimeTaken(microsec): %6d AvgTime: %6d PeakAvgTimeMax: %6d Output: %2d NumBytes: %6d \n",
+                                    frm_cnt, s_elapsed_time, u4_tot_cycles / frm_cnt, peak_avg_max, s_video_decode_op.u4_output_present, s_video_decode_op.u4_num_bytes_consumed);
 
             }
 #ifdef INTEL_CE5300
-            time_consumed += s_elapsed_time;
-            bytes_consumed += s_video_decode_op.u4_num_bytes_consumed;
-            if(!(frm_cnt % (s_app_ctx.fps)))
-            {
-                time_consumed = time_consumed / s_app_ctx.fps;
-                printf("Average decode time(micro sec) for the last second = %6d\n", time_consumed);
-                printf("Average bitrate(kb) for the last second = %6d\n", (bytes_consumed * 8) / 1024);
-                time_consumed = 0;
-                bytes_consumed = 0;
+        time_consumed += s_elapsed_time;
+        bytes_consumed += s_video_decode_op.u4_num_bytes_consumed;
+        if (!(frm_cnt % (s_app_ctx.fps)))
+        {
+            time_consumed = time_consumed/s_app_ctx.fps;
+            printf("Average decode time(micro sec) for the last second = %6d\n",time_consumed);
+            printf("Average bitrate(kb) for the last second = %6d\n",(bytes_consumed * 8) / 1024);
+            time_consumed = 0;
+            bytes_consumed = 0;
 
-            }
+        }
 #endif
 #else
-            printf("%d\n", s_video_decode_op.u4_num_bytes_consumed);
+        printf("%d\n",s_video_decode_op.u4_num_bytes_consumed);
 #endif
 
             if(ret != IV_SUCCESS)
@@ -2956,7 +3063,7 @@ int main(WORD32 argc, CHAR *argv[])
                 s_ctl_op.u4_size = sizeof(ivd_ctl_reset_op_t);
 
                 ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_ctl_ip,
-                                           (void *)&s_ctl_op);
+                                                   (void *)&s_ctl_op);
                 if(IV_SUCCESS != ret)
                 {
                     sprintf(ac_error_str, "Error in Reset");
@@ -2971,12 +3078,12 @@ int main(WORD32 argc, CHAR *argv[])
                     ihevcd_cxa_ctl_set_num_cores_op_t s_ctl_set_cores_op;
 
                     s_ctl_set_cores_ip.e_cmd = IVD_CMD_VIDEO_CTL;
-                    s_ctl_set_cores_ip.e_sub_cmd = (IVD_CONTROL_API_COMMAND_TYPE_T)IHEVCD_CXA_CMD_CTL_SET_NUM_CORES;
+                    s_ctl_set_cores_ip.e_sub_cmd =(IVD_CONTROL_API_COMMAND_TYPE_T) IHEVCD_CXA_CMD_CTL_SET_NUM_CORES;
                     s_ctl_set_cores_ip.u4_num_cores = s_app_ctx.u4_num_cores;
                     s_ctl_set_cores_ip.u4_size = sizeof(ihevcd_cxa_ctl_set_num_cores_ip_t);
                     s_ctl_set_cores_op.u4_size = sizeof(ihevcd_cxa_ctl_set_num_cores_op_t);
 
-                    ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_ctl_set_cores_ip,
+                    ret = ivd_cxa_api_function((iv_obj_t*)codec_obj, (void *)&s_ctl_set_cores_ip,
                                                (void *)&s_ctl_set_cores_op);
                     if(ret != IV_SUCCESS)
                     {
@@ -2994,13 +3101,13 @@ int main(WORD32 argc, CHAR *argv[])
                     ihevcd_cxa_ctl_set_processor_op_t s_ctl_set_num_processor_op;
 
                     s_ctl_set_num_processor_ip.e_cmd = IVD_CMD_VIDEO_CTL;
-                    s_ctl_set_num_processor_ip.e_sub_cmd = (IVD_CONTROL_API_COMMAND_TYPE_T)IHEVCD_CXA_CMD_CTL_SET_PROCESSOR;
+                    s_ctl_set_num_processor_ip.e_sub_cmd =(IVD_CONTROL_API_COMMAND_TYPE_T) IHEVCD_CXA_CMD_CTL_SET_PROCESSOR;
                     s_ctl_set_num_processor_ip.u4_arch = s_app_ctx.e_arch;
                     s_ctl_set_num_processor_ip.u4_soc = s_app_ctx.e_soc;
                     s_ctl_set_num_processor_ip.u4_size = sizeof(ihevcd_cxa_ctl_set_processor_ip_t);
                     s_ctl_set_num_processor_op.u4_size = sizeof(ihevcd_cxa_ctl_set_processor_op_t);
 
-                    ret = ivd_cxa_api_function((iv_obj_t *)codec_obj, (void *)&s_ctl_set_num_processor_ip,
+                    ret = ivd_cxa_api_function((iv_obj_t*)codec_obj, (void *)&s_ctl_set_num_processor_ip,
                                                (void *)&s_ctl_set_num_processor_op);
                     if(ret != IV_SUCCESS)
                     {
@@ -3030,6 +3137,34 @@ int main(WORD32 argc, CHAR *argv[])
 
             if(1 == s_video_decode_op.u4_output_present)
             {
+
+                CHAR cur_fname[1000];
+                CHAR *extn = NULL;
+                /* The objective is to dump the decoded frames into separate files instead of
+                 * dumping all the frames in one common file. Also, the number of dumped frames
+                 * at any given instance of time cannot exceed 'frame_memory'
+                 */
+                if(s_app_ctx.u4_file_save_flag)
+                {
+                    /* Locate the position of extension yuv */
+                    extn = strstr(s_app_ctx.ac_op_fname,"%d");
+                    if (extn != NULL)
+                    {
+                        output_write_stall(s_app_ctx.ac_op_fname,u4_op_frm_ts);
+                        /* Generate output file names */
+                        sprintf(cur_fname,s_app_ctx.ac_op_fname,u4_op_frm_ts);
+                        /* Open Output file */
+                        ps_op_file = fopen(cur_fname,"wb");
+                        if (NULL == ps_op_file)
+                        {
+                            sprintf(ac_error_str, "Could not open output file %s",
+                                    cur_fname);
+
+                            codec_exit(ac_error_str);
+                        }
+                    }
+                }
+
                 width = s_video_decode_op.s_disp_frm_buf.u4_y_wd;
                 height = s_video_decode_op.s_disp_frm_buf.u4_y_ht;
                 dump_output(&s_app_ctx, &(s_video_decode_op.s_disp_frm_buf),
@@ -3039,6 +3174,9 @@ int main(WORD32 argc, CHAR *argv[])
                             s_app_ctx.u4_chksum_save_flag);
 
                 u4_op_frm_ts++;
+                if (extn != NULL)
+                    fclose(ps_op_file);
+
             }
             else
             {
@@ -3074,16 +3212,16 @@ int main(WORD32 argc, CHAR *argv[])
     {
         double avg = u4_tot_cycles / frm_cnt;
         double bytes_avg = total_bytes_comsumed / frm_cnt;
-        double bitrate = (bytes_avg * 8 * s_app_ctx.fps) / 1000000;
+        double bitrate = (bytes_avg * 8 * s_app_ctx.fps)/1000000;
         printf("Bitrate @ %2d fps(mbps)          : %-6.2f\n", s_app_ctx.fps, bitrate);
         printf("Average decode time(micro sec)  : %-6d\n", (WORD32)avg);
         printf("Avg Peak decode time(%2d frames) : %-6d\n", PEAK_WINDOW_SIZE, (WORD32)peak_avg_max);
-        avg = (u4_tot_cycles + u4_tot_fmt_cycles) * 1.0 / frm_cnt;
+        avg = (u4_tot_cycles + u4_tot_fmt_cycles)* 1.0 / frm_cnt;
 
         if(0 == s_app_ctx.share_disp_buf)
-            printf("FPS achieved (with format conv) : %-3.2f\n", 1000000 / avg);
+            printf("FPS achieved (with format conv) : %-3.2f\n", 1000000/avg);
         else
-            printf("FPS achieved                    : %-3.2f\n", 1000000 / avg);
+            printf("FPS achieved                    : %-3.2f\n", 1000000/avg);
     }
 #endif
     /***********************************************************************/
@@ -3141,7 +3279,7 @@ int main(WORD32 argc, CHAR *argv[])
     {
         fclose(ps_ip_file);
 
-        if(1 == s_app_ctx.u4_file_save_flag)
+        if((1 == s_app_ctx.u4_file_save_flag) && (strstr(s_app_ctx.ac_op_fname,"%d") == NULL))
         {
             fclose(ps_op_file);
         }

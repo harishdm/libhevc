@@ -54,7 +54,7 @@ typedef struct
     /**
      * u8_cnt
      */
-    ULWORD64  u8_cnt;
+    UWORD64  u8_cnt;
 }trace_t;
 
 /**

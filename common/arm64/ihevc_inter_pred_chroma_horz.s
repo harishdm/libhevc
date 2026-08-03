@@ -105,17 +105,27 @@
 ihevc_inter_pred_chroma_horz_av8:
 
     // stmfd sp!, {x4-x12, x14}                    //stack stores the values of the arguments
-    push_v_regs
+
+    stp         d9,d10,[sp,#-16]!
+    stp         d11,d12,[sp,#-16]!
+    stp         d13,d14,[sp,#-16]!
+    stp         d8,d15,[sp,#-16]!           // Storing d15 using { sub sp,sp,#8; str d15,[sp] } is giving bus error.
+                                            // d8 is used as dummy register and stored along with d15 using stp. d8 is not used in the function.
     stp         x19, x20,[sp,#-16]!
 
-    mov         x15,x4 // pi1_coeff
-    mov         x16,x5 // ht
-    mov         x17,x6 // wd
+//    mov         x15,x4 // pi1_coeff
+//    mov         x16,x5 // ht
+//    mov         x17,x6 // wd
 
+//    mov         x4,x15                      //loads pi1_coeff
+//    mov         x7,x16                      //loads ht
+//    mov         x10,x17                     //loads wd
 
-    mov         x4,x15                      //loads pi1_coeff
-    mov         x7,x16                      //loads ht
-    mov         x10,x17                     //loads wd
+    mov         x7,x5
+    mov         x10,x6
+
+    lsl         x15,x2,#1
+    lsl         x16,x2,#2
 
     ld1         {v0.8b},[x4]                //coeff = vld1_s8(pi1_coeff)
     subs        x14,x7,#0                   //checks for ht == 0
@@ -123,16 +133,16 @@ ihevc_inter_pred_chroma_horz_av8:
     mov         x11,#2
     ble         end_loops
 
-    dup         v24.8b, v2.8b[0]            //coeffabs_0 = vdup_lane_u8(coeffabs, 0)
+    dup         v24.16b, v2.b[0]             //coeffabs_0 = vdup_lane_u8(coeffabs, 0)
     sub         x12,x0,#2                   //pu1_src - 2
-    dup         v25.8b, v2.8b[1]            //coeffabs_1 = vdup_lane_u8(coeffabs, 1)
+    dup         v25.16b, v2.b[1]             //coeffabs_1 = vdup_lane_u8(coeffabs, 1)
     add         x4,x12,x2                   //pu1_src_tmp2_8 = pu1_src + src_strd
-    dup         v26.8b, v2.8b[2]            //coeffabs_2 = vdup_lane_u8(coeffabs, 2)
+    dup         v26.16b, v2.b[2]             //coeffabs_2 = vdup_lane_u8(coeffabs, 2)
 
     tst         x10,#3                      //checks wd for multiples
     lsl         x5, x10, #1
 
-    dup         v27.8b, v2.8b[3]            //coeffabs_3 = vdup_lane_u8(coeffabs, 3)
+    dup         v27.16b, v2.b[3]             //coeffabs_3 = vdup_lane_u8(coeffabs, 3)
 
     bne         outer_loop_4
     cmp         x10,#12
@@ -148,364 +158,209 @@ skip_16:
 
     b           outer_loop_8
 
-
 outer_loop_16:
-    mov         x10,x5                      //2wd
-    mul         x14, x14 , x10
-
-    sub         x20,x3,#16
-    neg         x6, x20
 
     add         x4,x12,x2
-    mov         x9,#10
     and         x0, x12, #31
-    sub         x20,x5,x3,lsl #1
-    neg         x8, x20
-    add         x20,x12, x2 , lsl #1
-    prfm        PLDL1KEEP,[x20]
+    prfm        PLDL1KEEP,[x12,x15]
+    ld1         { v0.4s},[x12],x11          //vector load pu1_src
+    mov         x9,#10
+    ld1         { v2.4s},[x12],x11          //vector load pu1_src
 
-
-
-    add         x19,x12,#8
-    ld1         { v0.2s},[x12],x11          //vector load pu1_src
-    ld1         { v1.2s},[x19],x11          //vector load pu1_src
-    add         x20,x4, x2 , lsl #1
-    prfm        PLDL1KEEP,[x20]
-
-    ld1         { v2.2s},[x12],x11          //vector load pu1_src
-    ld1         { v3.2s},[x19],x11          //vector load pu1_src
-
-    ld1         { v4.2s},[x12],x11          //vector load pu1_src
-    ld1         { v5.2s},[x19],x11          //vector load pu1_src
-
-    ld1         { v6.2s},[x12],x9           //vector load pu1_src
-    ld1         { v7.2s},[x19],x9           //vector load pu1_src
-
-
-    add         x19,x4,#8
     umull       v30.8h, v2.8b, v25.8b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-    ld1         { v8.2s},[x4],x11           //vector load pu1_src
-    ld1         { v9.2s},[x19],x11          //vector load pu1_src
-
+    mov         x10,x5                      //2wd
+    ld1         { v4.4s},[x12],x11          //vector load pu1_src
     umlsl       v30.8h, v0.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
-    ld1         { v10.2s},[x4],x11          //vector load pu1_src
-    ld1         { v11.2s},[x19],x11         //vector load pu1_src
-
+    mul         x14, x14 , x10
+    prfm        PLDL1KEEP,[x4,x15]
+    ld1         { v6.4s},[x12],x9           //vector load pu1_src
     umlal       v30.8h, v4.8b, v26.8b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    ld1         { v12.2s},[x4],x11          //vector load pu1_src
-    ld1         { v13.2s},[x19],x11         //vector load pu1_src
-
+    sub         x20,x3,#16
+    ld1         { v29.4s},[x4],x11          //vector load pu1_src
     umlsl       v30.8h, v6.8b, v27.8b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+    neg         x6, x20
 
-    ld1         { v14.2s},[x4],x9           //vector load pu1_src
-    ld1         { v15.2s},[x19],x9          //vector load pu1_src
-
-    umull       v28.8h, v3.8b, v25.8b
-
-    umlsl       v28.8h, v1.8b, v24.8b
-
-
-    umlal       v28.8h, v5.8b, v26.8b
-
-    umlsl       v28.8h, v7.8b, v27.8b
-
-
+    umull2       v28.8h, v2.16b, v25.16b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    ld1         { v10.4s},[x4],x11          //vector load pu1_src
+    sub         x20,x5,x3,lsl #1
+    umlsl2       v28.8h, v0.16b, v24.16b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    neg         x8, x20
+    ld1         { v12.4s},[x4],x11          //vector load pu1_src
+    umlal2       v28.8h, v4.16b, v26.16b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
     cmp         x14,#32
+    ld1         { v14.4s},[x4],x9           //vector load pu1_src
+    umlsl2       v28.8h, v6.16b, v27.16b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+
     beq         epilog_end
     sub         x14, x14,#64
 
 inner_loop_16:
 
-
-
-
-//     bgt            l_2
-
-//    add x20,x12, x2 , lsl #1
-    prfm        PLDL1KEEP,[x20]
-//    add x20,x4, x2 , lsl #1
-    prfm        PLDL1KEEP,[x20]
-
-
-
-    subs        x10,x10,#16
-
-    umull       v22.8h, v10.8b, v25.8b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-
-    add         x20,x12,x8
-    csel        x12, x20, x12,eq
-    add         x20,x12,x2
-    csel        x4, x20, x4,eq
-    umlsl       v22.8h, v8.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
-
-
-    add         x20,x12, x2 , lsl #2
-    prfm        PLDL1KEEP,[x20]
     sqrshrun    v30.8b, v30.8h,#6
-
-    add         x19,x12,#8
-    ld1         { v0.2s},[x12],x11          //vector load pu1_src
-    ld1         { v1.2s},[x19],x11          //vector load pu1_src
-
-    sqrshrun    v31.8b, v28.8h,#6
-
-
-
-    ld1         { v2.2s},[x12],x11          //vector load pu1_src
-    ld1         { v3.2s},[x19],x11          //vector load pu1_src
+    subs        x10,x10,#16
+    umull       v22.8h, v10.8b, v25.8b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    add         x20,x12,x8
+    umlsl       v22.8h, v29.8b, v24.8b      //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    csel        x12, x20, x12,eq
     umlal       v22.8h, v12.8b, v26.8b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-
-
-
-    ld1         { v4.2s},[x12],x11          //vector load pu1_src
-    ld1         { v5.2s},[x19],x11          //vector load pu1_src
-    umlsl       v22.8h, v14.8b, v27.8b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
-
-    ld1         { v6.2s},[x12],x9           //vector load pu1_src
-    ld1         { v7.2s},[x19],x9           //vector load pu1_src
-    umull       v20.8h, v11.8b, v25.8b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-    add         x20,x4, x2 , lsl #2
-    prfm        PLDL1KEEP,[x20]
-    umlsl       v20.8h, v9.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
-    //mov       v30.s[1],v31.s[0]
     add         x13,x1,#8
+    umlsl       v22.8h, v14.8b, v27.8b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
     st1         { v30.4h}, [x1],x3
+    sqrshrun    v31.8b, v28.8h,#6
+    add         x20,x12,x2
+
+    umull2       v20.8h, v10.16b, v25.16b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    csel        x4, x20, x4,eq
+    prfm        PLDL1KEEP,[x12,x16]
+    umlsl2       v20.8h, v29.16b, v24.16b      //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    ld1         { v0.4s},[x12],x11          //vector load pu1_src
+    umlal2       v20.8h, v12.16b, v26.16b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    ld1         { v2.4s},[x12],x11          //vector load pu1_src
+    umlsl2       v20.8h, v14.16b, v27.16b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
     st1         { v31.4h}, [x13],x3
-    umlal       v20.8h, v13.8b, v26.8b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    add         x19,x4,#8
-    ld1         { v8.2s},[x4],x11           //vector load pu1_src
-    ld1         { v9.2s},[x19],x11          //vector load pu1_src
-    umlsl       v20.8h, v15.8b, v27.8b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
-
-    ld1         { v10.2s},[x4],x11          //vector load pu1_src
-    ld1         { v11.2s},[x19],x11         //vector load pu1_src
-    umull       v30.8h, v2.8b, v25.8b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-    ld1         { v12.2s},[x4],x11          //vector load pu1_src
-    ld1         { v13.2s},[x19],x11         //vector load pu1_src
-    umlsl       v30.8h, v0.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
-    ld1         { v14.2s},[x4],x9           //vector load pu1_src
-    ld1         { v15.2s},[x19],x11         //vector load pu1_src
-    umlal       v30.8h, v4.8b, v26.8b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    cmp         x10,#0
     sqrshrun    v22.8b, v22.8h,#6
+    cmp         x10,#0
+
+    umull       v30.8h, v2.8b, v25.8b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    ld1         { v4.4s},[x12],x11          //vector load pu1_src
+    umlsl       v30.8h, v0.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    ld1         { v6.4s},[x12],x9           //vector load pu1_src
+    prfm        PLDL1KEEP,[x4,x16]
+    ld1         { v29.4s},[x4],x11          //vector load pu1_src
+    umlal       v30.8h, v4.8b, v26.8b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    csel        x10, x5, x10,eq             //2wd
+    umlsl       v30.8h, v6.8b, v27.8b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+    st1         { v22.4h},[x1],x6           //store the result pu1_dst
     sqrshrun    v23.8b, v20.8h,#6
 
-
-
-    umlsl       v30.8h, v6.8b, v27.8b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
-    csel        x10, x5, x10,eq             //2wd
-    umull       v28.8h, v3.8b, v25.8b
-
-
-    //add       x13,x1,#8
-    //mov       v22.s[1],v23.s[0]
-    st1         { v22.4h},[x1],x6           //store the result pu1_dst
-    st1         { v23.4h},[x13],x6          //store the result pu1_dst
-    umlsl       v28.8h, v1.8b, v24.8b
-
-
     add         x20,x1,x8
+    ld1         { v10.4s},[x4],x11          //vector load pu1_src
+    umull2       v28.8h, v2.16b, v25.16b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
     csel        x1, x20, x1,eq
-    umlal       v28.8h, v5.8b, v26.8b
-
+    ld1         { v12.4s},[x4],x11          //vector load pu1_src
+    umlsl2       v28.8h, v0.16b, v24.16b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
     subs        x14,x14,#32                 //decrement the ht loop
-    umlsl       v28.8h, v7.8b, v27.8b
-
-//      mov            x0, x7
+    ld1         { v14.4s},[x4],x9           //vector load pu1_src
+    umlal2       v28.8h, v4.16b, v26.16b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    st1         { v23.4h},[x13],x6          //store the result pu1_dst
+    umlsl2       v28.8h, v6.16b, v27.16b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
 
     bgt         inner_loop_16
-
-
 
     add         x14,x14,#64
     cmp         x14,#32
     beq         epilog_end
 
 epilog:
+
     sqrshrun    v30.8b, v30.8h,#6
-    sqrshrun    v31.8b, v28.8h,#6
-
-
-
     add         x13,x1,#8
-    //mov       v30.s[1],v31.s[0]
+    umull       v22.8h, v10.8b, v25.8b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    umlsl       v22.8h, v29.8b, v24.8b      //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    umlal       v22.8h, v12.8b, v26.8b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    subs        x10,x10,#16                 //decrement the wd loop
+    umlsl       v22.8h, v14.8b, v27.8b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
     st1         { v30.4h}, [x1],x3
+
+    sqrshrun    v31.8b, v28.8h,#6
+    add         x20,x12,x8
+    umull2       v20.8h, v10.16b, v25.16b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    csel        x12, x20, x12,eq
+    umlsl2       v20.8h, v29.16b, v24.16b      //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    csel        x12, x20, x12,eq
+    umlal2       v20.8h, v12.16b, v26.16b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    csel        x10, x5, x10,eq             //2wd
+    umlsl2       v20.8h, v14.16b, v27.16b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+    add         x20,x12,x2
     st1         { v31.4h}, [x13],x3
 
-    umull       v22.8h, v10.8b, v25.8b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-
-
-
-    umlsl       v22.8h, v8.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-    subs        x10,x10,#16                 //decrement the wd loop
-    umlal       v22.8h, v12.8b, v26.8b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-    add         x20,x12,x8
-    csel        x12, x20, x12,eq
-    umlsl       v22.8h, v14.8b, v27.8b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-    csel        x10, x5, x10,eq             //2wd
-
-
-    add         x20,x12,x2
-    csel        x4, x20, x4,eq
-    umull       v20.8h, v11.8b, v25.8b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-    add         x19,x12,#8
-    ld1         { v0.2s},[x12],x11          //vector load pu1_src
-    ld1         { v1.2s},[x19],x11          //vector load pu1_src
-
-    umlsl       v20.8h, v9.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-    ld1         { v2.2s},[x12],x11          //vector load pu1_src
-    ld1         { v3.2s},[x19],x11          //vector load pu1_src
-    umlal       v20.8h, v13.8b, v26.8b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    ld1         { v4.2s},[x12],x11          //vector load pu1_src
-    ld1         { v5.2s},[x19],x11          //vector load pu1_src
-
-    umlsl       v20.8h, v15.8b, v27.8b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-    ld1         { v6.2s},[x12],x9           //vector load pu1_src
-    ld1         { v7.2s},[x19],x9           //vector load pu1_src
-    umull       v30.8h, v2.8b, v25.8b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-
-    add         x19,x4,#8
-    ld1         { v8.2s},[x4],x11           //vector load pu1_src
-    ld1         { v9.2s},[x19],x11          //vector load pu1_src
-    umlsl       v30.8h, v0.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-    ld1         { v10.2s},[x4],x11          //vector load pu1_src
-    ld1         { v11.2s},[x19],x11         //vector load pu1_src
-    umlal       v30.8h, v4.8b, v26.8b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    umlsl       v30.8h, v6.8b, v27.8b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
-    ld1         { v12.2s},[x4],x11          //vector load pu1_src
-    ld1         { v13.2s},[x19],x11         //vector load pu1_src
-    umull       v28.8h, v3.8b, v25.8b
-    ld1         { v14.2s},[x4],x9           //vector load pu1_src
-    ld1         { v15.2s},[x19],x9          //vector load pu1_src
-    umlsl       v28.8h, v1.8b, v24.8b
+    ld1         { v0.4s},[x12],x11          //vector load pu1_src
     sqrshrun    v22.8b, v22.8h,#6
-    sqrshrun    v23.8b, v20.8h,#6
-
-    //mov       v22.s[1],v23.s[0]
+    ld1         { v2.4s},[x12],x11          //vector load pu1_src
+    umull       v30.8h, v2.8b, v25.8b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    csel        x4, x20, x4,eq
+    ld1         { v4.4s},[x12],x11          //vector load pu1_src
+    umlsl       v30.8h, v0.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    ld1         { v6.4s},[x12],x9           //vector load pu1_src
+    umlal       v30.8h, v4.8b, v26.8b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    ld1         { v29.4s},[x4],x11          //vector load pu1_src
+    umlsl       v30.8h, v6.8b, v27.8b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
     st1         { v22.4h},[x1],x6           //store the result pu1_dst
-    st1         { v23.4h},[x13],x6          //store the result pu1_dst
-    umlal       v28.8h, v5.8b, v26.8b
 
-    umlsl       v28.8h, v7.8b, v27.8b
+    sqrshrun    v23.8b, v20.8h,#6
+    ld1         { v10.4s},[x4],x11          //vector load pu1_src
+    umull2       v28.8h, v2.16b, v25.16b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    ld1         { v12.4s},[x4],x11          //vector load pu1_src
+    umlsl2       v28.8h, v0.16b, v24.16b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    ld1         { v14.4s},[x4],x9           //vector load pu1_src
+    umlal2       v28.8h, v4.16b, v26.16b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
     add         x20,x1,x8
+    umlsl2       v28.8h, v6.16b, v27.16b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+    st1         { v23.4h},[x13],x6          //store the result pu1_dst
     csel        x1, x20, x1,eq
 
-
-
 epilog_end:
+
     sqrshrun    v30.8b, v30.8h,#6
+    umull       v22.8h, v10.8b, v25.8b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    umlsl       v22.8h, v29.8b, v24.8b      //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    umlal       v22.8h, v12.8b, v26.8b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    add         x13,x1,#8
+    umlsl       v22.8h, v14.8b, v27.8b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+    st1         { v30.4h}, [x1],x3
     sqrshrun    v31.8b, v28.8h,#6
 
-
-    umull       v22.8h, v10.8b, v25.8b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-    umlsl       v22.8h, v8.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-    umlal       v22.8h, v12.8b, v26.8b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-    umlsl       v22.8h, v14.8b, v27.8b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
-
-    umull       v20.8h, v11.8b, v25.8b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-    umlsl       v20.8h, v9.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-    umlal       v20.8h, v13.8b, v26.8b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-    umlsl       v20.8h, v15.8b, v27.8b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
     sqrshrun    v22.8b, v22.8h,#6
-    sqrshrun    v23.8b, v20.8h,#6
-
-    add         x13,x1,#8
-
-    //mov       v30.s[1],v31.s[0]
-    st1         { v30.4h}, [x1],x3
+    umull2       v20.8h, v10.16b, v25.16b      //mul_res = vmull_u8(src[0_3], coeffabs_3)//
     st1         { v31.4h}, [x13],x3
-
-    //mov       v22.s[1],v23.s[0]
+    umlsl2       v20.8h, v29.16b, v24.16b      //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    umlal2       v20.8h, v12.16b, v26.16b      //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
     st1         { v22.4h},[x1]              //store the result pu1_dst
+    umlsl2       v20.8h, v14.16b, v27.16b      //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+
+    sqrshrun    v23.8b, v20.8h,#6
     st1         { v23.4h},[x13]             //store the result pu1_dst
-
-
 
     b           end_loops
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 outer_loop_8:
 
-
+    add         x4,x12,x2                   //pu1_src + src_strd
+    mov         x20,#8
+    ld1         {v0.16b},[x12],x20
     add         x6,x1,x3                    //pu1_dst + dst_strd
     mov         x7,x5
-    add         x4,x12,x2                   //pu1_src + src_strd
-
 
 inner_loop_8:
-    //ld1 {v0.2s, v1.2s},[x12],x11                //vector load pu1_src
-    ld1         {v0.2s},[x12],x11           //vector load pu1_src
-    ld1         {v1.2s},[x12],x11           //vector load pu1_src
-    ld1         {v2.2s},[x12],x11           //vector load pu1_src
-    ld1         {v3.2s},[x12],x11           //vector load pu1_src
 
-    //vext.u8    d2,d0,d1,#2                        //vector extract of src[0_2]
-    umull       v8.8h, v1.8b, v25.8b        //mul_res = vmull_u8(src[0_3], coeffabs_3)//
-    umlsl       v8.8h, v0.8b, v24.8b        //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-    //vext.u8    d4,d0,d1,#4                        //vector extract of src[0_4]
-    //vext.u8    d6,d0,d1,#6                        //vector extract of src[0_6]
-    umlal       v8.8h, v2.8b, v26.8b        //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-    umlsl       v8.8h, v3.8b, v27.8b        //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+    EXT         v1.16b ,  v0.16b ,  v0.16b,#2
+    ld1         {v4.16b},[x4],x20           //vector load pu1_src
 
-    ld1         {v4.2s},[x4],x11            //vector load pu1_src
-    ld1         {v5.2s},[x4],x11            //vector load pu1_src
-    ld1         {v6.2s},[x4],x11            //vector load pu1_src
-    ld1         {v7.2s},[x4],x11            //vector load pu1_src
-    //ld1 {v12.2s, v13.2s},[x4],x11                //vector load pu1_src + src_strd
-    //vext.u8    d14,d12,d13,#2                    //vector extract of src[0_2]
+    EXT         v2.16b ,  v0.16b ,  v0.16b,#4
+    EXT         v3.16b ,  v0.16b ,  v0.16b,#6
+
+    umull       v29.8h, v1.8b, v25.8b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    umlsl       v29.8h, v0.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    umlal       v29.8h, v2.8b, v26.8b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    umlsl       v29.8h, v3.8b, v27.8b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+
+    EXT         v5.16b ,  v4.16b ,  v4.16b,#2
+    ld1         {v0.16b},[x12],x20
+    EXT         v6.16b ,  v4.16b ,  v4.16b,#4
+    EXT         v7.16b ,  v4.16b ,  v4.16b,#6
+    sqrshrun    v29.8b, v29.8h,#6           //right shift and saturating narrow result 1
+
     umull       v10.8h, v5.8b, v25.8b       //mul_res = vmull_u8(src[0_3], coeffabs_3)//
     umlsl       v10.8h, v4.8b, v24.8b       //mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-    //vext.u8    d16,d12,d13,#4                    //vector extract of src[0_4]
-    //vext.u8    d18,d12,d13,#6                    //vector extract of src[0_6]
-    sqrshrun    v8.8b, v8.8h,#6             //right shift and saturating narrow result 1
     umlal       v10.8h, v6.8b, v26.8b       //mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    st1         {v29.8b},[x1],#8            //store the result pu1_dst
     umlsl       v10.8h, v7.8b, v27.8b       //mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
-    st1         {v8.8b},[x1],#8             //store the result pu1_dst
-
     sqrshrun    v10.8b, v10.8h,#6           //right shift and saturating narrow result 2
     subs        x7,x7,#8                    //decrement the wd loop
     st1         {v10.8b},[x6],#8            //store the result pu1_dst
     bgt         inner_loop_8
 
+    sub         x12,x12,x12
     sub         x12,x12,x5
     subs        x14,x14,#2                  //decrement the ht loop
     sub         x1,x1,x5
@@ -513,6 +368,8 @@ inner_loop_8:
     add         x1,x1,x3,lsl #1
     bgt         outer_loop_8
     b           end_loops
+
+
 
 //height if 4 comes
 outer_loop_ht_4:
@@ -526,173 +383,140 @@ inner_loop_ht_4:
     mov         x12,x9
     mov         x4,x1
 
-    sub         x8, x2, #6
+    ld1         {v0.16b},[x12],x2           //(1)vector load pu1_src
+    EXT         V1.16b,v0.16b,v0.16b,#2
+    EXT         V2.16b,v0.16b,v0.16b,#4
+    EXT         V3.16b,v0.16b,v0.16b,#6
 
-    ld1         {v0.2s},[x12],x11           //(1)vector load pu1_src
-    ld1         {v1.2s},[x12],x11           //(1)vector load pu1_src
-    ld1         {v2.2s},[x12],x11           //(1)vector load pu1_src
-    //ld1 {v3.2s},[x12],x2                //(1)vector load pu1_src
-    ld1         {v3.2s},[x12],x8            //(1)vector load pu1_src
+    ld1         {v4.16b},[x12],x2           //(2)vector load pu1_src
+    EXT         V5.16b,v4.16b,v4.16b,#2
+    EXT         V6.16b,v4.16b,v4.16b,#4
+    EXT         V7.16b,v4.16b,v4.16b,#6
 
-    //sub        x12, x12, #6                //(1)
+    ld1         {v14.16b},[x12],x2          //(3)vector load pu1_src
+    umull       v29.8h, v1.8b, v25.8b       //(1)mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    umlsl       v29.8h, v0.8b, v24.8b       //(1)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    umlal       v29.8h, v2.8b, v26.8b       //(1)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    umlsl       v29.8h, v3.8b, v27.8b       //(1)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
 
-    ld1         {v4.2s},[x12],x11           //(2)vector load pu1_src
-    ld1         {v5.2s},[x12],x11           //(2)vector load pu1_src
-    ld1         {v6.2s},[x12],x11           //(2)vector load pu1_src
-    //ld1 {v7.2s},[x12],x2                //(2)vector load pu1_src
-    ld1         {v7.2s},[x12],x8            //(2)vector load pu1_src
+    EXT         V15.16b,v14.16b,v14.16b,#2
+    EXT         V16.16b,v14.16b,v14.16b,#4
+    EXT         V17.16b,v14.16b,v14.16b,#6
 
-    //sub        x12, x12, #6                //(2)
-
-    ld1         {v14.2s},[x12],x11          //(3)vector load pu1_src
-    umull       v8.8h, v1.8b, v25.8b        //(1)mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-    ld1         {v15.2s},[x12],x11          //(3)vector load pu1_src
-    umlsl       v8.8h, v0.8b, v24.8b        //(1)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
-    ld1         {v16.2s},[x12],x11          //(3)vector load pu1_src
-    umlal       v8.8h, v2.8b, v26.8b        //(1)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    //ld1 {v17.2s},[x12],x2                //(3)vector load pu1_src
-    ld1         {v17.2s},[x12],x8           //(3)vector load pu1_src
-    umlsl       v8.8h, v3.8b, v27.8b        //(1)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
-    //sub        x12, x12, #6                //(3)
+    ld1         {v18.16b},[x12]          //(4)vector load pu1_src
     umull       v10.8h, v5.8b, v25.8b       //(2)mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-    ld1         {v18.2s},[x12],x11          //(4)vector load pu1_src
     umlsl       v10.8h, v4.8b, v24.8b       //(2)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
-    ld1         {v19.2s},[x12],x11          //(4)vector load pu1_src
     umlal       v10.8h, v6.8b, v26.8b       //(2)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    ld1         {v20.2s},[x12],x11          //(4)vector load pu1_src
     umlsl       v10.8h, v7.8b, v27.8b       //(2)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
 
-    ld1         {v21.2s},[x12],x2           //(4)vector load pu1_src
-    sqrshrun    v8.8b, v8.8h,#6             //(1)right shift and saturating narrow result 1
+    EXT         V19.16b,v18.16b,v18.16b,#2
+    EXT         V20.16b,v18.16b,v18.16b,#4
+    EXT         V21.16b,v18.16b,v18.16b,#6
+    sqrshrun    v29.8b, v29.8h,#6           //(1)right shift and saturating narrow result 1
 
     add         x9,x9,#8                    //(core loop)
 
     subs        x7,x7,#8                    //(prologue)decrement the wd loop
     beq         epilogue
 
+
 core_loop:
     mov         x12,x9
 
-    ld1         {v0.2s},[x12],x11           //(1_1)vector load pu1_src
+    ld1         {v0.16b},[x12],x2           //(1_1)vector load pu1_src
+
     umull       v12.8h, v15.8b, v25.8b      //(3)mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-    ld1         {v1.2s},[x12],x11           //(1_1)vector load pu1_src
     umlsl       v12.8h, v14.8b, v24.8b      //(3)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
-    ld1         {v2.2s},[x12],x11           //(1_1)vector load pu1_src
     umlal       v12.8h, v16.8b, v26.8b      //(3)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    //ld1 {v3.2s},[x12],x2                //(1_1)vector load pu1_src
-    ld1         {v3.2s},[x12],x8            //(1_1)vector load pu1_src
     umlsl       v12.8h, v17.8b, v27.8b      //(3)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
 
-    //sub        x12, x12, #6                //(1_1)
+    ld1         {v4.16b},[x12],x2           //(2)vector load pu1_src
 
-    st1         {v8.8b},[x4],x3             //(1)store the result pu1_dst
+    EXT         V1.16b,v0.16b,v0.16b,#2
+    EXT         V2.16b,v0.16b,v0.16b,#4
+    EXT         V3.16b,v0.16b,v0.16b,#6
+
+    st1         {v29.8b},[x4],x3            //(1)store the result pu1_dst
     sqrshrun    v10.8b, v10.8h,#6           //(2)right shift and saturating narrow result 2
 
-    ld1         {v4.2s},[x12],x11           //(2_1)vector load pu1_src
     umull       v22.8h, v19.8b, v25.8b      //(4)mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
-    ld1         {v5.2s},[x12],x11           //(2_1)vector load pu1_src
     umlsl       v22.8h, v18.8b, v24.8b      //(4)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
-    ld1         {v6.2s},[x12],x11           //(2_1)vector load pu1_src
     umlal       v22.8h, v20.8b, v26.8b      //(4)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    //ld1 {v7.2s},[x12],x2                //(2_1)vector load pu1_src
-    ld1         {v7.2s},[x12],x8            //(2_1)vector load pu1_src
     umlsl       v22.8h, v21.8b, v27.8b      //(4)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
 
-    //sub        x12, x12, #6                //(2_1)
+    ld1         {v14.16b},[x12],x2          //(3)vector load pu1_src
+
+    EXT         V5.16b,v4.16b,v4.16b,#2
+    EXT         V6.16b,v4.16b,v4.16b,#4
+    EXT         V7.16b,v4.16b,v4.16b,#6
 
     st1         {v10.8b},[x4],x3            //(2)store the result pu1_dst
     sqrshrun    v12.8b, v12.8h,#6           //(3)right shift and saturating narrow result 1
 
-    ld1         {v14.2s},[x12],x11          //(3_1)vector load pu1_src
-    umull       v8.8h, v1.8b, v25.8b        //(1_1)mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    umull       v29.8h, v1.8b, v25.8b       //(1_1)mul_res = vmull_u8(src[0_3], coeffabs_3)//
+    umlsl       v29.8h, v0.8b, v24.8b       //(1_1)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    umlal       v29.8h, v2.8b, v26.8b       //(1_1)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    umlsl       v29.8h, v3.8b, v27.8b       //(1_1)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
 
-    ld1         {v15.2s},[x12],x11          //(3_1)vector load pu1_src
-    umlsl       v8.8h, v0.8b, v24.8b        //(1_1)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
+    ld1         {v18.16b},[x12]          //(4)vector load pu1_src
 
-    ld1         {v16.2s},[x12],x11          //(3_1)vector load pu1_src
-    umlal       v8.8h, v2.8b, v26.8b        //(1_1)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
+    EXT         V15.16b,v14.16b,v14.16b,#2
+    EXT         V16.16b,v14.16b,v14.16b,#4
+    EXT         V17.16b,v14.16b,v14.16b,#6
 
-    //ld1 {v17.2s},[x12],x2                //(3_1)vector load pu1_src
-    ld1         {v17.2s},[x12],x8           //(3_1)vector load pu1_src
-    umlsl       v8.8h, v3.8b, v27.8b        //(1_1)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
-    //sub        x12, x12, #6                //(3_1)
-
-    st1         {v12.8b},[x4],x3            //(3)store the result pu1_dst
     sqrshrun    v22.8b, v22.8h,#6           //(4)right shift and saturating narrow result 2
 
     add         x9,x9,#8                    //(core loop)
 
     umull       v10.8h, v5.8b, v25.8b       //(2_1)mul_res = vmull_u8(src[0_3], coeffabs_3)//
-    ld1         {v18.2s},[x12],x11          //(4_1)vector load pu1_src
-
-    ld1         {v19.2s},[x12],x11          //(4_1)vector load pu1_src
     umlsl       v10.8h, v4.8b, v24.8b       //(2_1)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
-    ld1         {v20.2s},[x12],x11          //(4_1)vector load pu1_src
     umlal       v10.8h, v6.8b, v26.8b       //(2_1)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    ld1         {v21.2s},[x12],x2           //(4_1)vector load pu1_src
     umlsl       v10.8h, v7.8b, v27.8b       //(2_1)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
+
+    st1         {v12.8b},[x4],x3            //(3)store the result pu1_dst
+
+    EXT         V19.16b,v18.16b,v18.16b,#2
+    EXT         V20.16b,v18.16b,v18.16b,#4
+    EXT         V21.16b,v18.16b,v18.16b,#6
 
     add         x1,x1,#8                    //(core loop)
 
     subs        x7,x7,#8                    //(core loop)
 
     st1         {v22.8b},[x4], x3           //(4)store the result pu1_dst
-    sqrshrun    v8.8b, v8.8h,#6             //(1_1)right shift and saturating narrow result 1
+    sqrshrun    v29.8b, v29.8h,#6           //(1_1)right shift and saturating narrow result 1
 
     mov         x4, x1                      //(core loop)
 
     bgt         core_loop                   //loopback
 
+
 epilogue:
     umull       v12.8h, v15.8b, v25.8b      //(3)mul_res = vmull_u8(src[0_3], coeffabs_3)//
-
     umlsl       v12.8h, v14.8b, v24.8b      //(3)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
     umlal       v12.8h, v16.8b, v26.8b      //(3)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
+    st1         {v29.8b},[x4],x3            //(1)store the result pu1_dst
     umlsl       v12.8h, v17.8b, v27.8b      //(3)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
-    st1         {v8.8b},[x4],x3             //(1)store the result pu1_dst
     sqrshrun    v10.8b, v10.8h,#6           //(2)right shift and saturating narrow result 2
 
     umull       v22.8h, v19.8b, v25.8b      //(4)mul_res = vmull_u8(src[0_3], coeffabs_3)//
     umlsl       v22.8h, v18.8b, v24.8b      //(4)mul_res = vmlsl_u8(src[0_2], coeffabs_2)//
-
     umlal       v22.8h, v20.8b, v26.8b      //(4)mul_res = vmlsl_u8(src[0_0], coeffabs_0)//
-
-    umlsl       v22.8h, v21.8b, v27.8b      //(4)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
-
     st1         {v10.8b},[x4],x3            //(2)store the result pu1_dst
+    umlsl       v22.8h, v21.8b, v27.8b      //(4)mul_res = vmlal_u8(src[0_1], coeffabs_1)//
     sqrshrun    v12.8b, v12.8h,#6           //(3)right shift and saturating narrow result 1
 
-    st1         {v12.8b},[x4],x3            //(3)store the result pu1_dst
 
     add         x1,x1,#8                    //(core loop)
 
     sqrshrun    v22.8b, v22.8h,#6           //(4)right shift and saturating narrow result 2
 
 
-    st1         {v22.8b},[x4], x3           //(4)store the result pu1_dst
-
     sub         x9,x9,x5
+    st1         {v12.8b},[x4],x3            //(3)store the result pu1_dst
     subs        x14,x14,#4                  //decrement the ht loop
     sub         x1,x1,x5
+    st1         {v22.8b},[x4], x3           //(4)store the result pu1_dst
     add         x9,x9,x2,lsl #2
     add         x1,x1,x3,lsl #2
     bgt         outer_loop_ht_4
@@ -702,49 +526,36 @@ outer_loop_4:
     add         x6,x1,x3                    //pu1_dst + dst_strd
     mov         x7,x5
     add         x4,x12,x2                   //pu1_src + src_strd
-
+    mov         x20,#4
 inner_loop_4:
-    //ld1 {v0.2s, v1.2s},[x12]                    //vector load pu1_src
 
-    ld1         {v20.2s},[x12],x11          //vector load pu1_src
-    ld1         {v21.2s},[x12],x11          //vector load pu1_src
-    ld1         {v22.2s},[x12],x11          //vector load pu1_src
-    ld1         {v23.2s},[x12]              //vector load pu1_src
+    ld1         {v20.16b},[x12],x20          //vector load pu1_src
 
-    sub         x12,x12,#2                  //increment the input pointer
-    ld1         {v16.2s},[x4],x11           //vector load pu1_src
-    ld1         {v17.2s},[x4],x11           //vector load pu1_src
-    ld1         {v18.2s},[x4],x11           //vector load pu1_src
-    ld1         {v19.2s},[x4]               //vector load pu1_src
-    //vext.u8    d2,d0,d1,#2                        //vector extract of src[0_2]
-    //vext.u8    d4,d0,d1,#4                        //vector extract of src[0_4]
-    //ld1 {v12.2s, v13.2s},[x4]                    //vector load pu1_src + src_strd
-    //vext.u8    d6,d0,d1,#6                        //vector extract of src[0_6]
+    EXT         v21.16b,v20.16b,v20.16b,#2
 
-    sub         x4,x4,#2                    //increment the input pointer
-    //vext.u8    d14,d12,d13,#2                    //vector extract of src[0_2]
-    //vext.u8    d16,d12,d13,#4                    //vector extract of src[0_4]
-    //vext.u8    d18,d12,d13,#6                    //vector extract of src[0_6]
+    ld1         {v16.16b},[x4],x20          //vector load pu1_src
+
+    EXT         v22.16b,v20.16b,v20.16b,#4
+    EXT         v23.16b,v20.16b,v20.16b,#6
+    EXT         v17.16b,v16.16b,v16.16b,#2
+    EXT         v18.16b,v16.16b,v16.16b,#4
+    EXT         v19.16b,v16.16b,v16.16b,#6
 
     zip1        v0.2s, v20.2s, v16.2s
-    zip2        v4.2s, v20.2s, v16.2s       //vector zip the i iteration and ii interation in single register
     zip1        v1.2s, v21.2s, v17.2s
-    zip2        v5.2s, v21.2s, v17.2s
     zip1        v2.2s, v22.2s, v18.2s
-    zip2        v6.2s, v22.2s, v18.2s
     zip1        v3.2s, v23.2s, v19.2s
-    zip2        v7.2s, v23.2s, v19.2s
 
-    umull       v8.8h, v1.8b, v25.8b        //arithmetic operations for ii iteration in the same time
-    umlsl       v8.8h, v0.8b, v24.8b
-    umlal       v8.8h, v2.8b, v26.8b
-    umlsl       v8.8h, v3.8b, v27.8b
+    umull       v29.8h, v1.8b, v25.8b       //arithmetic operations for ii iteration in the same time
+    umlsl       v29.8h, v0.8b, v24.8b
+    umlal       v29.8h, v2.8b, v26.8b
+    umlsl       v29.8h, v3.8b, v27.8b
 
-    sqrshrun    v8.8b, v8.8h,#6             //narrow right shift and saturating the result
-    st1         {v8.s}[0],[x1],#4           //store the i iteration result which is in upper part of the register
+    sqrshrun    v29.8b, v29.8h,#6           //narrow right shift and saturating the result
+    st1         {v29.s}[0],[x1],#4          //store the i iteration result which is in upper part of the register
     subs        x7,x7,#4                    //decrement the wd by 4
 
-    st1         {v8.s}[1],[x6],#4           //store the ii iteration result which is in lower part of the register
+    st1         {v29.s}[1],[x6],#4          //store the ii iteration result which is in lower part of the register
 
     bgt         inner_loop_4
 
@@ -758,8 +569,13 @@ inner_loop_4:
 end_loops:
 
     // ldmfd sp!,{x4-x12,x15}                  //reload the registers from sp
+
     ldp         x19, x20,[sp],#16
-    pop_v_regs
+    ldp         d8,d15,[sp],#16             // Loading d15 using { ldr d15,[sp]; add sp,sp,#8 } is giving bus error.
+                                            // d8 is used as dummy register and loaded along with d15 using ldp. d8 is not used in the function.
+    ldp         d13,d14,[sp],#16
+    ldp         d11,d12,[sp],#16
+    ldp         d9,d10,[sp],#16
     ret
 
 

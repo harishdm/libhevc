@@ -94,6 +94,7 @@
 #include "ihevcd_opencl_mc_interface.h"
 #endif
 #include "ihevcd_statistics.h"
+#include "ihevcd_parse_residual.h"
 
 /*****************************************************************************/
 /* Function Prototypes                                                       */
@@ -192,14 +193,12 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
                 return IV_FAIL;
             }
 
-#if 0
             if(ps_handle->pv_fxns != ihevcd_cxa_api_function)
             {
                 *(pu4_api_op + 1) |= 1 << IVD_UNSUPPORTEDPARAM;
                 *(pu4_api_op + 1) |= IVD_INVALID_HANDLE_NULL;
                 return IV_FAIL;
             }
-#endif
 
             if(ps_handle->pv_codec_handle == NULL)
             {
@@ -353,6 +352,7 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
             iv_mem_rec_t *ps_mem_rec;
             WORD32 max_wd = ps_ip->s_ivd_init_ip_t.u4_frm_max_wd;
             WORD32 max_ht = ps_ip->s_ivd_init_ip_t.u4_frm_max_ht;
+            WORD32 i4_profile = (WORD32)ps_ip->e_profile;
 
             max_wd = ALIGN64(max_wd);
             max_ht = ALIGN64(max_ht);
@@ -454,7 +454,13 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
                             && (ps_ip->s_ivd_init_ip_t.e_output_format
                                             != IV_YUV_420SP_UV)
                             && (ps_ip->s_ivd_init_ip_t.e_output_format
-                                            != IV_YUV_420SP_VU))
+                                            != IV_YUV_420SP_VU)
+                            && (ps_ip->s_ivd_init_ip_t.e_output_format
+                                            != IV_YUV_422SP_UV)
+                            && (ps_ip->s_ivd_init_ip_t.e_output_format
+                                            != IV_YUV_422SP_VU)
+                            && (ps_ip->s_ivd_init_ip_t.e_output_format
+                                            != IV_YUV_422P))
             {
                 ps_op->s_ivd_init_op_t.u4_error_code |= 1
                                 << IVD_UNSUPPORTEDPARAM;
@@ -477,7 +483,7 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
 
             ps_mem_rec = ps_ip->s_ivd_init_ip_t.pv_mem_rec_location;
             /* check memrecords sizes are correct */
-            for(i = 0; i < (WORD32)ps_ip->s_ivd_init_ip_t.u4_num_mem_rec; i++)
+            for(i = 0; i < ps_ip->s_ivd_init_ip_t.u4_num_mem_rec; i++)
             {
                 if(ps_mem_rec[i].u4_size != sizeof(iv_mem_rec_t))
                 {
@@ -570,6 +576,7 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
                                 max_wd;
                 s_fill_mem_rec_ip.s_ivd_fill_mem_rec_ip_t.u4_max_frm_ht =
                                 max_ht;
+                s_fill_mem_rec_ip.e_profile = (HEVC_DEC_PROFILE_T)i4_profile;
 
                 if(ps_ip->s_ivd_init_ip_t.u4_size
                                 > offsetof(ihevcd_cxa_init_ip_t, i4_level))
@@ -640,7 +647,11 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
                                 && (s_fill_mem_rec_ip.e_output_format
                                                 != IV_YUV_420SP_UV)
                                 && (s_fill_mem_rec_ip.e_output_format
-                                                != IV_YUV_420SP_VU))
+                                                != IV_YUV_420SP_VU)
+                                && (s_fill_mem_rec_ip.e_output_format
+                                                != IV_YUV_422SP_UV)
+                                && (s_fill_mem_rec_ip.e_output_format
+                                                != IV_YUV_422SP_VU))
                 {
                     s_fill_mem_rec_ip.u4_share_disp_buf = 0;
                 }
@@ -870,7 +881,7 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
 
             for(j = 0; j < ps_ip->s_ivd_set_display_frame_ip_t.num_disp_bufs;
                             j++)
-            {
+                            {
                 if(ps_ip->s_ivd_set_display_frame_ip_t.s_disp_buffer[j].u4_num_bufs
                                 == 0)
                 {
@@ -882,9 +893,8 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
                 }
 
                 for(i = 0;
-                                i
-                                                < (WORD32)ps_ip->s_ivd_set_display_frame_ip_t.s_disp_buffer[j].u4_num_bufs;
-                                i++)
+                    i < (WORD32)ps_ip->s_ivd_set_display_frame_ip_t.s_disp_buffer[j].u4_num_bufs;
+                    i++)
                 {
                     if(ps_ip->s_ivd_set_display_frame_ip_t.s_disp_buffer[j].pu1_bufs[i]
                                     == NULL)
@@ -1207,7 +1217,7 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
                        (ps_ip->i4_degrade_pics > 4) ||
                        (ps_ip->i4_nondegrade_interval < 0) ||
                        (ps_ip->i4_degrade_type < 0) ||
-                       (ps_ip->i4_degrade_type > 15))
+                       (ps_ip->i4_degrade_type > 15) )
                     {
                         ps_op->u4_error_code |= 1 << IVD_UNSUPPORTEDPARAM;
                         return IV_FAIL;
@@ -1308,10 +1318,10 @@ static IV_API_CALL_STATUS_T api_check_struct_sanity(iv_obj_t *ps_handle,
 #else
                     if(ps_ip->u4_num_cores != 1)
 #endif
-                        {
-                            ps_op->u4_error_code |= 1 << IVD_UNSUPPORTEDPARAM;
-                            return IV_FAIL;
-                        }
+                    {
+                        ps_op->u4_error_code |= 1 << IVD_UNSUPPORTEDPARAM;
+                        return IV_FAIL;
+                    }
                     break;
                 }
                 case IHEVCD_CXA_CMD_CTL_SET_PROCESSOR:
@@ -1429,90 +1439,101 @@ WORD32 ihevcd_set_default_params(codec_t *ps_codec)
 
 void ihevcd_update_function_ptr(codec_t *ps_codec)
 {
+    func_selector_t *ps_func_sel = &ps_codec->s_func_selector;
 
     /* Init inter pred function array */
     ps_codec->apf_inter_pred[0] = NULL;
-    ps_codec->apf_inter_pred[1] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_copy_fptr;
-    ps_codec->apf_inter_pred[2] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_vert_fptr;
-    ps_codec->apf_inter_pred[3] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_horz_fptr;
-    ps_codec->apf_inter_pred[4] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_horz_w16out_fptr;
-    ps_codec->apf_inter_pred[5] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_copy_w16out_fptr;
-    ps_codec->apf_inter_pred[6] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_vert_w16out_fptr;
-    ps_codec->apf_inter_pred[7] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_horz_w16out_fptr;
-    ps_codec->apf_inter_pred[8] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_horz_w16out_fptr;
-    ps_codec->apf_inter_pred[9] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_vert_w16inp_fptr;
-    ps_codec->apf_inter_pred[10] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_luma_vert_w16inp_w16out_fptr;
+    ps_codec->apf_inter_pred[1] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_copy_fptr;
+    ps_codec->apf_inter_pred[2] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_vert_fptr;
+    ps_codec->apf_inter_pred[3] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_horz_fptr;
+    ps_codec->apf_inter_pred[4] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_horz_w16out_fptr;
+    ps_codec->apf_inter_pred[5] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_copy_w16out_fptr;
+    ps_codec->apf_inter_pred[6] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_vert_w16out_fptr;
+    ps_codec->apf_inter_pred[7] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_horz_w16out_fptr;
+    ps_codec->apf_inter_pred[8] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_horz_w16out_fptr;
+    ps_codec->apf_inter_pred[9] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_vert_w16inp_fptr;
+    ps_codec->apf_inter_pred[10] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_luma_vert_w16inp_w16out_fptr;
     ps_codec->apf_inter_pred[11] = NULL;
-    ps_codec->apf_inter_pred[12] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_copy_fptr;
-    ps_codec->apf_inter_pred[13] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_vert_fptr;
-    ps_codec->apf_inter_pred[14] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_horz_fptr;
-    ps_codec->apf_inter_pred[15] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_horz_w16out_fptr;
-    ps_codec->apf_inter_pred[16] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_copy_w16out_fptr;
-    ps_codec->apf_inter_pred[17] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_vert_w16out_fptr;
-    ps_codec->apf_inter_pred[18] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_horz_w16out_fptr;
-    ps_codec->apf_inter_pred[19] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_horz_w16out_fptr;
-    ps_codec->apf_inter_pred[20] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_vert_w16inp_fptr;
-    ps_codec->apf_inter_pred[21] = (pf_inter_pred)ps_codec->s_func_selector.ihevc_inter_pred_chroma_vert_w16inp_w16out_fptr;
+    ps_codec->apf_inter_pred[12] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_copy_fptr;
+    ps_codec->apf_inter_pred[13] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_vert_fptr;
+    ps_codec->apf_inter_pred[14] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_horz_fptr;
+    ps_codec->apf_inter_pred[15] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_horz_w16out_fptr;
+    ps_codec->apf_inter_pred[16] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_copy_w16out_fptr;
+    ps_codec->apf_inter_pred[17] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_vert_w16out_fptr;
+    ps_codec->apf_inter_pred[18] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_horz_w16out_fptr;
+    ps_codec->apf_inter_pred[19] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_horz_w16out_fptr;
+    ps_codec->apf_inter_pred[20] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_vert_w16inp_fptr;
+    ps_codec->apf_inter_pred[21] = (pf_inter_pred)ps_func_sel->ihevc_inter_pred_chroma_vert_w16inp_w16out_fptr;
 
     /* Init intra pred function array */
-    ps_codec->apf_intra_pred_luma[0] = (pf_intra_pred)NULL;
-    ps_codec->apf_intra_pred_luma[1] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_planar_fptr;
-    ps_codec->apf_intra_pred_luma[2] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_dc_fptr;
-    ps_codec->apf_intra_pred_luma[3] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_mode2_fptr;
-    ps_codec->apf_intra_pred_luma[4] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_mode_3_to_9_fptr;
-    ps_codec->apf_intra_pred_luma[5] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_horz_fptr;
-    ps_codec->apf_intra_pred_luma[6] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_mode_11_to_17_fptr;
-    ps_codec->apf_intra_pred_luma[7] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_mode_18_34_fptr;
-    ps_codec->apf_intra_pred_luma[8] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_mode_19_to_25_fptr;
-    ps_codec->apf_intra_pred_luma[9] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_ver_fptr;
-    ps_codec->apf_intra_pred_luma[10] =  (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_luma_mode_27_to_33_fptr;
+     ps_codec->apf_intra_pred_luma[0] = (pf_intra_pred)NULL;
+     ps_codec->apf_intra_pred_luma[1] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_planar_fptr;
+     ps_codec->apf_intra_pred_luma[2] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_dc_fptr;
+     ps_codec->apf_intra_pred_luma[3] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_mode2_fptr;
+     ps_codec->apf_intra_pred_luma[4] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_mode_3_to_9_fptr;
+     ps_codec->apf_intra_pred_luma[5] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_horz_fptr;
+     ps_codec->apf_intra_pred_luma[6] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_mode_11_to_17_fptr;
+     ps_codec->apf_intra_pred_luma[7] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_mode_18_34_fptr;
+     ps_codec->apf_intra_pred_luma[8] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_mode_19_to_25_fptr;
+     ps_codec->apf_intra_pred_luma[9] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_ver_fptr;
+     ps_codec->apf_intra_pred_luma[10] =  (pf_intra_pred)ps_func_sel->ihevc_intra_pred_luma_mode_27_to_33_fptr;
 
-    ps_codec->apf_intra_pred_chroma[0] = (pf_intra_pred)NULL;
-    ps_codec->apf_intra_pred_chroma[1] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_planar_fptr;
-    ps_codec->apf_intra_pred_chroma[2] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_dc_fptr;
-    ps_codec->apf_intra_pred_chroma[3] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_mode2_fptr;
-    ps_codec->apf_intra_pred_chroma[4] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_mode_3_to_9_fptr;
-    ps_codec->apf_intra_pred_chroma[5] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_horz_fptr;
-    ps_codec->apf_intra_pred_chroma[6] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_mode_11_to_17_fptr;
-    ps_codec->apf_intra_pred_chroma[7] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_mode_18_34_fptr;
-    ps_codec->apf_intra_pred_chroma[8] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_mode_19_to_25_fptr;
-    ps_codec->apf_intra_pred_chroma[9] =  (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_ver_fptr;
-    ps_codec->apf_intra_pred_chroma[10] = (pf_intra_pred)ps_codec->s_func_selector.ihevc_intra_pred_chroma_mode_27_to_33_fptr;
+     ps_codec->apf_intra_pred_chroma[0] = (pf_intra_pred)NULL;
+     ps_codec->apf_intra_pred_chroma[1] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_planar_fptr;
+     ps_codec->apf_intra_pred_chroma[2] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_dc_fptr;
+     ps_codec->apf_intra_pred_chroma[3] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_mode2_fptr;
+     ps_codec->apf_intra_pred_chroma[4] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_mode_3_to_9_fptr;
+     ps_codec->apf_intra_pred_chroma[5] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_horz_fptr;
+     ps_codec->apf_intra_pred_chroma[6] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_mode_11_to_17_fptr;
+     ps_codec->apf_intra_pred_chroma[7] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_mode_18_34_fptr;
+     ps_codec->apf_intra_pred_chroma[8] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_mode_19_to_25_fptr;
+     ps_codec->apf_intra_pred_chroma[9] =  (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_ver_fptr;
+     ps_codec->apf_intra_pred_chroma[10] = (pf_intra_pred)ps_func_sel->ihevc_intra_pred_chroma_mode_27_to_33_fptr;
 
-    /* Init itrans_recon function array */
-    ps_codec->apf_itrans_recon[0] = (pf_itrans_recon)ps_codec->s_func_selector.ihevc_itrans_recon_4x4_ttype1_fptr;
-    ps_codec->apf_itrans_recon[1] = (pf_itrans_recon)ps_codec->s_func_selector.ihevc_itrans_recon_4x4_fptr;
-    ps_codec->apf_itrans_recon[2] = (pf_itrans_recon)ps_codec->s_func_selector.ihevc_itrans_recon_8x8_fptr;
-    ps_codec->apf_itrans_recon[3] = (pf_itrans_recon)ps_codec->s_func_selector.ihevc_itrans_recon_16x16_fptr;
-    ps_codec->apf_itrans_recon[4] = (pf_itrans_recon)ps_codec->s_func_selector.ihevc_itrans_recon_32x32_fptr;
-    ps_codec->apf_itrans_recon[5] = (pf_itrans_recon)ps_codec->s_func_selector.ihevc_chroma_itrans_recon_4x4_fptr;
-    ps_codec->apf_itrans_recon[6] = (pf_itrans_recon)ps_codec->s_func_selector.ihevc_chroma_itrans_recon_8x8_fptr;
-    ps_codec->apf_itrans_recon[7] = (pf_itrans_recon)ps_codec->s_func_selector.ihevc_chroma_itrans_recon_16x16_fptr;
+     /* Init itrans_recon function array */
+      ps_codec->apf_itrans_recon[0] = (pf_itrans_recon)ps_func_sel->ihevc_itrans_recon_4x4_ttype1_fptr;
+      ps_codec->apf_itrans_recon[1] = (pf_itrans_recon)ps_func_sel->ihevc_itrans_recon_4x4_fptr;
+      ps_codec->apf_itrans_recon[2] = (pf_itrans_recon)ps_func_sel->ihevc_itrans_recon_8x8_fptr;
+      ps_codec->apf_itrans_recon[3] = (pf_itrans_recon)ps_func_sel->ihevc_itrans_recon_16x16_fptr;
+      ps_codec->apf_itrans_recon[4] = (pf_itrans_recon)ps_func_sel->ihevc_itrans_recon_32x32_fptr;
+      ps_codec->apf_itrans_recon[5] = (pf_itrans_recon)ps_func_sel->ihevc_chroma_itrans_recon_4x4_fptr;
+      ps_codec->apf_itrans_recon[6] = (pf_itrans_recon)ps_func_sel->ihevc_chroma_itrans_recon_8x8_fptr;
+      ps_codec->apf_itrans_recon[7] = (pf_itrans_recon)ps_func_sel->ihevc_chroma_itrans_recon_16x16_fptr;
 
-    /* Init recon function array */
-    ps_codec->apf_recon[0] = (pf_recon)ps_codec->s_func_selector.ihevc_recon_4x4_ttype1_fptr;
-    ps_codec->apf_recon[1] = (pf_recon)ps_codec->s_func_selector.ihevc_recon_4x4_fptr;
-    ps_codec->apf_recon[2] = (pf_recon)ps_codec->s_func_selector.ihevc_recon_8x8_fptr;
-    ps_codec->apf_recon[3] = (pf_recon)ps_codec->s_func_selector.ihevc_recon_16x16_fptr;
-    ps_codec->apf_recon[4] = (pf_recon)ps_codec->s_func_selector.ihevc_recon_32x32_fptr;
-    ps_codec->apf_recon[5] = (pf_recon)ps_codec->s_func_selector.ihevc_chroma_recon_4x4_fptr;
-    ps_codec->apf_recon[6] = (pf_recon)ps_codec->s_func_selector.ihevc_chroma_recon_8x8_fptr;
-    ps_codec->apf_recon[7] = (pf_recon)ps_codec->s_func_selector.ihevc_chroma_recon_16x16_fptr;
+      /* Init recon function array */
+      ps_codec->apf_recon[0] = (pf_recon)ps_func_sel->ihevc_recon_4x4_ttype1_fptr;
+      ps_codec->apf_recon[1] = (pf_recon)ps_func_sel->ihevc_recon_4x4_fptr;
+      ps_codec->apf_recon[2] = (pf_recon)ps_func_sel->ihevc_recon_8x8_fptr;
+      ps_codec->apf_recon[3] = (pf_recon)ps_func_sel->ihevc_recon_16x16_fptr;
+      ps_codec->apf_recon[4] = (pf_recon)ps_func_sel->ihevc_recon_32x32_fptr;
+      ps_codec->apf_recon[5] = (pf_recon)ps_func_sel->ihevc_chroma_recon_4x4_fptr;
+      ps_codec->apf_recon[6] = (pf_recon)ps_func_sel->ihevc_chroma_recon_8x8_fptr;
+      ps_codec->apf_recon[7] = (pf_recon)ps_func_sel->ihevc_chroma_recon_16x16_fptr;
 
-    /* Init itrans_recon_dc function array */
-    ps_codec->apf_itrans_recon_dc[0] = (pf_itrans_recon_dc)ps_codec->s_func_selector.ihevcd_itrans_recon_dc_luma_fptr;
-    ps_codec->apf_itrans_recon_dc[1] = (pf_itrans_recon_dc)ps_codec->s_func_selector.ihevcd_itrans_recon_dc_chroma_fptr;
+      /* Init itrans_recon_dc function array */
+      ps_codec->apf_itrans_recon_dc[0] = (pf_itrans_recon_dc)ps_func_sel->ihevcd_itrans_recon_dc_luma_fptr;
+      ps_codec->apf_itrans_recon_dc[1] = (pf_itrans_recon_dc)ps_func_sel->ihevcd_itrans_recon_dc_chroma_fptr;
 
-    /* Init sao function array */
-    ps_codec->apf_sao_luma[0] = (pf_sao_luma)ps_codec->s_func_selector.ihevc_sao_edge_offset_class0_fptr;
-    ps_codec->apf_sao_luma[1] = (pf_sao_luma)ps_codec->s_func_selector.ihevc_sao_edge_offset_class1_fptr;
-    ps_codec->apf_sao_luma[2] = (pf_sao_luma)ps_codec->s_func_selector.ihevc_sao_edge_offset_class2_fptr;
-    ps_codec->apf_sao_luma[3] = (pf_sao_luma)ps_codec->s_func_selector.ihevc_sao_edge_offset_class3_fptr;
+      /* Init sao function array */
+      ps_codec->apf_sao_luma[0] = (pf_sao_luma)ps_func_sel->ihevc_sao_edge_offset_class0_fptr;
+      ps_codec->apf_sao_luma[1] = (pf_sao_luma)ps_func_sel->ihevc_sao_edge_offset_class1_fptr;
+      ps_codec->apf_sao_luma[2] = (pf_sao_luma)ps_func_sel->ihevc_sao_edge_offset_class2_fptr;
+      ps_codec->apf_sao_luma[3] = (pf_sao_luma)ps_func_sel->ihevc_sao_edge_offset_class3_fptr;
 
-    ps_codec->apf_sao_chroma[0] = (pf_sao_chroma)ps_codec->s_func_selector.ihevc_sao_edge_offset_class0_chroma_fptr;
-    ps_codec->apf_sao_chroma[1] = (pf_sao_chroma)ps_codec->s_func_selector.ihevc_sao_edge_offset_class1_chroma_fptr;
-    ps_codec->apf_sao_chroma[2] = (pf_sao_chroma)ps_codec->s_func_selector.ihevc_sao_edge_offset_class2_chroma_fptr;
-    ps_codec->apf_sao_chroma[3] = (pf_sao_chroma)ps_codec->s_func_selector.ihevc_sao_edge_offset_class3_chroma_fptr;
+      ps_codec->apf_sao_chroma[0] = (pf_sao_chroma)ps_func_sel->ihevc_sao_edge_offset_class0_chroma_fptr;
+      ps_codec->apf_sao_chroma[1] = (pf_sao_chroma)ps_func_sel->ihevc_sao_edge_offset_class1_chroma_fptr;
+      ps_codec->apf_sao_chroma[2] = (pf_sao_chroma)ps_func_sel->ihevc_sao_edge_offset_class2_chroma_fptr;
+      ps_codec->apf_sao_chroma[3] = (pf_sao_chroma)ps_func_sel->ihevc_sao_edge_offset_class3_chroma_fptr;
+
+      /* HBD functions */
+      ps_codec->ppf_hbd_intra_pred_luma     = (pf_hbd_intra_pred_luma*)ps_func_sel->ppv_ihevcd_hbd_intra_pred_luma;
+      ps_codec->ppf_hbd_intra_pred_chroma   = (pf_hbd_intra_pred_chroma*)ps_func_sel->ppv_ihevcd_hbd_intra_pred_chroma;
+      ps_codec->ppf_hbd_itrans_recon        = (pf_hbd_itrans_recon*)ps_func_sel->ppv_ihevcd_hbd_itrans_recon;
+      ps_codec->ppf_hbd_itrans_recon_dc     = (pf_hbd_itrans_recon_dc*)ps_func_sel->ppv_ihevcd_hbd_itrans_recon_dc;
+      ps_codec->ppf_hbd_recon               = (pf_hbd_recon*)ps_func_sel->ppv_ihevcd_hbd_recon;
+      ps_codec->ppf_hbd_sao_luma            = (pf_hbd_sao_luma*)ps_func_sel->ppv_ihevcd_hbd_sao_luma;
+      ps_codec->ppf_hbd_sao_chroma          = (pf_hbd_sao_chroma*)ps_func_sel->ppv_ihevcd_hbd_sao_chroma;
+      ps_codec->ppf_hbd_inter_pred          = (pf_hbd_inter_pred*)ps_func_sel->ppv_ihevcd_hbd_inter_pred;
 }
 /**
 *******************************************************************************
@@ -1567,6 +1588,8 @@ WORD32 ihevcd_init(codec_t *ps_codec)
     ps_codec->i4_max_prev_poc_lsb = -1;
     ps_codec->s_parse.i4_abs_pic_order_cnt = -1;
 
+    ps_codec->i4_chroma_array_type = CHROMA_FMT_IDC_YUV420;
+
     /* Set ref chroma format by default to 420SP UV interleaved */
     ps_codec->e_ref_chroma_fmt = IV_YUV_420SP_UV;
 
@@ -1587,21 +1610,19 @@ WORD32 ihevcd_init(codec_t *ps_codec)
     /* If the codec is in shared mode and required format is 420 SP VU interleaved then change
      * reference buffers chroma format
      */
+    /* Nithya: 422 assignment happens after sps parsing */
     if(IV_YUV_420SP_VU == ps_codec->e_chroma_fmt)
     {
         ps_codec->e_ref_chroma_fmt = IV_YUV_420SP_VU;
     }
-
-
 
     ps_codec->i4_disable_deblk_pic = 0;
 
     ps_codec->i4_degrade_pic_cnt    = 0;
     ps_codec->i4_degrade_pics       = 0;
     ps_codec->i4_degrade_type       = 0;
-    ps_codec->i4_disable_sao_pic    = 0;
+    ps_codec->i4_disable_sao_pic = 0;
     ps_codec->i4_fullpel_inter_pred = 0;
-    ps_codec->u4_enable_fmt_conv_ahead = 0;
 
     {
         sps_t *ps_sps = ps_codec->ps_sps_base;
@@ -1654,16 +1675,21 @@ WORD32 ihevcd_init(codec_t *ps_codec)
     ihevc_disp_mgr_init((disp_mgr_t *)ps_codec->pv_disp_buf_mgr);
 
     /* Initialize dpb manager */
-    ihevc_dpb_mgr_init((dpb_mgr_t *)ps_codec->pv_dpb_mgr);
+    ihevc_dpb_mgr_init((dpb_mgr_t*)ps_codec->pv_dpb_mgr);
 
     ps_codec->e_processor_soc = SOC_GENERIC;
-    /* The following can be over-ridden using soc parameter as a hack */
-    ps_codec->u4_nctb = 0x7FFFFFFF;
+    ps_codec->u4_nctb = 0x7FFFFFFF; //MAX_NCTB;
     ihevcd_init_arch(ps_codec);
 
     ihevcd_init_function_ptr(ps_codec);
 
     ihevcd_update_function_ptr(ps_codec);
+
+    /* Initialize the function pointer for parse residual coding */
+    ps_codec->pv_parse_residual_coding = (void *)&ihevcd_parse_residual_coding;
+
+    /* Initialize the function pointer for IQ, IT, recon CTB */
+    ps_codec->pv_iquant_itrans_recon_ctb = (void *)&ihevcd_iquant_itrans_recon_ctb;
 
     return status;
 }
@@ -1696,7 +1722,6 @@ WORD32 ihevcd_get_num_rec(void *pv_api_ip, void *pv_api_op)
 
     iv_num_mem_rec_op_t *ps_mem_q_op;
 
-    UNUSED(pv_api_ip);
     ps_mem_q_op = (iv_num_mem_rec_op_t *)pv_api_op;
     ps_mem_q_op->u4_num_mem_rec = MEM_REC_CNT;
     DEBUG("Get num mem records without concealment %d\n",
@@ -1710,9 +1735,9 @@ WORD32 ihevcd_get_num_rec(void *pv_api_ip, void *pv_api_op)
         cncl_mem_ip.s_ivd_num_rec_ip_t.e_cmd = IV_CMD_GET_NUM_MEM_REC;
         cncl_mem_ip.s_ivd_num_rec_ip_t.u4_size = sizeof(icncl_num_mem_rec_ip_t);
 
-        status = icncl_api_function(NULL, (void *)&cncl_mem_ip, (void *)&cncl_mem_op);
+        status = icncl_api_function(NULL, (void *) &cncl_mem_ip, (void *) &cncl_mem_op);
 
-        if(status == IV_SUCCESS)
+        if (status == IV_SUCCESS)
         {
             /* Add the concealment library's memory requirements */
             ps_mem_q_op->u4_num_mem_rec += cncl_mem_op.s_ivd_num_mem_rec_op_t.u4_num_mem_rec;
@@ -1782,6 +1807,7 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
     WORD32 max_num_cu_cols;
     WORD32 i;
     WORD32 max_num_4x4_cols;
+    WORD32 i4_pixel_size;
     IV_API_CALL_STATUS_T status = IV_SUCCESS;
     no_of_mem_rec_filled = 0;
 
@@ -1868,10 +1894,13 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
     /* Shared disp buffer mode is supported only for 420SP formats */
     if((chroma_format != IV_YUV_420P) &&
        (chroma_format != IV_YUV_420SP_UV) &&
-       (chroma_format != IV_YUV_420SP_VU))
+       (chroma_format != IV_YUV_420SP_VU) &&
+       (chroma_format != IV_YUV_422SP_UV) &&
+       (chroma_format != IV_YUV_422SP_VU))
     {
         share_disp_buf = 0;
     }
+
 
     {
 
@@ -2006,15 +2035,15 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
         WORD32 max_luma_samples = gai4_ihevc_max_luma_pic_size[lvl_idx];
 #ifdef GPU_BUILD
         ps_mem_rec->u4_mem_size += (max_dpb_size + 2) *
-                        ihevcd_get_pic_mv_bank_size(max_luma_samples);
+            ihevcd_get_pic_mv_bank_size(max_luma_samples);
 #else
         ps_mem_rec->u4_mem_size += (max_dpb_size + 1) *
-                        ihevcd_get_pic_mv_bank_size(max_luma_samples);
+            ihevcd_get_pic_mv_bank_size(max_luma_samples);
 #endif
         DEBUG("\nMemory record Id %d = %d \n", MEM_REC_MVBANK,
                         ps_mem_rec->u4_mem_size);
     }
-    // TODO GPU : Have to creat ping-pong view for VPS,SPS,PPS.
+    // TODO GPU : Have to create ping-pong view for VPS,SPS,PPS.
     ps_mem_rec = &ps_mem_rec_base[MEM_REC_VPS];
     ps_mem_rec->u4_mem_size = MAX_VPS_CNT * sizeof(vps_t);
     DEBUG("\nMemory record Id %d = %d \n", MEM_REC_VPS,
@@ -2118,7 +2147,7 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
     ps_mem_rec = &ps_mem_rec_base[MEM_REC_INTRA_FLAG];
 
     /* 1 bit per 8x8 */
-    ps_mem_rec->u4_mem_size = (max_wd_luma / MIN_CU_SIZE) * (max_ht_luma / MIN_CU_SIZE) / 8;
+    ps_mem_rec->u4_mem_size = (max_wd_luma / MIN_CU_SIZE) * (max_ht_luma / MIN_CU_SIZE)/8;
 #ifdef GPU_BUILD
     ps_mem_rec->u4_mem_size = ALIGN128(ps_mem_rec->u4_mem_size);
     ps_mem_rec->u4_mem_size = ps_mem_rec->u4_mem_size * 2;
@@ -2131,7 +2160,7 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
 
     /* 1 bit per 8x8 */
     /* Extra row and column are allocated for easy processing of top and left blocks while loop filtering */
-    ps_mem_rec->u4_mem_size = ((max_wd_luma + 64) / MIN_CU_SIZE) * ((max_ht_luma + 64) / MIN_CU_SIZE) / 8;
+    ps_mem_rec->u4_mem_size = ((max_wd_luma + 64) / MIN_CU_SIZE) * ((max_ht_luma + 64) / MIN_CU_SIZE)/8;
 #ifdef GPU_BUILD
     ps_mem_rec->u4_mem_size = ALIGN128(ps_mem_rec->u4_mem_size);
     ps_mem_rec->u4_mem_size = ps_mem_rec->u4_mem_size * 2;
@@ -2207,7 +2236,7 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
     /* Only one top row is enough but left has to be replicated for each process context */
     ps_mem_rec = &ps_mem_rec_base[MEM_REC_PIC_PU_IDX_NEIGHBOR];
 
-    ps_mem_rec->u4_mem_size = (max_num_4x4_cols  /* left */ + MAX_PROCESS_THREADS * (MAX_CTB_SIZE / 4)/* top */ + 1/* top right */) * sizeof(WORD32);
+    ps_mem_rec->u4_mem_size = (max_num_4x4_cols  /* left */ + MAX_PROCESS_THREADS * (MAX_CTB_SIZE / 4)  /* top */ + 1/* top right */) * sizeof(WORD32);
     DEBUG("\nMemory record Id %d = %d \n", MEM_REC_PIC_PU_IDX_NEIGHBOR,
                     ps_mem_rec->u4_mem_size);
 
@@ -2223,9 +2252,21 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
         WORD32 sao_size = 0;
         ntaps_luma = 8;
 
+        /* Size of luma and chroma pixels */
+        if ((HEVC_MAIN == ps_mem_q_ip->e_profile) || (HEVC_MAIN_422 == ps_mem_q_ip->e_profile)) {
+            i4_pixel_size = sizeof(UWORD8);
+        } else {
+            i4_pixel_size = sizeof(UWORD16);
+        }
+
         /* Max inter pred size (number of bytes) */
         inter_pred_tmp_buf_size = sizeof(WORD16) * (MAX_CTB_SIZE + ntaps_luma) * MAX_CTB_SIZE;
         inter_pred_tmp_buf_size = ALIGN64(inter_pred_tmp_buf_size);
+        /* To hold inverse scanned output */
+        size += sizeof(WORD16) * MAX_TU_SIZE * MAX_TU_SIZE;
+
+        /* To hold intermediate output during inverse transform */
+        size += sizeof(WORD16) * MAX_TU_SIZE * MAX_TU_SIZE;
 
 
         /* To hold pu_index w.r.t. frame level pu_t array for a CTB at 4x4 level*/
@@ -2247,76 +2288,76 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
 
 #ifdef GPU_SAO_PING_PONG
         /* To hold SAO left buffer for luma */
-        sao_size += sizeof(UWORD8) * (MAX(max_ht_luma, max_wd_luma)) * 2;
+        sao_size += i4_pixel_size * (MAX(max_ht_luma, max_wd_luma)) * 2;
 
         /* To hold SAO left buffer for chroma */
-        sao_size += sizeof(UWORD8) * (MAX(max_ht_luma, max_wd_luma)) * 2;
+        sao_size += i4_pixel_size * (MAX(max_ht_luma, max_wd_luma)) * 2;
 
         /* To hold SAO top buffer for luma */
-        sao_size += sizeof(UWORD8) * max_wd_luma * 2;
+        sao_size += i4_pixel_size * max_wd_luma * 2;
 
         /* To hold SAO top buffer for chroma */
-        sao_size += sizeof(UWORD8) * max_wd_luma * 2;
+        sao_size += i4_pixel_size * max_wd_luma * 2;
 
         /* To hold SAO top left luma pixel value for last output ctb in a row*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows * 2;
+        sao_size += i4_pixel_size * max_ctb_rows * 2;
 
         /* To hold SAO top left chroma pixel value last output ctb in a row*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows * 2 * 2;
+        sao_size += i4_pixel_size * max_ctb_rows * 2 * 2;
 
         /* To hold SAO top left pixel luma for current ctb - column array*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows * 2;
+        sao_size += i4_pixel_size * max_ctb_rows * 2;
 
         /* To hold SAO top left pixel chroma for current ctb-column array*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows * 2 * 2;
+        sao_size += i4_pixel_size * max_ctb_rows * 2 * 2;
 
         /* To hold SAO top right pixel luma pixel value last output ctb in a row*/
-        sao_size += sizeof(UWORD8) * max_ctb_cols * 2;
+        sao_size += i4_pixel_size * max_ctb_cols * 2;
 
         /* To hold SAO top right pixel chroma pixel value last output ctb in a row*/
-        sao_size += sizeof(UWORD8) * max_ctb_cols * 2 * 2;
+        sao_size += i4_pixel_size * max_ctb_cols * 2 * 2;
 
         /*To hold SAO botton bottom left pixels for luma*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows * 2;
+        sao_size += i4_pixel_size * max_ctb_rows * 2;
 
         /*To hold SAO botton bottom left pixels for luma*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows * 2 * 2;
+        sao_size += i4_pixel_size * max_ctb_rows * 2 * 2;
 #else
         /* To hold SAO left buffer for luma */
-        sao_size += sizeof(UWORD8) * (MAX(max_ht_luma, max_wd_luma));
+        sao_size += i4_pixel_size * (MAX(max_ht_luma, max_wd_luma));
 
         /* To hold SAO left buffer for chroma */
-        sao_size += sizeof(UWORD8) * (MAX(max_ht_luma, max_wd_luma));
+        sao_size += i4_pixel_size * (MAX(max_ht_luma, max_wd_luma));
 
         /* To hold SAO top buffer for luma */
-        sao_size += sizeof(UWORD8) * max_wd_luma;
+        sao_size += i4_pixel_size * max_wd_luma;
 
         /* To hold SAO top buffer for chroma */
-        sao_size += sizeof(UWORD8) * max_wd_luma;
+        sao_size += i4_pixel_size * max_wd_luma;
 
         /* To hold SAO top left luma pixel value for last output ctb in a row*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows;
+        sao_size += i4_pixel_size * max_ctb_rows;
 
         /* To hold SAO top left chroma pixel value last output ctb in a row*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows * 2;
+        sao_size += i4_pixel_size * max_ctb_rows * 2;
 
         /* To hold SAO top left pixel luma for current ctb - column array*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows;
+        sao_size += i4_pixel_size * max_ctb_rows;
 
         /* To hold SAO top left pixel chroma for current ctb-column array*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows * 2;
+        sao_size += i4_pixel_size * max_ctb_rows * 2;
 
         /* To hold SAO top right pixel luma pixel value last output ctb in a row*/
-        sao_size += sizeof(UWORD8) * max_ctb_cols;
+        sao_size += i4_pixel_size * max_ctb_cols;
 
         /* To hold SAO top right pixel chroma pixel value last output ctb in a row*/
-        sao_size += sizeof(UWORD8) * max_ctb_cols * 2;
+        sao_size += i4_pixel_size * max_ctb_cols * 2;
 
         /*To hold SAO botton bottom left pixels for luma*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows;
+        sao_size += i4_pixel_size * max_ctb_rows;
 
         /*To hold SAO botton bottom left pixels for luma*/
-        sao_size += sizeof(UWORD8) * max_ctb_rows * 2;
+        sao_size += i4_pixel_size * max_ctb_rows * 2;
 #endif
         sao_size = ALIGN64(sao_size);
         size += sao_size;
@@ -2331,6 +2372,9 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
         WORD32 size = 0;
 
         size = 4 * MAX_CTB_SIZE * MAX_CTB_SIZE;
+
+        /* Account for bit depth */
+        size *= i4_pixel_size;
 
         /* 2 temporary buffers*/
         size *= 2;
@@ -2383,7 +2427,7 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
         qp_const_flag_size = (qp_const_flag_size + 7) >> 3;
 
         /* QP changes at CU level - So store at 8x8 level */
-        num_8x8 = (max_ht_luma * max_wd_luma) / (MIN_CU_SIZE * MIN_CU_SIZE);
+        num_8x8 = (max_ht_luma * max_wd_luma)/(MIN_CU_SIZE * MIN_CU_SIZE);
         qp_size = num_8x8;
 
         /* To hold vertical boundary strength */
@@ -2404,7 +2448,6 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
         ps_mem_rec->u4_mem_size = ps_mem_rec->u4_mem_size * 2;
 #endif
     }
-
     DEBUG("\nMemory record Id %d = %d \n", MEM_REC_BS_QP,
                     ps_mem_rec->u4_mem_size);
 
@@ -2431,8 +2474,15 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
     {
         UWORD32 size;
 
-        /* 4 bytes per color component per CTB */
-        size = 3 * 4;
+        if (sizeof(UWORD8) == i4_pixel_size)
+        {
+            /* 4 bytes per color component per CTB */
+            size = 3 * 4;
+        }
+        else /* HBD: currently upto 12 bit depth case */
+        {
+            size = sizeof(sao_10bd_t);
+        }
 
         /* MAX number of CTBs in a row */
         size *= max_wd_luma / MIN_CTB_SIZE;
@@ -2499,8 +2549,8 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
          * based on when parsing and processing threads are synchronized
          */
         ps_mem_rec->u4_mem_size +=
-                        ihevcd_get_total_pic_buf_size(max_wd_luma * max_ht_luma, level,  PAD_WD,  PAD_HT,
-                                                      num_ref_frames, num_reorder_frames_local);
+            ihevcd_get_total_pic_buf_size(max_wd_luma * max_ht_luma, level,  PAD_WD,  PAD_HT,
+                                          num_ref_frames, num_reorder_frames_local, i4_pixel_size);
     }
     DEBUG("\nMemory record Id %d = %d \n", MEM_REC_REF_PIC,
                     ps_mem_rec->u4_mem_size);
@@ -2533,9 +2583,9 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
         cncl_fill_ip.s_ivd_fill_mem_rec_ip_t.u4_max_frm_wd = max_wd_luma;
         cncl_fill_ip.s_ivd_fill_mem_rec_ip_t.u4_max_frm_ht = max_ht_luma;
 
-        status = icncl_api_function(NULL, (void *)&cncl_fill_ip, (void *)&cncl_fill_op);
+        status = icncl_api_function(NULL, (void *) &cncl_fill_ip, (void *) &cncl_fill_op);
 
-        if(IV_SUCCESS == status)
+        if (IV_SUCCESS == status)
         {
             icncl_num_mem_rec_ip_t cncl_mem_ip;
             icncl_num_mem_rec_op_t cncl_mem_op;
@@ -2543,8 +2593,8 @@ WORD32 ihevcd_fill_num_mem_rec(void *pv_api_ip, void *pv_api_op)
             cncl_mem_ip.s_ivd_num_rec_ip_t.e_cmd = IV_CMD_GET_NUM_MEM_REC;
             cncl_mem_ip.s_ivd_num_rec_ip_t.u4_size = sizeof(icncl_num_mem_rec_ip_t);
 
-            status = icncl_api_function(NULL, (void *)&cncl_mem_ip, (void *)&cncl_mem_op);
-            if(IV_SUCCESS == status)
+            status = icncl_api_function(NULL, (void *) &cncl_mem_ip, (void *) &cncl_mem_op);
+            if (IV_SUCCESS == status)
             {
                 ps_mem_q_op->s_ivd_fill_mem_rec_op_t.u4_num_mem_rec_filled += cncl_mem_op.s_ivd_num_mem_rec_op_t.u4_num_mem_rec;
             }
@@ -2597,11 +2647,13 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
     WORD32 i;
     iv_mem_rec_t *ps_mem_rec, *ps_mem_rec_base;
     WORD32 status = IV_SUCCESS;
-    codec_t *ps_codec;
+    codec_t * ps_codec;
     WORD32 max_tile_cols, max_tile_rows;
+    WORD32 i4_pixel_size;
 
     dec_init_ip = (ihevcd_cxa_init_ip_t *)pv_api_ip;
     dec_init_op = (ihevcd_cxa_init_op_t *)pv_api_op;
+
 
     ps_mem_rec_base = dec_init_ip->s_ivd_init_ip_t.pv_mem_rec_location;
 
@@ -2626,6 +2678,8 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
     {
         ps_codec->i4_init_level = MAX_LEVEL;
     }
+
+    ps_codec->i4_profile = (WORD32)dec_init_ip->e_profile;
 
     if(dec_init_ip->s_ivd_init_ip_t.u4_size
                     > offsetof(ihevcd_cxa_init_ip_t, u4_num_ref_frames))
@@ -2674,7 +2728,9 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
     /* Shared display mode is supported only for 420SP and 420P formats */
     if((dec_init_ip->s_ivd_init_ip_t.e_output_format != IV_YUV_420P) &&
        (dec_init_ip->s_ivd_init_ip_t.e_output_format != IV_YUV_420SP_UV) &&
-       (dec_init_ip->s_ivd_init_ip_t.e_output_format != IV_YUV_420SP_VU))
+       (dec_init_ip->s_ivd_init_ip_t.e_output_format != IV_YUV_420SP_VU) &&
+       (dec_init_ip->s_ivd_init_ip_t.e_output_format != IV_YUV_422SP_UV) &&
+       (dec_init_ip->s_ivd_init_ip_t.e_output_format != IV_YUV_422SP_VU))
     {
         ps_codec->i4_share_disp_buf = 0;
     }
@@ -2711,7 +2767,6 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
 
     ps_codec->i4_max_wd = dec_init_ip->s_ivd_init_ip_t.u4_frm_max_wd;
     ps_codec->i4_max_ht = dec_init_ip->s_ivd_init_ip_t.u4_frm_max_ht;
-
     ps_codec->i4_max_wd = ALIGN64(ps_codec->i4_max_wd);
     ps_codec->i4_max_ht = ALIGN64(ps_codec->i4_max_ht);
 
@@ -2790,7 +2845,7 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
     ps_codec->apu1_pic_intra_flag[0] = ps_mem_rec->pv_base;
     ps_codec->apu1_pic_intra_flag[1] = ps_codec->apu1_pic_intra_flag[0] + (ps_mem_rec->u4_mem_size / 2);
 #else
-    memset(ps_mem_rec->pv_base, 0, (ps_codec->i4_max_wd / MIN_CU_SIZE) * (ps_codec->i4_max_ht / MIN_CU_SIZE) / 8);
+    memset(ps_mem_rec->pv_base, 0, (ps_codec->i4_max_wd / MIN_CU_SIZE) * (ps_codec->i4_max_ht / MIN_CU_SIZE)/8);
 
     ps_codec->pu1_pic_intra_flag = (UWORD8 *)ps_mem_rec->pv_base;
     ps_codec->s_parse.pu1_pic_intra_flag = ps_codec->pu1_pic_intra_flag;
@@ -2807,7 +2862,7 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
     }
 #else
     {
-        WORD32 loop_filter_size = ((ps_codec->i4_max_wd  + 64) / MIN_CU_SIZE) * ((ps_codec->i4_max_ht + 64) / MIN_CU_SIZE) / 8;
+        WORD32 loop_filter_size = ((ps_codec->i4_max_wd  + 64) / MIN_CU_SIZE) * ((ps_codec->i4_max_ht + 64) / MIN_CU_SIZE)/8;
         WORD32 loop_filter_strd = (ps_codec->i4_max_wd + 63) >> 6;
 
         memset(ps_mem_rec->pv_base, 0, loop_filter_size);
@@ -2868,7 +2923,7 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
 #ifdef GPU_BUILD
     memset(ps_mem_rec->pv_base, 0, ps_mem_rec->u4_mem_size);
     ps_codec->apu1_proc_map[0] = (UWORD8 *)ps_mem_rec->pv_base;
-    ps_codec->apu1_proc_map[1] = (UWORD8 *)ps_mem_rec->pv_base + (ps_mem_rec->u4_mem_size / 2);
+    ps_codec->apu1_proc_map[1] = (UWORD8 *)ps_mem_rec->pv_base + (ps_mem_rec->u4_mem_size/2);
 #else
     ps_codec->pu1_proc_map = (UWORD8 *)ps_mem_rec->pv_base;
 #endif
@@ -2898,6 +2953,13 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
 
         WORD32 inter_pred_tmp_buf_size, ntaps_luma;
 
+        /* Sizeof luma and chroma pixels */
+        if ((HEVC_MAIN == dec_init_ip->e_profile) || (HEVC_MAIN_422 == dec_init_ip->e_profile)) {
+            i4_pixel_size = sizeof(UWORD8);
+        } else {
+            i4_pixel_size = sizeof(UWORD16);
+        }
+
         /* Max inter pred size */
         ntaps_luma = 8;
         inter_pred_tmp_buf_size = sizeof(WORD16) * (MAX_CTB_SIZE + ntaps_luma) * MAX_CTB_SIZE;
@@ -2909,11 +2971,11 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
         pic_pu_idx_map_size = ALIGN64(pic_pu_idx_map_size);
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
-            ps_codec->as_process[i].pi2_inter_pred_tmp_buf1 = (WORD16 *)pu1_buf;
-            pu1_buf += inter_pred_tmp_buf_size;
+              ps_codec->as_process[i].pi2_inter_pred_tmp_buf1 = (WORD16 *)pu1_buf;
+              pu1_buf += inter_pred_tmp_buf_size;
 
-            ps_codec->as_process[i].pi2_inter_pred_tmp_buf2 = (WORD16 *)pu1_buf;
-            pu1_buf += inter_pred_tmp_buf_size;
+             ps_codec->as_process[i].pi2_inter_pred_tmp_buf2 = (WORD16 *)pu1_buf;
+              pu1_buf += inter_pred_tmp_buf_size;
 
             /* Inverse transform intermediate and inverse scan output buffers reuse inter pred scratch buffers */
             ps_codec->as_process[i].pi2_itrans_intrmd_buf =
@@ -2926,8 +2988,10 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
                             (UWORD32 *)pu1_buf;
             pu1_buf += pic_pu_idx_map_size;
 
-            //   ps_codec->as_process[i].pi2_inter_pred_tmp_buf3 = (WORD16 *)pu1_buf;
-            //   pu1_buf += inter_pred_tmp_buf_size;
+
+
+         //   ps_codec->as_process[i].pi2_inter_pred_tmp_buf3 = (WORD16 *)pu1_buf;
+         //   pu1_buf += inter_pred_tmp_buf_size;
 
             ps_codec->as_process[i].i4_inter_pred_tmp_buf_strd = MAX_CTB_SIZE;
 
@@ -2937,47 +3001,49 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
             ps_codec->as_process[i].s_sao_ctxt.pu1_sao_src_left_luma = (UWORD8 *)pu1_buf;
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_left_luma = (UWORD8 *)pu1_buf;
-        pu1_buf += MAX(ps_codec->i4_max_ht, ps_codec->i4_max_wd);
+        pu1_buf += ((MAX(ps_codec->i4_max_ht, ps_codec->i4_max_wd)) * i4_pixel_size);
 
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
             ps_codec->as_process[i].s_sao_ctxt.pu1_sao_src_left_chroma = (UWORD8 *)pu1_buf;
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_left_chroma = (UWORD8 *)pu1_buf;
-        pu1_buf += MAX(ps_codec->i4_max_ht, ps_codec->i4_max_wd);
+        {
+            pu1_buf += ((MAX(ps_codec->i4_max_ht, ps_codec->i4_max_wd)) * i4_pixel_size);
+        }
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
             ps_codec->as_process[i].s_sao_ctxt.pu1_sao_src_top_luma = (UWORD8 *)pu1_buf;
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_top_luma = (UWORD8 *)pu1_buf;
-        pu1_buf += ps_codec->i4_max_wd;
+        pu1_buf += (ps_codec->i4_max_wd * i4_pixel_size);
 
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
             ps_codec->as_process[i].s_sao_ctxt.pu1_sao_src_top_chroma = (UWORD8 *)pu1_buf;
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_top_chroma = (UWORD8 *)pu1_buf;
-        pu1_buf += ps_codec->i4_max_wd;
+        pu1_buf += (ps_codec->i4_max_wd * i4_pixel_size);
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
             ps_codec->as_process[i].s_sao_ctxt.pu1_sao_src_luma_top_left_ctb = (UWORD8 *)pu1_buf;
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_luma_top_left_ctb = (UWORD8 *)pu1_buf;
-        pu1_buf += ps_codec->i4_max_ht / MIN_CTB_SIZE;
+        pu1_buf += (ps_codec->i4_max_ht/MIN_CTB_SIZE) * i4_pixel_size;
 
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
             ps_codec->as_process[i].s_sao_ctxt.pu1_sao_src_chroma_top_left_ctb = (UWORD8 *)pu1_buf;
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_chroma_top_left_ctb = (UWORD8 *)pu1_buf;
-        pu1_buf += (ps_codec->i4_max_ht / MIN_CTB_SIZE) * 2;
+        pu1_buf += (ps_codec->i4_max_ht/MIN_CTB_SIZE)*2 * i4_pixel_size;
 
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
             ps_codec->as_process[i].s_sao_ctxt.pu1_sao_src_top_left_luma_curr_ctb = (UWORD8 *)pu1_buf;
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_top_left_luma_curr_ctb = (UWORD8 *)pu1_buf;
-        pu1_buf += ps_codec->i4_max_ht / MIN_CTB_SIZE;
+        pu1_buf += (ps_codec->i4_max_ht/MIN_CTB_SIZE) * i4_pixel_size;
 
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
@@ -2985,21 +3051,21 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_top_left_chroma_curr_ctb = (UWORD8 *)pu1_buf;
 
-        pu1_buf += (ps_codec->i4_max_ht / MIN_CTB_SIZE) * 2;
+        pu1_buf += (ps_codec->i4_max_ht/MIN_CTB_SIZE)*2 * i4_pixel_size;
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
             ps_codec->as_process[i].s_sao_ctxt.pu1_sao_src_top_left_luma_top_right = (UWORD8 *)pu1_buf;
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_top_left_luma_top_right = (UWORD8 *)pu1_buf;
 
-        pu1_buf += ps_codec->i4_max_wd / MIN_CTB_SIZE;
+        pu1_buf += (ps_codec->i4_max_wd/MIN_CTB_SIZE) * i4_pixel_size;
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
             ps_codec->as_process[i].s_sao_ctxt.pu1_sao_src_top_left_chroma_top_right = (UWORD8 *)pu1_buf;
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_top_left_chroma_top_right = (UWORD8 *)pu1_buf;
 
-        pu1_buf += (ps_codec->i4_max_wd / MIN_CTB_SIZE) * 2;
+        pu1_buf += (ps_codec->i4_max_wd/MIN_CTB_SIZE)*2 * i4_pixel_size;
 
         /*Per CTB, Store 1 value for luma , 2 values for chroma*/
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
@@ -3008,7 +3074,7 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_top_left_luma_bot_left = (UWORD8 *)pu1_buf;
 
-        pu1_buf += (ps_codec->i4_max_ht / MIN_CTB_SIZE);
+        pu1_buf += (ps_codec->i4_max_ht/MIN_CTB_SIZE) * i4_pixel_size;
 
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
@@ -3016,7 +3082,7 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
         }
         ps_codec->s_parse.s_sao_ctxt.pu1_sao_src_top_left_chroma_bot_left = (UWORD8 *)pu1_buf;
 
-        pu1_buf += (ps_codec->i4_max_ht / MIN_CTB_SIZE) * 2;
+        pu1_buf += (ps_codec->i4_max_ht/MIN_CTB_SIZE) * 2 * i4_pixel_size;
     }
 
     ps_mem_rec = &ps_mem_rec_base[MEM_REC_SAO_SCRATCH];
@@ -3024,11 +3090,11 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
         UWORD8 *pu1_buf = (UWORD8 *)ps_mem_rec->pv_base;
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
-            ps_codec->as_process[i].s_sao_ctxt.pu1_tmp_buf_luma = (UWORD8 *)pu1_buf;
-            pu1_buf += 4 * MAX_CTB_SIZE * MAX_CTB_SIZE * sizeof(UWORD8);
+            ps_codec->as_process[i].s_sao_ctxt.pu1_tmp_buf_luma = (UWORD8 *) pu1_buf;
+            pu1_buf += 4 * MAX_CTB_SIZE * MAX_CTB_SIZE * i4_pixel_size;
 
-            ps_codec->as_process[i].s_sao_ctxt.pu1_tmp_buf_chroma = (UWORD8 *)pu1_buf;
-            pu1_buf += 4 * MAX_CTB_SIZE * MAX_CTB_SIZE * sizeof(UWORD8);
+            ps_codec->as_process[i].s_sao_ctxt.pu1_tmp_buf_chroma = (UWORD8 *) pu1_buf;
+            pu1_buf += 4 * MAX_CTB_SIZE * MAX_CTB_SIZE * i4_pixel_size;
         }
     }
 
@@ -3074,7 +3140,7 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
         qp_const_flag_size /= 8;
 
         /* QP changes at CU level - So store at 8x8 level */
-        num_8x8 = (ps_codec->i4_max_ht * ps_codec->i4_max_wd) / (MIN_CU_SIZE * MIN_CU_SIZE);
+        num_8x8 = (ps_codec->i4_max_ht * ps_codec->i4_max_wd)/(MIN_CU_SIZE * MIN_CU_SIZE);
         qp_size = num_8x8;
 #ifndef GPU_BUILD
         memset(pu1_buf, 0, vert_bs_size + horz_bs_size + qp_size + qp_const_flag_size);
@@ -3150,30 +3216,29 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
         UWORD8 *pu1_buf = (UWORD8 *)ps_mem_rec->pv_base;
         for(i = 0; i < 2; i++)
         {
-            ps_codec->as_process[i].pu1_tile_idx = (UWORD16 *)pu1_buf;
+            ps_codec->as_process[i].pu1_tile_idx = (UWORD16*)pu1_buf;
         }
 
         pu1_buf += ps_mem_rec->u4_mem_size / 2;
 
         for(i = 2; i < 4; i++)
         {
-            ps_codec->as_process[i].pu1_tile_idx = (UWORD16 *)pu1_buf;
+            ps_codec->as_process[i].pu1_tile_idx = (UWORD16*)pu1_buf;
         }
 #else
         UWORD8 *pu1_buf = (UWORD8 *)ps_mem_rec->pv_base;
-
         for(i = 0; i < MAX_PROCESS_THREADS; i++)
         {
-            ps_codec->as_process[i].pu1_tile_idx = (UWORD16 *)pu1_buf + ps_codec->i4_max_wd / MIN_CTB_SIZE /* Offset 1 row */;
+            ps_codec->as_process[i].pu1_tile_idx = (UWORD16*)pu1_buf + ps_codec->i4_max_wd / MIN_CTB_SIZE /* Offset 1 row */;
         }
 #endif
     }
 
     ps_mem_rec = &ps_mem_rec_base[MEM_REC_SAO];
 #ifdef GPU_BUILD
-    memset(ps_mem_rec->pv_base, 0, ps_mem_rec->u4_mem_size);
+    memset(ps_mem_rec->pv_base,0,ps_mem_rec->u4_mem_size);
     ps_codec->aps_pic_sao[0] = (sao_t *)ps_mem_rec->pv_base;
-    ps_codec->aps_pic_sao[1] = (sao_t *)((UWORD32)ps_mem_rec->pv_base + ps_mem_rec->u4_mem_size / 2);
+    ps_codec->aps_pic_sao[1] = (sao_t *)((UWORD32)ps_mem_rec->pv_base + ps_mem_rec->u4_mem_size/2);
 #else
     ps_codec->s_parse.ps_pic_sao = (sao_t *)ps_mem_rec->pv_base;
     ps_codec->s_parse.s_sao_ctxt.ps_pic_sao = (sao_t *)ps_mem_rec->pv_base;
@@ -3205,10 +3270,6 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
     ps_codec->pv_pic_buf_base = (UWORD8 *)ps_codec->pv_pic_buf_mgr + sizeof(buf_mgr_t);
     ps_codec->i4_total_pic_buf_size = ps_mem_rec->u4_mem_size - sizeof(buf_mgr_t);
 
-
-
-
-
 #ifdef APPLY_CONCEALMENT
     {
 
@@ -3222,14 +3283,14 @@ WORD32 ihevcd_init_mem_rec(iv_obj_t *ps_codec_obj,
         ps_mem_rec = dec_init_ip->s_ivd_init_ip_t.pv_mem_rec_location;
         mem_loc = MEM_REC_CNT;
 
-        ps_codec->ps_conceal = (iv_obj_t *)ps_mem_rec[mem_loc].pv_base;
+        ps_codec->ps_conceal = (iv_obj_t *) ps_mem_rec[mem_loc].pv_base;
         ps_codec->i4_first_frame_done = 0;
 
         cncl_init_ip.u4_size = sizeof(icncl_init_ip_t);
         cncl_init_ip.pv_mem_rec_location = &(ps_mem_rec[mem_loc]);
         cncl_init_ip.e_cmd = IV_CMD_INIT;
 
-        status = icncl_api_function(ps_codec->ps_conceal, (void *)&cncl_init_ip, (void *)&cncl_init_op);
+        status = icncl_api_function(ps_codec->ps_conceal, (void *) &cncl_init_ip, (void *) &cncl_init_op);
 
     }
 #endif //APPLY_CONCEALMENT
@@ -3309,14 +3370,14 @@ WORD32 ihevcd_retrieve_memrec(iv_obj_t *ps_codec_obj,
         cncl_fill_ip.s_ivd_fill_mem_rec_ip_t.pv_mem_rec_location = &(ps_mem_rec[mem_loc]);
         cncl_fill_ip.s_ivd_fill_mem_rec_ip_t.u4_size = sizeof(icncl_fill_mem_rec_ip_t);
 
-        status = icncl_api_function(NULL, (void *)&cncl_fill_ip, (void *)&cncl_fill_op);
+        status = icncl_api_function(NULL, (void *) &cncl_fill_ip, (void *) &cncl_fill_op);
 
         cncl_fill_ip.s_ivd_fill_mem_rec_ip_t.e_cmd = IV_CMD_RETRIEVE_MEMREC;
         cncl_fill_op.s_ivd_fill_mem_rec_op_t.u4_size = sizeof(icncl_fill_mem_rec_op_t);
 
-        status = icncl_api_function(ps_codec->ps_conceal, (void *)&cncl_fill_ip, (void *)&cncl_fill_op);
+        status = icncl_api_function(ps_codec->ps_conceal, (void *) &cncl_fill_ip, (void *) &cncl_fill_op);
 
-        if(status == IV_SUCCESS)
+        if (status == IV_SUCCESS)
         {
             /* Add the concealment library's memory requirements */
             dec_clr_op->u4_num_mem_rec_filled += cncl_fill_op.s_ivd_fill_mem_rec_op_t.u4_num_mem_rec_filled;
@@ -3326,7 +3387,7 @@ WORD32 ihevcd_retrieve_memrec(iv_obj_t *ps_codec_obj,
     DEBUG("Retrieve num mem recs: %d\n",
                     dec_clr_op->u4_num_mem_rec_filled);
     STATS_PRINT();
-    ihevcd_jobq_free((jobq_t *)ps_codec->pv_proc_jobq);
+    ihevcd_jobq_free((jobq_t*)ps_codec->pv_proc_jobq);
 
 
 
@@ -3369,7 +3430,7 @@ WORD32 ihevcd_set_display_frame(iv_obj_t *ps_codec_obj,
 
     WORD32 i;
 
-    codec_t *ps_codec = (codec_t *)(ps_codec_obj->pv_codec_handle);
+    codec_t * ps_codec = (codec_t *) (ps_codec_obj->pv_codec_handle);
 
     ps_dec_disp_ip = (ivd_set_display_frame_ip_t *)pv_api_ip;
     ps_dec_disp_op = (ivd_set_display_frame_op_t *)pv_api_op;
@@ -3378,24 +3439,39 @@ WORD32 ihevcd_set_display_frame(iv_obj_t *ps_codec_obj,
     if(ps_codec->i4_share_disp_buf)
     {
         UWORD32 num_bufs = ps_dec_disp_ip->num_disp_bufs;
-        pic_buf_t *ps_pic_buf;
+        pic_buf_t *ps_pic_buf ;
         UWORD8 *pu1_buf;
         WORD32 buf_ret;
+        WORD32 i4_pixel_size;
         WORD32 strd;
         strd = ps_codec->i4_strd;
         if(0 == strd)
             strd = ps_codec->i4_max_wd + PAD_WD;
         num_bufs = MIN(num_bufs, BUF_MGR_MAX_CNT);
         ps_codec->i4_num_disp_bufs = num_bufs;
+        if(ps_codec->i4_sps_done)
+        {
+            i4_pixel_size = MAX(ps_codec->i4_pixel_size_uv, ps_codec->i4_pixel_size_y);
+        }
+        else
+        {
+            if ((HEVC_MAIN == ps_codec->i4_profile) || (HEVC_MAIN_422 == ps_codec->i4_profile)) {
+            i4_pixel_size = sizeof(UWORD8);
+        } else {
+            i4_pixel_size = sizeof(UWORD16);
+            }
+        }
+
 
         ps_pic_buf = (pic_buf_t *)ps_codec->ps_pic_buf;
-        for(i = 0; i < (WORD32)num_bufs; i++)
+        for(i = 0; i < num_bufs; i++)
         {
             pu1_buf =  ps_dec_disp_ip->s_disp_buffer[i].pu1_bufs[0];
-            ps_pic_buf->pu1_luma = pu1_buf + strd * PAD_TOP + PAD_LEFT;
+            ps_pic_buf->pu1_luma = pu1_buf + (strd * PAD_TOP + PAD_LEFT) * i4_pixel_size;
 
             pu1_buf =  ps_dec_disp_ip->s_disp_buffer[i].pu1_bufs[1];
-            ps_pic_buf->pu1_chroma = pu1_buf + strd * (PAD_TOP / 2) + PAD_LEFT;
+            ps_pic_buf->pu1_chroma = pu1_buf + (strd * (PAD_TOP / 2) + PAD_LEFT) * i4_pixel_size;
+
 
             buf_ret = ihevc_buf_mgr_add((buf_mgr_t *)ps_codec->pv_pic_buf_mgr, ps_pic_buf, i);
 
@@ -3453,9 +3529,9 @@ WORD32 ihevcd_set_flush_mode(iv_obj_t *ps_codec_obj,
                              void *pv_api_op)
 {
 
-    codec_t *ps_codec;
-    ivd_ctl_flush_op_t *ps_ctl_op = (ivd_ctl_flush_op_t *)pv_api_op;
-    UNUSED(pv_api_ip);
+    codec_t * ps_codec;
+    ivd_ctl_flush_op_t *ps_ctl_op = (ivd_ctl_flush_op_t*)pv_api_op;
+
     ps_codec = (codec_t *)(ps_codec_obj->pv_codec_handle);
 
     /* Signal flush frame control call */
@@ -3504,11 +3580,10 @@ WORD32 ihevcd_get_status(iv_obj_t *ps_codec_obj,
 {
 
     WORD32 i;
-    codec_t *ps_codec;
+    codec_t * ps_codec;
     WORD32 wd, ht;
-    ivd_ctl_getstatus_op_t *ps_ctl_op = (ivd_ctl_getstatus_op_t *)pv_api_op;
-
-    UNUSED(pv_api_ip);
+    WORD32  i4_pixel_size_y, i4_pixel_size_uv;
+    ivd_ctl_getstatus_op_t *ps_ctl_op = (ivd_ctl_getstatus_op_t*)pv_api_op;
 
     ps_ctl_op->u4_error_code = 0;
 
@@ -3526,12 +3601,17 @@ WORD32 ihevcd_get_status(iv_obj_t *ps_codec_obj,
     else if((ps_codec->e_chroma_fmt == IV_YUV_420SP_UV)
                     || (ps_codec->e_chroma_fmt == IV_YUV_420SP_VU))
         ps_ctl_op->u4_min_num_out_bufs = MIN_OUT_BUFS_420SP;
+    else if(ps_codec->e_chroma_fmt == IV_YUV_422P)
+        ps_ctl_op->u4_min_num_out_bufs = MIN_OUT_BUFS_422;
+    else if((ps_codec->e_chroma_fmt == IV_YUV_422SP_UV)
+                    || (ps_codec->e_chroma_fmt == IV_YUV_422SP_VU))
+        ps_ctl_op->u4_min_num_out_bufs = MIN_OUT_BUFS_422SP;
 
     ps_ctl_op->u4_num_disp_bufs = 1;
 
     for(i = 0; i < (WORD32)ps_ctl_op->u4_min_num_in_bufs; i++)
     {
-        ps_ctl_op->u4_min_in_buf_size[i] = MAX((ps_codec->i4_wd * ps_codec->i4_ht), MIN_BITSBUF_SIZE);
+        ps_ctl_op->u4_min_in_buf_size[i] = MAX((ps_codec->i4_wd* ps_codec->i4_ht), MIN_BITSBUF_SIZE);
     }
 
     wd = ps_codec->i4_wd;
@@ -3539,6 +3619,9 @@ WORD32 ihevcd_get_status(iv_obj_t *ps_codec_obj,
 
     if(ps_codec->i4_sps_done)
     {
+        i4_pixel_size_y  = ps_codec->i4_pixel_size_y;
+        i4_pixel_size_uv = ps_codec->i4_pixel_size_uv;
+
         if(0 == ps_codec->i4_share_disp_buf)
         {
             wd = ps_codec->i4_disp_wd;
@@ -3553,6 +3636,13 @@ WORD32 ihevcd_get_status(iv_obj_t *ps_codec_obj,
     }
     else
     {
+        if ((HEVC_MAIN == ps_codec->i4_profile) || (HEVC_MAIN_422 == ps_codec->i4_profile)) {
+            i4_pixel_size_y = sizeof(UWORD8);
+        } else {
+            i4_pixel_size_y = sizeof(UWORD16);
+        }
+        i4_pixel_size_uv = i4_pixel_size_y;
+
         if(1 == ps_codec->i4_share_disp_buf)
         {
             wd = ALIGN32(wd + PAD_WD);
@@ -3606,13 +3696,13 @@ WORD32 ihevcd_get_status(iv_obj_t *ps_codec_obj,
     /*!*/
     if(ps_codec->e_chroma_fmt == IV_YUV_420P)
     {
-        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht);
-        ps_ctl_op->u4_min_out_buf_size[1] = (wd * ht) >> 2;
-        ps_ctl_op->u4_min_out_buf_size[2] = (wd * ht) >> 2;
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * i4_pixel_size_y;
+        ps_ctl_op->u4_min_out_buf_size[1] = ((wd * ht) >> 2) * i4_pixel_size_uv;
+        ps_ctl_op->u4_min_out_buf_size[2] = ((wd * ht) >> 2) * i4_pixel_size_uv;
     }
     else if(ps_codec->e_chroma_fmt == IV_YUV_422ILE)
     {
-        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * 2;
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * (i4_pixel_size_y + i4_pixel_size_uv);
         ps_ctl_op->u4_min_out_buf_size[1] =
                         ps_ctl_op->u4_min_out_buf_size[2] = 0;
     }
@@ -3631,9 +3721,22 @@ WORD32 ihevcd_get_status(iv_obj_t *ps_codec_obj,
     else if((ps_codec->e_chroma_fmt == IV_YUV_420SP_UV)
                     || (ps_codec->e_chroma_fmt == IV_YUV_420SP_VU))
     {
-        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht);
-        ps_ctl_op->u4_min_out_buf_size[1] = (wd * ht) >> 1;
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * i4_pixel_size_y;
+        ps_ctl_op->u4_min_out_buf_size[1] = ((wd * ht) >> 1) * i4_pixel_size_uv;
         ps_ctl_op->u4_min_out_buf_size[2] = 0;
+    }
+    else if((ps_codec->e_chroma_fmt == IV_YUV_422SP_UV)
+                    || (ps_codec->e_chroma_fmt == IV_YUV_422SP_VU))
+    {
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * i4_pixel_size_y;
+        ps_ctl_op->u4_min_out_buf_size[1] = (wd * ht) * i4_pixel_size_uv;
+        ps_ctl_op->u4_min_out_buf_size[2] = 0;
+    }
+    else if (ps_codec->e_chroma_fmt == IV_YUV_422P)
+    {
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * i4_pixel_size_y;
+        ps_ctl_op->u4_min_out_buf_size[1] = ((wd * ht) >> 1) * i4_pixel_size_uv;
+        ps_ctl_op->u4_min_out_buf_size[2] = ((wd * ht) >> 1) * i4_pixel_size_uv;
     }
     ps_ctl_op->u4_pic_ht = ht;
     ps_ctl_op->u4_pic_wd = wd;
@@ -3676,13 +3779,12 @@ WORD32 ihevcd_get_buf_info(iv_obj_t *ps_codec_obj,
                            void *pv_api_op)
 {
 
-    codec_t *ps_codec;
+    codec_t * ps_codec;
     UWORD32 i = 0;
     WORD32 wd, ht;
+    WORD32  i4_pixel_size_y, i4_pixel_size_uv;
     ivd_ctl_getbufinfo_op_t *ps_ctl_op =
-                    (ivd_ctl_getbufinfo_op_t *)pv_api_op;
-
-    UNUSED(pv_api_ip);
+                    (ivd_ctl_getbufinfo_op_t*)pv_api_op;
     ps_ctl_op->u4_error_code = 0;
 
     ps_codec = (codec_t *)(ps_codec_obj->pv_codec_handle);
@@ -3699,12 +3801,17 @@ WORD32 ihevcd_get_buf_info(iv_obj_t *ps_codec_obj,
     else if((ps_codec->e_chroma_fmt == IV_YUV_420SP_UV)
                     || (ps_codec->e_chroma_fmt == IV_YUV_420SP_VU))
         ps_ctl_op->u4_min_num_out_bufs = MIN_OUT_BUFS_420SP;
+    else if(ps_codec->e_chroma_fmt == IV_YUV_422P)
+        ps_ctl_op->u4_min_num_out_bufs = MIN_OUT_BUFS_422;
+    else if((ps_codec->e_chroma_fmt == IV_YUV_422SP_UV)
+                    || (ps_codec->e_chroma_fmt == IV_YUV_422SP_VU))
+        ps_ctl_op->u4_min_num_out_bufs = MIN_OUT_BUFS_422SP;
 
     ps_ctl_op->u4_num_disp_bufs = 1;
 
-    for(i = 0; i < ps_ctl_op->u4_min_num_in_bufs; i++)
+    for(i = 0; i < (WORD32)ps_ctl_op->u4_min_num_in_bufs; i++)
     {
-        ps_ctl_op->u4_min_in_buf_size[i] = MAX((ps_codec->i4_wd * ps_codec->i4_ht), MIN_BITSBUF_SIZE);
+        ps_ctl_op->u4_min_in_buf_size[i] = MAX((ps_codec->i4_wd* ps_codec->i4_ht), MIN_BITSBUF_SIZE);
     }
 
     wd = ps_codec->i4_max_wd;
@@ -3712,6 +3819,9 @@ WORD32 ihevcd_get_buf_info(iv_obj_t *ps_codec_obj,
 
     if(ps_codec->i4_sps_done)
     {
+        i4_pixel_size_y  = ps_codec->i4_pixel_size_y;
+        i4_pixel_size_uv = ps_codec->i4_pixel_size_uv;
+
         if(0 == ps_codec->i4_share_disp_buf)
         {
             wd = ps_codec->i4_disp_wd;
@@ -3726,6 +3836,13 @@ WORD32 ihevcd_get_buf_info(iv_obj_t *ps_codec_obj,
     }
     else
     {
+        if ((HEVC_MAIN == ps_codec->i4_profile) || (HEVC_MAIN_422 == ps_codec->i4_profile)) {
+            i4_pixel_size_y = sizeof(UWORD8);
+        } else {
+            i4_pixel_size_y = sizeof(UWORD16);
+        }
+        i4_pixel_size_uv = i4_pixel_size_y;
+
         if(1 == ps_codec->i4_share_disp_buf)
         {
             wd = ALIGN32(wd + PAD_WD);
@@ -3780,13 +3897,13 @@ WORD32 ihevcd_get_buf_info(iv_obj_t *ps_codec_obj,
     /*!*/
     if(ps_codec->e_chroma_fmt == IV_YUV_420P)
     {
-        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht);
-        ps_ctl_op->u4_min_out_buf_size[1] = (wd * ht) >> 2;
-        ps_ctl_op->u4_min_out_buf_size[2] = (wd * ht) >> 2;
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * i4_pixel_size_y;
+        ps_ctl_op->u4_min_out_buf_size[1] = ((wd * ht) >> 2) * i4_pixel_size_uv;
+        ps_ctl_op->u4_min_out_buf_size[2] = ((wd * ht) >> 2) * i4_pixel_size_uv;
     }
     else if(ps_codec->e_chroma_fmt == IV_YUV_422ILE)
     {
-        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * 2;
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * (i4_pixel_size_y + i4_pixel_size_uv);
         ps_ctl_op->u4_min_out_buf_size[1] =
                         ps_ctl_op->u4_min_out_buf_size[2] = 0;
     }
@@ -3805,9 +3922,22 @@ WORD32 ihevcd_get_buf_info(iv_obj_t *ps_codec_obj,
     else if((ps_codec->e_chroma_fmt == IV_YUV_420SP_UV)
                     || (ps_codec->e_chroma_fmt == IV_YUV_420SP_VU))
     {
-        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht);
-        ps_ctl_op->u4_min_out_buf_size[1] = (wd * ht) >> 1;
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * i4_pixel_size_y;
+        ps_ctl_op->u4_min_out_buf_size[1] = ((wd * ht) >> 1) * i4_pixel_size_uv;
         ps_ctl_op->u4_min_out_buf_size[2] = 0;
+    }
+    else if((ps_codec->e_chroma_fmt == IV_YUV_422SP_UV)
+                    || (ps_codec->e_chroma_fmt == IV_YUV_422SP_VU))
+    {
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * i4_pixel_size_y;
+        ps_ctl_op->u4_min_out_buf_size[1] = (wd * ht) * i4_pixel_size_uv;
+        ps_ctl_op->u4_min_out_buf_size[2] = 0;
+    }
+    else if (ps_codec->e_chroma_fmt == IV_YUV_422P)
+    {
+        ps_ctl_op->u4_min_out_buf_size[0] = (wd * ht) * i4_pixel_size_y;
+        ps_ctl_op->u4_min_out_buf_size[1] = ((wd * ht) >> 1) * i4_pixel_size_uv;
+        ps_ctl_op->u4_min_out_buf_size[2] = ((wd * ht) >> 1) * i4_pixel_size_uv;
     }
     ps_codec->i4_num_disp_bufs = ps_ctl_op->u4_num_disp_bufs;
 
@@ -3846,7 +3976,7 @@ WORD32 ihevcd_set_params(iv_obj_t *ps_codec_obj,
                          void *pv_api_op)
 {
 
-    codec_t *ps_codec;
+    codec_t * ps_codec;
     WORD32 ret = IV_SUCCESS;
     WORD32 strd;
     ivd_ctl_set_config_ip_t *s_ctl_dynparams_ip =
@@ -3879,10 +4009,10 @@ WORD32 ihevcd_set_params(iv_obj_t *ps_codec_obj,
     }
 
 
-    if((-1 != (WORD32)s_ctl_dynparams_ip->u4_disp_wd) &&
-                    (0  != s_ctl_dynparams_ip->u4_disp_wd) &&
-                    (0  != strd) &&
-                    ((WORD32)s_ctl_dynparams_ip->u4_disp_wd < strd))
+    if( (-1 != (WORD32)s_ctl_dynparams_ip->u4_disp_wd) &&
+        (0  != s_ctl_dynparams_ip->u4_disp_wd) &&
+        (0  != strd) &&
+        ((WORD32)s_ctl_dynparams_ip->u4_disp_wd < strd))
     {
         s_ctl_dynparams_op->u4_error_code |= (1 << IVD_UNSUPPORTEDPARAM);
         s_ctl_dynparams_op->u4_error_code |= IHEVCD_INVALID_DISP_STRD;
@@ -3894,8 +4024,8 @@ WORD32 ihevcd_set_params(iv_obj_t *ps_codec_obj,
         {
             strd = s_ctl_dynparams_ip->u4_disp_wd;
         }
-        else if(0 == ps_codec->i4_sps_done ||
-                        0 == ps_codec->i4_pps_done)
+        else if(0 == ps_codec->i4_sps_done/* ||
+                        0 == ps_codec->i4_pps_done*/)
         {
             strd = s_ctl_dynparams_ip->u4_disp_wd;
         }
@@ -3961,9 +4091,9 @@ WORD32 ihevcd_set_params(iv_obj_t *ps_codec_obj,
 */
 WORD32 ihevcd_reset(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
 {
-    codec_t *ps_codec;
+    codec_t * ps_codec;
     ivd_ctl_reset_op_t *s_ctl_reset_op = (ivd_ctl_reset_op_t *)pv_api_op;
-    UNUSED(pv_api_ip);
+
     ps_codec = (codec_t *)(ps_codec_obj->pv_codec_handle);
 
     if(ps_codec != NULL)
@@ -4060,8 +4190,8 @@ WORD32 ihevcd_rel_display_frame(iv_obj_t *ps_codec_obj,
 */
 
 WORD32 ihevcd_set_degrade(iv_obj_t *ps_codec_obj,
-                          void *pv_api_ip,
-                          void *pv_api_op)
+                            void *pv_api_ip,
+                            void *pv_api_op)
 {
     ihevcd_cxa_ctl_degrade_ip_t *ps_ip;
     ihevcd_cxa_ctl_degrade_op_t *ps_op;
@@ -4134,6 +4264,7 @@ WORD32 ihevcd_get_frame_dimensions(iv_obj_t *ps_codec_obj,
             buffer_wd = ps_codec->i4_strd;
             buffer_ht = ps_codec->i4_ht + PAD_HT;
         }
+
     }
     else
     {
@@ -4165,13 +4296,6 @@ WORD32 ihevcd_get_frame_dimensions(iv_obj_t *ps_codec_obj,
     {
         y_offset = PAD_TOP;
         x_offset = PAD_LEFT;
-#if 0
-        if((NULL != ps_codec->ps_seqParams) && (1 == (ps_codec->ps_seqParams->u1_is_valid)) && (0 != ps_codec->u2_crop_offset_y))
-        {
-            y_offset += ps_codec->u2_crop_offset_y / ps_codec->i4_strd;
-            x_offset += ps_codec->u2_crop_offset_y % ps_codec->i4_strd;
-        }
-#endif
     }
 
     ps_op->u4_disp_wd[0] = disp_wd;
@@ -4209,6 +4333,7 @@ WORD32 ihevcd_get_frame_dimensions(iv_obj_t *ps_codec_obj,
         ps_op->u4_x_offset[1] <<= 1;
     }
 
+
     return IV_SUCCESS;
 
 }
@@ -4240,8 +4365,8 @@ WORD32 ihevcd_get_frame_dimensions(iv_obj_t *ps_codec_obj,
 *******************************************************************************
 */
 WORD32 ihevcd_get_vui_params(iv_obj_t *ps_codec_obj,
-                             void *pv_api_ip,
-                             void *pv_api_op)
+                                   void *pv_api_ip,
+                                   void *pv_api_op)
 {
     ihevcd_cxa_ctl_get_vui_params_ip_t *ps_ip;
     ihevcd_cxa_ctl_get_vui_params_op_t *ps_op;
@@ -4313,7 +4438,7 @@ WORD32 ihevcd_get_vui_params(iv_obj_t *ps_codec_obj,
     ps_op->u1_num_ticks_poc_diff_one_minus1          =  ps_vui->u1_num_ticks_poc_diff_one_minus1;
     ps_op->u1_bitstream_restriction_flag             =  ps_vui->u1_bitstream_restriction_flag;
     ps_op->u1_tiles_fixed_structure_flag             =  ps_vui->u1_tiles_fixed_structure_flag;
-    ps_op->u1_motion_vectors_over_pic_boundaries_flag =  ps_vui->u1_motion_vectors_over_pic_boundaries_flag;
+    ps_op->u1_motion_vectors_over_pic_boundaries_flag=  ps_vui->u1_motion_vectors_over_pic_boundaries_flag;
     ps_op->u1_restricted_ref_pic_lists_flag          =  ps_vui->u1_restricted_ref_pic_lists_flag;
     ps_op->u4_min_spatial_segmentation_idc           =  ps_vui->u4_min_spatial_segmentation_idc;
     ps_op->u1_max_bytes_per_pic_denom                =  ps_vui->u1_max_bytes_per_pic_denom;
@@ -4391,27 +4516,17 @@ WORD32 ihevcd_set_processor(iv_obj_t *ps_codec_obj,
     ps_ip = (ihevcd_cxa_ctl_set_processor_ip_t *)pv_api_ip;
     ps_op = (ihevcd_cxa_ctl_set_processor_op_t *)pv_api_op;
 
-    ps_codec->e_processor_arch = (IVD_ARCH_T)ps_ip->u4_arch;
-    ps_codec->e_processor_soc = (IVD_SOC_T)ps_ip->u4_soc;
+    ps_codec->e_processor_arch = (IVD_ARCH_T) ps_ip->u4_arch;
+    ps_codec->e_processor_soc = (IVD_SOC_T) ps_ip->u4_soc;
 
     ihevcd_init_function_ptr(ps_codec);
 
     ihevcd_update_function_ptr(ps_codec);
 
-    if(ps_codec->e_processor_soc && (ps_codec->e_processor_soc <= SOC_HISI_37X))
-    {
-        /* 8th bit indicates if format conversion is to be done ahead */
-        if(ps_codec->e_processor_soc & 0x80)
-            ps_codec->u4_enable_fmt_conv_ahead = 1;
-
-        /* Lower 7 bit indicate NCTB - if non-zero */
-        ps_codec->e_processor_soc &= 0x7F;
-
-        if(ps_codec->e_processor_soc)
-            ps_codec->u4_nctb = ps_codec->e_processor_soc;
-
-
-    }
+    if(ps_codec->e_processor_soc >= 10)
+        ps_codec->u4_nctb = ps_codec->e_processor_soc/10;
+    //else
+       // ps_codec->u4_nctb = MAX_NCTB;
 
     if((ps_codec->e_processor_soc == SOC_HISI_37X) && (ps_codec->i4_num_cores == 2))
     {
@@ -4497,8 +4612,8 @@ WORD32 ihevcd_set_num_cores(iv_obj_t *ps_codec_obj,
 */
 
 WORD32 ihevcd_gpu_enable_disable(iv_obj_t *ps_codec_obj,
-                                 void *pv_api_ip,
-                                 void *pv_api_op)
+                            void *pv_api_ip,
+                            void *pv_api_op)
 {
     ihevcd_cxa_ctl_gpu_enable_diable_ip_t *ps_ip;
     ihevcd_cxa_ctl_gpu_enable_diable_op_t *ps_op;
@@ -4549,8 +4664,8 @@ WORD32 ihevcd_ctl(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
     WORD32 subcommand;
     codec_t *ps_codec = (codec_t *)ps_codec_obj->pv_codec_handle;
 
-    ps_ctl_ip = (ivd_ctl_set_config_ip_t *)pv_api_ip;
-    ps_ctl_op = (ivd_ctl_set_config_op_t *)pv_api_op;
+    ps_ctl_ip = (ivd_ctl_set_config_ip_t*)pv_api_ip;
+    ps_ctl_op = (ivd_ctl_set_config_op_t*)pv_api_op;
 
     if(ps_codec->i4_init_done != 1)
     {
@@ -4577,7 +4692,7 @@ WORD32 ihevcd_ctl(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
         case IVD_CMD_CTL_SETDEFAULT:
         {
             ivd_ctl_set_config_op_t *s_ctl_dynparams_op =
-                            (ivd_ctl_set_config_op_t *)pv_api_op;
+                (ivd_ctl_set_config_op_t *)pv_api_op;
 
             ret = ihevcd_set_default_params(ps_codec);
             if(IV_SUCCESS == ret)
@@ -4621,7 +4736,7 @@ WORD32 ihevcd_ctl(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
             break;
         case IHEVCD_CXA_CMD_CTL_DEGRADE:
             ret = ihevcd_set_degrade(ps_codec_obj, (void *)pv_api_ip,
-                            (void *)pv_api_op);
+                                       (void *)pv_api_op);
             break;
         case IHEVCD_CXA_CMD_CTL_SET_NUM_CORES:
             ret = ihevcd_set_num_cores(ps_codec_obj, (void *)pv_api_ip,
@@ -4637,12 +4752,12 @@ WORD32 ihevcd_ctl(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
             break;
         case IHEVCD_CXA_CMD_CTL_SET_PROCESSOR:
             ret = ihevcd_set_processor(ps_codec_obj, (void *)pv_api_ip,
-                            (void *)pv_api_op);
+                                        (void *)pv_api_op);
             break;
 #ifdef GPU_BUILD
         case IHEVCD_CXA_CMD_CTL_GPU_ENABLE_DISABLE:
             ret = ihevcd_gpu_enable_disable(ps_codec_obj, (void *)pv_api_ip,
-                            (void *)pv_api_op);
+                                              (void *)pv_api_op);
             break;
 #endif
         default:
@@ -4717,7 +4832,7 @@ IV_API_CALL_STATUS_T ihevcd_cxa_api_function(iv_obj_t *ps_handle,
             break;
 
         case IVD_CMD_VIDEO_DECODE:
-            ret = ihevcd_decode(ps_handle, (void *)pv_api_ip, (void *)pv_api_op);
+            ret = ihevcd_decode(ps_handle,(void *)pv_api_ip,(void *)pv_api_op);
             break;
 
         case IVD_CMD_GET_DISPLAY_FRAME:

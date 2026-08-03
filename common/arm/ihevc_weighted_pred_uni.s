@@ -125,16 +125,17 @@
 ihevc_weighted_pred_uni_a9q:
 
     stmfd       sp!, {r4-r12, r14}          @stack stores the values of the arguments
+    vpush       {d8  -  d15}
 
-    ldr         r4,[sp,#40]                 @load wgt0
-    ldr         r7,[sp,#52]                 @load lvl_shift
+    ldr         r4,[sp,#104]                 @load wgt0
+    ldr         r7,[sp,#116]                 @load lvl_shift
     mov         r11,#1
-    ldr         r5,[sp,#44]                 @load off0
+    ldr         r5,[sp,#108]                 @load off0
     mul         r10,r7,r4                   @lvl_shift * wgt0
-    ldr         r6,[sp,#48]                 @load shift
-    ldr         r8,[sp,#56]                 @load ht
+    ldr         r6,[sp,#112]                 @load shift
+    ldr         r8,[sp,#120]                 @load ht
     add         r10,r10,r5,lsl r6           @lvl_shift * wgt0 + (off0 << shift)
-    ldr         r9,[sp,#60]                 @load wt
+    ldr         r9,[sp,#124]                 @load wt
     sub         r12,r6,#1
     vmov.s16    d0[0],r4                    @moved for scalar multiplication
     lsl         r2,r2,#1
@@ -214,6 +215,7 @@ end_core_loop:
     bgt         core_loop                   @if ht is greater than 0 goto outer_loop
 
 end_loops:
+    vpop        {d8  -  d15}
     ldmfd       sp!,{r4-r12,r15}            @reload the registers from sp
 
 

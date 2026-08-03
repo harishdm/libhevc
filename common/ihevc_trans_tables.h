@@ -41,6 +41,8 @@ extern const WORD32 g_ihevc_iquant_scales[6];
 
 extern const WORD16 g_ihevc_iquant_intr_scales[6][8];
 
+extern const WORD32 g_ihevc_iquant_scales_flat_scale[6];
+
 extern const WORD32 g_ihevc_quant_scales[6];
 
 extern const WORD16 g_ai2_ihevc_trans_dst_4[4][4];
@@ -52,10 +54,11 @@ extern const WORD16 g_ai2_ihevc_trans_4_transpose[4][4];
 extern const WORD16 g_ai2_ihevc_trans_8[8][8];
 
 extern const WORD16 g_ai2_ihevc_trans_16[16][16];
+extern const WORD32 g_ai4_ihevc_trans_16[16][8];
 extern const WORD16 g_ai2_ihevc_trans_16_transpose[1][16];
 extern const WORD16 g_ai2_ihevc_trans_32_transpose[1][32];
 extern const WORD16 g_ai2_ihevc_trans_32[32][32];
-
+extern const WORD32 g_ai4_ihevc_trans_32[32][16];
 
 extern const WORD32 g_ai4_ihevc_trans_dst_intr_4[3][4];
 
@@ -112,5 +115,17 @@ extern MEM_ALIGN16 const WORD16 g_ai2_ihevc_trans_intr_odd_8[8][8];
 extern const WORD16 g_ai2_ihevc_trans_intr_4[4][8];
 
 extern const UWORD8 IHEVCE_CHROMA_SHUFFLEMASK_HBD[8];
+
+
+/*inverse tx 32x32 related tables*/
+
+extern const WORD16 g_ai2_ihevc_trans_32_intr_packed_avx2[32][16];
+extern const WORD16 g_ai2_ihevc_trans_32_intr_packed_alt_rows_avx2[16][16] ;
+extern const WORD16 g_ai2_ihevc_trans_16_even_packed_avx2[12][16];
+extern const WORD16 g_ai2_ihevc_trans_16_intr_even_avx2[12][16];
+extern const WORD16 g_ai2_ihevc_trans_32_intr_odd_packed_avx2[128][16];
+extern const WORD16 g_ai2_ihevc_trans_32_intr_odd_packed_alt_rows_avx2[64][16] ;
+extern const WORD16 g_ai2_ihevc_trans_32_intr_packed_shuffle1[4][16];
+extern const WORD16 g_ai2_ihevc_trans_32_intr_packed_shuffle2[4][16];
 
 #endif /*_IHEVC_TRANS_TABLES_H_*/

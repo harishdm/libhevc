@@ -24,7 +24,7 @@
 *  Type definitions used in the code
 *
 * @author
-*  Srinivas T
+*  Ittiam
 *
 * @remarks
 *  None
@@ -48,6 +48,7 @@ typedef char            CHAR;
 
 typedef double          DOUBLE;
 
+typedef char           STRWORD8;
 
 
 

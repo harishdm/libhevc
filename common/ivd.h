@@ -75,7 +75,7 @@ typedef enum
 {
     SOC_NA                  = 0x7FFFFFFF,
     SOC_GENERIC             = 0x0,
-    SOC_HISI_37X            = 0x100,
+    SOC_HISI_37X
 }IVD_SOC_T;
 
 /* IVD_FRAME_SKIP_MODE_T:Skip mode Enumeration                               */
@@ -226,7 +226,7 @@ typedef enum {
     IVD_DEC_REF_BUF_NULL                        = 0x28,
     IVD_DEC_FRM_SKIPPED                         = 0x29,
     IVD_RES_CHANGED                             = 0x2a,
-    IVD_DUMMY_ELEMENT_FOR_CODEC_EXTENSIONS      = 0x300,
+    IVD_DUMMY_ELEMENT_FOR_CODEC_EXTENSIONS      = 0x30,
 }IVD_ERROR_CODES_T;
 
 
@@ -295,7 +295,7 @@ typedef struct {
 }ivd_init_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -350,7 +350,7 @@ typedef struct {
 }ivd_video_decode_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -606,7 +606,7 @@ typedef struct
 
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -624,7 +624,7 @@ typedef struct {
 }ivd_ctl_flush_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -643,7 +643,7 @@ typedef struct {
 /* IVD_CONTROL_API_COMMAND_TYPE_T::e_sub_cmd    = IVD_CMD_ctl_RESET          */
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -662,7 +662,7 @@ typedef struct {
 }ivd_ctl_reset_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -722,7 +722,7 @@ typedef struct {
 }ivd_ctl_set_config_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -742,7 +742,7 @@ typedef struct {
 /* IVD_CONTROL_API_COMMAND_TYPE_T::e_sub_cmd=IVD_CMD_ctl_GETBUFINFO          */
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -760,7 +760,7 @@ typedef struct {
 }ivd_ctl_getbufinfo_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -807,7 +807,7 @@ typedef struct {
 /* IVD_CONTROL_API_COMMAND_TYPE_T::e_sub_cmd=IVD_CMD_ctl_GETPARAMS           */
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -825,11 +825,11 @@ typedef struct {
 }ivd_ctl_getstatus_ip_t;
 
 
-typedef struct {
+typedef struct{
 
-    /**
-     * u4_size of the structure
-     */
+     /**
+      * u4_size of the structure
+      */
     UWORD32                  u4_size;
 
     /**
@@ -902,7 +902,7 @@ typedef struct {
 /* IVD_CONTROL_API_COMMAND_TYPE_T::e_sub_cmd=IVD_CMD_ctl_GETVERSION          */
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -930,7 +930,7 @@ typedef struct {
 }ivd_ctl_getversioninfo_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */

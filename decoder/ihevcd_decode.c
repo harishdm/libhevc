@@ -83,11 +83,11 @@
 
 IHEVCD_ERROR_T ihevcd_fmt_conv(codec_t *ps_codec,
                                process_ctxt_t *ps_proc,
-                               UWORD8 *pu1_y_dst,
-                               UWORD8 *pu1_u_dst,
-                               UWORD8 *pu1_v_dst,
-                               WORD32 cur_row,
-                               WORD32 num_rows);
+                             UWORD8 *pu1_y_dst,
+                             UWORD8 *pu1_u_dst,
+                             UWORD8 *pu1_v_dst,
+                             WORD32 cur_row,
+                             WORD32 num_rows);
 WORD32 ihevcd_init(codec_t *ps_codec);
 /*****************************************************************************/
 /* Function Prototypes                                                       */
@@ -121,7 +121,7 @@ static UWORD32 ihevcd_map_error(IHEVCD_ERROR_T e_error)
 {
     UWORD32 error_code = 0;
     error_code = e_error;
-    switch(error_code)
+    switch(e_error)
     {
         case IHEVCD_SUCCESS :
             break;
@@ -179,19 +179,24 @@ static void ihevcd_fill_outargs(codec_t *ps_codec,
                                 ivd_video_decode_ip_t *ps_dec_ip,
                                 ivd_video_decode_op_t *ps_dec_op)
 {
+    WORD32  i4_bit_depth_luma, i4_bit_depth_chroma;
 
-    ps_dec_op->u4_error_code = ihevcd_map_error((IHEVCD_ERROR_T)ps_codec->i4_error_code);
+    ps_dec_op->u4_error_code = ihevcd_map_error((IHEVCD_ERROR_T )ps_codec->i4_error_code);
     ps_dec_op->u4_num_bytes_consumed = ps_dec_ip->u4_num_Bytes
                     - ps_codec->i4_bytes_remaining;
     if(ps_codec->i4_sps_done)
     {
         ps_dec_op->u4_pic_wd = ps_codec->i4_disp_wd;
         ps_dec_op->u4_pic_ht = ps_codec->i4_disp_ht;
+        i4_bit_depth_luma    = ps_codec->i4_bit_depth_luma;
+        i4_bit_depth_chroma  = ps_codec->i4_bit_depth_chroma;
     }
     else
     {
         ps_dec_op->u4_pic_wd = 0;
         ps_dec_op->u4_pic_ht = 0;
+        i4_bit_depth_luma    = 0;
+        i4_bit_depth_chroma  = 0;
     }
 
     ps_dec_op->e_pic_type = ps_codec->e_dec_pic_type;
@@ -217,18 +222,22 @@ static void ihevcd_fill_outargs(codec_t *ps_codec,
         ps_dec_op->u4_frame_decoded_flag = 0;
 
     }
+    ps_dec_op->s_disp_frm_buf.u4_y_bit_depth    = i4_bit_depth_luma;
+    ps_dec_op->s_disp_frm_buf.u4_uv_bit_depth   = i4_bit_depth_chroma;
+
     /* If there is a display buffer */
     if(ps_codec->ps_disp_buf)
     {
         pic_buf_t *ps_disp_buf = ps_codec->ps_disp_buf;
 
         ps_dec_op->u4_output_present = 1;
-        PROFILE_DIS_PROCESS_CTB_SET_NOOUTPUT();
         ps_dec_op->u4_ts = ps_disp_buf->u4_ts;
         if((ps_codec->i4_flush_mode == 0) && (ps_codec->s_parse.i4_end_of_frame == 0))
             ps_dec_op->u4_output_present = 0;
         ps_dec_op->s_disp_frm_buf.u4_y_wd = ps_codec->i4_disp_wd;
         ps_dec_op->s_disp_frm_buf.u4_y_ht = ps_codec->i4_disp_ht;
+    //  ps_dec_op->s_disp_frm_buf.u4_y_bit_depth    = i4_bit_depth_luma;
+    //  ps_dec_op->s_disp_frm_buf.u4_uv_bit_depth   = i4_bit_depth_chroma;
 
         if(ps_codec->i4_share_disp_buf)
         {
@@ -469,23 +478,20 @@ WORD32 ihevcd_decode(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
 
         if(1 == ps_dec_op->u4_output_present)
         {
-            WORD32 xpos = ps_codec->i4_disp_wd - 32 - LOGO_WD;
-            WORD32 ypos = ps_codec->i4_disp_ht - 32 - LOGO_HT;
+            WORD32 ypos = ps_codec->i4_disp_ht - 64 - LOGO_HT;
 
             if(ypos < 0)
                 ypos = 0;
 
-            if(xpos < 0)
-                xpos = 0;
-
             INSERT_LOGO(ps_dec_ip->s_out_buffer.pu1_bufs[0],
-                        ps_dec_ip->s_out_buffer.pu1_bufs[1],
-                        ps_dec_ip->s_out_buffer.pu1_bufs[2], ps_codec->i4_disp_strd,
-                        xpos,
-                        ypos,
-                        ps_codec->e_chroma_fmt,
-                        ps_codec->i4_disp_wd,
-                        ps_codec->i4_disp_ht);
+                            ps_dec_ip->s_out_buffer.pu1_bufs[1],
+                            ps_dec_ip->s_out_buffer.pu1_bufs[2], ps_codec->i4_disp_strd,
+                            32 ,
+                            ps_codec->i4_disp_ht - 32 - LOGO_HT,
+                            ps_codec->e_chroma_fmt,
+                            ps_codec->i4_bit_depth_luma,
+                            ps_codec->i4_disp_wd,
+                            ps_codec->i4_disp_ht);
         }
 
 
@@ -611,8 +617,8 @@ WORD32 ihevcd_decode(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
         /* TODO: Next picture's slice reached */
         if(ret != IHEVCD_SLICE_IN_HEADER_MODE)
         {
-            if((0 == ps_codec->i4_slice_error) ||
-                            (ps_codec->i4_bytes_remaining - (nal_len + nal_ofst) <= MIN_START_CODE_LEN))
+            if( (0 == ps_codec->i4_slice_error) ||
+                            (ps_codec->i4_bytes_remaining - (nal_len + nal_ofst) <= MIN_START_CODE_LEN) )
             {
                 ps_codec->pu1_inp_bitsbuf += (nal_ofst + nal_len);
                 ps_codec->i4_bytes_remaining -= (nal_ofst + nal_len);
@@ -650,35 +656,39 @@ WORD32 ihevcd_decode(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
         if(ps_codec->i4_num_cores > 1 && ps_codec->s_parse.i4_end_of_frame)
         {
 
+            /* If format conversion jobs were not issued in pic_init() add them here */
             /* Add job queue for format conversion / frame copy for each ctb row */
             /* Only if the codec is in non-shared mode or in shared mode but needs 420P output */
+#if ENABLE_FMT_CONV_AHEAD
             process_ctxt_t *ps_proc;
 
             /* i4_num_cores - 1 contexts are currently being used by other threads */
             ps_proc = &ps_codec->as_process[ps_codec->i4_num_cores - 1];
 
+            if((ps_codec->ps_disp_buf) && (ps_codec->i4_disp_buf_id == ps_proc->i4_cur_pic_buf_id) &&
+               ((0 == ps_codec->i4_share_disp_buf) || (IV_YUV_420P == ps_codec->e_chroma_fmt)))
+#else
             if((ps_codec->ps_disp_buf) &&
                ((0 == ps_codec->i4_share_disp_buf) || (IV_YUV_420P == ps_codec->e_chroma_fmt)))
+#endif
             {
-                /* If format conversion jobs were not issued in pic_init() add them here */
-                if((0 == ps_codec->u4_enable_fmt_conv_ahead) ||
-                                (ps_codec->i4_disp_buf_id == ps_proc->i4_cur_pic_buf_id))
-                    for(i = 0; i < ps_sps->i2_pic_ht_in_ctb; i++)
-                    {
-                        proc_job_t s_job;
-                        IHEVCD_ERROR_T ret;
-                        s_job.i4_cmd = CMD_FMTCONV;
-                        s_job.i2_ctb_cnt = 0;
-                        s_job.i2_ctb_x = 0;
-                        s_job.i2_ctb_y = i;
-                        s_job.i2_slice_idx = 0;
-                        s_job.i4_tu_coeff_data_ofst = 0;
-                        ret = ihevcd_jobq_queue((jobq_t *)ps_codec->s_parse.pv_proc_jobq,
-                                                &s_job, sizeof(proc_job_t), 1);
-                        if(ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS)
-                            return (WORD32)ret;
-                    }
+
+                for(i = 0; i < ps_sps->i2_pic_ht_in_ctb; i++)
+                {
+                    proc_job_t s_job;
+                    IHEVCD_ERROR_T ret;
+                    s_job.i4_cmd = CMD_FMTCONV;
+                    s_job.i2_ctb_cnt = 0;
+                    s_job.i2_ctb_x = 0;
+                    s_job.i2_ctb_y = i;
+                    s_job.i2_slice_idx = 0;
+                    s_job.i4_tu_coeff_data_ofst = 0;
+                    ret = ihevcd_jobq_queue((jobq_t *)ps_codec->s_parse.pv_proc_jobq,
+                                            &s_job, sizeof(proc_job_t), 1);
+                    if(ret != IHEVCD_SUCCESS)
+                          return (WORD32)ret;
             }
+}
             /* Reached end of frame : Signal terminate */
             /* The terminate flag is checked only after all the jobs are dequeued */
             ret = ihevcd_jobq_terminate((jobq_t *)ps_codec->s_parse.pv_proc_jobq);
@@ -694,7 +704,7 @@ WORD32 ihevcd_decode(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
 
                 ret = ihevcd_jobq_dequeue((jobq_t *)ps_proc->pv_proc_jobq, &s_job,
                                           sizeof(proc_job_t), 1);
-                if((IHEVCD_ERROR_T)IHEVCD_SUCCESS != ret)
+                if(IHEVCD_SUCCESS != ret)
                     break;
 
                 ps_proc->i4_ctb_cnt = s_job.i2_ctb_cnt;
@@ -741,7 +751,7 @@ WORD32 ihevcd_decode(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
         /* Only if the codec is in non-shared mode or in shared mode but needs 420P output */
         else if((ps_codec->ps_disp_buf) && ((0 == ps_codec->i4_share_disp_buf) ||
                                             (IV_YUV_420P == ps_codec->e_chroma_fmt)) &&
-                        (ps_codec->s_parse.i4_end_of_frame))
+                                            (ps_codec->s_parse.i4_end_of_frame))
         {
             process_ctxt_t *ps_proc = &ps_codec->as_process[proc_idx];
             /* Set remaining number of rows to be processed */
@@ -765,21 +775,21 @@ WORD32 ihevcd_decode(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
 
         }
 #ifdef GPU_BUILD
-        {
-            /*
-             * Add the buffer to the display buffer. Free mv buffer.
-             */
             {
+                /*
+                 * Add the buffer to the display buffer. Free mv buffer.
+                 */
+                {
 
-                ihevc_disp_mgr_add(ps_codec->pv_disp_buf_mgr,
+                    ihevc_disp_mgr_add(ps_codec->pv_disp_buf_mgr,
                                    ps_codec->as_process[proc_idx].i4_cur_pic_buf_id,
                                    ps_codec->as_process[proc_idx].ps_slice_hdr->i4_abs_pic_order_cnt,
                                    ps_codec->as_process[proc_idx].ps_cur_pic);
-            }
-            ihevcd_free_ref_mv_buffers(ps_codec);
-            ihevcd_gpu_mc_pic_deinit(ps_codec);
+                }
+                ihevcd_free_ref_mv_buffers(ps_codec);
+                ihevcd_gpu_mc_pic_deinit(ps_codec);
 
-        }
+            }
 #endif
 
 
@@ -802,8 +812,8 @@ WORD32 ihevcd_decode(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
 
         /* Insert the current picture as short term reference */
         ihevc_dpb_mgr_insert_ref((dpb_mgr_t *)ps_codec->pv_dpb_mgr,
-                                 ps_codec->as_process[proc_idx].ps_cur_pic,
-                                 ps_codec->as_process[proc_idx].i4_cur_pic_buf_id);
+                                ps_codec->as_process[proc_idx].ps_cur_pic,
+                                ps_codec->as_process[proc_idx].i4_cur_pic_buf_id);
 
         /* If a frame was displayed (in non-shared mode), then release it from display manager */
         if((0 == ps_codec->i4_share_disp_buf) && (ps_codec->ps_disp_buf))
@@ -822,9 +832,7 @@ WORD32 ihevcd_decode(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
 
         DEBUG_VALIDATE_PADDED_REGION(&ps_codec->as_process[proc_idx]);
         if(ps_codec->u4_pic_cnt > 0)
-        {
-            DEBUG_DUMP_PIC_PU(ps_codec);
-        }
+        DEBUG_DUMP_PIC_PU(ps_codec);
         DEBUG_DUMP_PIC_BUFFERS(ps_codec);
 
         /* Increment the number of pictures decoded */
@@ -834,23 +842,20 @@ WORD32 ihevcd_decode(iv_obj_t *ps_codec_obj, void *pv_api_ip, void *pv_api_op)
 
     if(1 == ps_dec_op->u4_output_present)
     {
-        WORD32 xpos = ps_codec->i4_disp_wd - 32 - LOGO_WD;
-        WORD32 ypos = ps_codec->i4_disp_ht - 32 - LOGO_HT;
+        WORD32 ypos = ps_codec->i4_disp_ht - 64 - LOGO_HT;
 
         if(ypos < 0)
             ypos = 0;
 
-        if(xpos < 0)
-            xpos = 0;
-
         INSERT_LOGO(ps_dec_ip->s_out_buffer.pu1_bufs[0],
-                    ps_dec_ip->s_out_buffer.pu1_bufs[1],
-                    ps_dec_ip->s_out_buffer.pu1_bufs[2], ps_codec->i4_disp_strd,
-                    xpos,
-                    ypos,
-                    ps_codec->e_chroma_fmt,
-                    ps_codec->i4_disp_wd,
-                    ps_codec->i4_disp_ht);
+                        ps_dec_ip->s_out_buffer.pu1_bufs[1],
+                        ps_dec_ip->s_out_buffer.pu1_bufs[2], ps_codec->i4_disp_strd,
+                        32 ,
+                        ypos,
+                        ps_codec->e_chroma_fmt,
+                        ps_codec->i4_bit_depth_luma,
+                        ps_codec->i4_disp_wd,
+                        ps_codec->i4_disp_ht);
     }
 
 

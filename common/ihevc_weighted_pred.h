@@ -24,7 +24,7 @@
 *  Function declarations used for buffer management
 *
 * @author
-*  Srinivas T
+*  Ittiam
 *
 * @remarks
 *  None
@@ -162,6 +162,13 @@ ihevc_weighted_pred_bi_ft ihevc_weighted_pred_bi_sse42;
 ihevc_weighted_pred_chroma_bi_ft ihevc_weighted_pred_chroma_bi_sse42;
 ihevc_weighted_pred_bi_default_ft ihevc_weighted_pred_bi_default_sse42;
 ihevc_weighted_pred_chroma_bi_default_ft ihevc_weighted_pred_chroma_bi_default_sse42;
+
+ihevc_weighted_pred_uni_ft ihevc_weighted_pred_uni_avx;
+ihevc_weighted_pred_chroma_uni_ft ihevc_weighted_pred_chroma_uni_avx;
+ihevc_weighted_pred_bi_ft ihevc_weighted_pred_bi_avx;
+ihevc_weighted_pred_chroma_bi_ft ihevc_weighted_pred_chroma_bi_avx;
+ihevc_weighted_pred_bi_default_ft ihevc_weighted_pred_bi_default_avx;
+ihevc_weighted_pred_chroma_bi_default_ft ihevc_weighted_pred_chroma_bi_default_avx;
 
 /* AVX2 function declarations */
 ihevc_weighted_pred_bi_default_ft ihevc_weighted_pred_bi_default_avx2;

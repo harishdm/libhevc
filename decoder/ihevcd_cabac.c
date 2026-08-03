@@ -54,7 +54,6 @@
 #include "ihevc_typedefs.h"
 #include "iv.h"
 #include "ivd.h"
-#include "ihevcd_cxa.h"
 
 
 #include "ihevc_debug.h"
@@ -140,8 +139,7 @@ IHEVCD_ERROR_T ihevcd_cabac_init(cab_ctxt_t *ps_cabac,
     ASSERT(ps_bitstrm != NULL);
     ASSERT((qp >= 0) && (qp < 52));
     ASSERT((cabac_init_idc >= 0) && (cabac_init_idc < 3));
-    UNUSED(qp);
-    UNUSED(cabac_init_idc);
+
     /* CABAC engine uses 32 bit range instead of 9 bits as specified by
      * the spec. This is done to reduce number of renormalizations
      */
@@ -149,12 +147,12 @@ IHEVCD_ERROR_T ihevcd_cabac_init(cab_ctxt_t *ps_cabac,
 #if FULLRANGE
     ps_cabac->u4_range = (UWORD32)510 << RANGE_SHIFT;
     BITS_GET(ps_cabac->u4_ofst, ps_bitstrm->pu4_buf, ps_bitstrm->u4_bit_ofst,
-                    ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, (9 + RANGE_SHIFT));
+               ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, (9 + RANGE_SHIFT));
 
 #else
     ps_cabac->u4_range = (UWORD32)510;
     BITS_GET(ps_cabac->u4_ofst, ps_bitstrm->pu4_buf, ps_bitstrm->u4_bit_ofst,
-                    ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, 9);
+               ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, 9);
 
 #endif
 
@@ -163,11 +161,11 @@ IHEVCD_ERROR_T ihevcd_cabac_init(cab_ctxt_t *ps_cabac,
            pu1_init_ctxt,
            IHEVC_CAB_CTXT_END);
     DEBUG_RANGE_OFST("init", ps_cabac->u4_range, ps_cabac->u4_ofst);
-    return ((IHEVCD_ERROR_T)IHEVCD_SUCCESS);
+    return (IHEVCD_SUCCESS);
 }
 
 IHEVCD_ERROR_T ihevcd_cabac_reset(cab_ctxt_t *ps_cabac,
-                                  bitstrm_t *ps_bitstrm)
+                                 bitstrm_t *ps_bitstrm)
 {
     /* Sanity checks */
     ASSERT(ps_cabac != NULL);
@@ -180,16 +178,16 @@ IHEVCD_ERROR_T ihevcd_cabac_reset(cab_ctxt_t *ps_cabac,
 #if FULLRANGE
     ps_cabac->u4_range = (UWORD32)510 << RANGE_SHIFT;
     BITS_GET(ps_cabac->u4_ofst, ps_bitstrm->pu4_buf, ps_bitstrm->u4_bit_ofst,
-                    ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, (9 + RANGE_SHIFT));
+               ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, (9 + RANGE_SHIFT));
 
 #else
     ps_cabac->u4_range = (UWORD32)510;
     BITS_GET(ps_cabac->u4_ofst, ps_bitstrm->pu4_buf, ps_bitstrm->u4_bit_ofst,
-                    ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, 9);
+               ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, 9);
 
 #endif
 
-    return ((IHEVCD_ERROR_T)IHEVCD_SUCCESS);
+    return (IHEVCD_SUCCESS);
 }
 
 /**
@@ -217,9 +215,9 @@ IHEVCD_ERROR_T ihevcd_cabac_reset(cab_ctxt_t *ps_cabac,
  *
  ******************************************************************************
  */
-UWORD32 ihevcd_cabac_decode_bin(cab_ctxt_t *ps_cabac,
-                                bitstrm_t *ps_bitstrm,
-                                WORD32 ctxt_index
+ UWORD32 ihevcd_cabac_decode_bin(cab_ctxt_t *ps_cabac,
+                               bitstrm_t *ps_bitstrm,
+                               WORD32 ctxt_index
 
                                )
 {
@@ -312,8 +310,8 @@ UWORD32 ihevcd_cabac_decode_bin(cab_ctxt_t *ps_cabac,
  *
  ******************************************************************************
  */
-UWORD32 ihevcd_cabac_decode_bypass_bin(cab_ctxt_t *ps_cabac,
-                                       bitstrm_t *ps_bitstrm)
+ UWORD32 ihevcd_cabac_decode_bypass_bin(cab_ctxt_t *ps_cabac,
+                                      bitstrm_t *ps_bitstrm)
 {
 
     UWORD32 u4_bin;
@@ -363,7 +361,7 @@ UWORD32 ihevcd_cabac_decode_bypass_bin(cab_ctxt_t *ps_cabac,
  ******************************************************************************
  */
 UWORD32 ihevcd_cabac_decode_terminate(cab_ctxt_t *ps_cabac,
-                                      bitstrm_t *ps_bitstrm)
+                                     bitstrm_t *ps_bitstrm)
 {
     UWORD32 u4_range = ps_cabac->u4_range;
     UWORD32 u4_ofst = ps_cabac->u4_ofst;
@@ -457,8 +455,8 @@ UWORD32 ihevcd_cabac_decode_terminate(cab_ctxt_t *ps_cabac,
  */
 
 UWORD32 ihevcd_cabac_decode_bypass_bins(cab_ctxt_t *ps_cabac,
-                                        bitstrm_t *ps_bitstrm,
-                                        WORD32 numbins)
+                                      bitstrm_t *ps_bitstrm,
+                                      WORD32 numbins)
 {
     UWORD32 u4_bins;
 
@@ -475,7 +473,7 @@ UWORD32 ihevcd_cabac_decode_bypass_bins(cab_ctxt_t *ps_cabac,
     u4_bins = 0;
 
     BITS_GET(u4_bits, ps_bitstrm->pu4_buf, ps_bitstrm->u4_bit_ofst,
-                    ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, numbins);
+                ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, numbins);
 
     do
     {
@@ -560,7 +558,7 @@ UWORD32 ihevcd_cabac_decode_bins_tunary(cab_ctxt_t *ps_cabac,
         bin_index = ctxt_index + MIN((u4_sym >> ctxt_shift), ctxt_inc_max);
         IHEVCD_CABAC_DECODE_BIN(bin, ps_cabac, ps_bitstrm,  bin_index);
         u4_sym++;
-    }while(((WORD32)u4_sym < c_max) && bin);
+    }while((u4_sym < c_max) && bin);
 
     u4_sym = u4_sym - 1 + bin;
 
@@ -592,8 +590,8 @@ UWORD32 ihevcd_cabac_decode_bins_tunary(cab_ctxt_t *ps_cabac,
  ******************************************************************************
  */
 UWORD32 ihevcd_cabac_decode_bypass_bins_tunary(cab_ctxt_t *ps_cabac,
-                                               bitstrm_t *ps_bitstrm,
-                                               WORD32 c_max)
+                                         bitstrm_t *ps_bitstrm,
+                                         WORD32 c_max)
 {
 
     UWORD32 u4_sym;
@@ -606,7 +604,7 @@ UWORD32 ihevcd_cabac_decode_bypass_bins_tunary(cab_ctxt_t *ps_cabac,
     ASSERT(u4_range >= 256);
     u4_sym = 0;
     BITS_NXT(u4_bits, ps_bitstrm->pu4_buf, ps_bitstrm->u4_bit_ofst,
-                    ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, (UWORD32)c_max);
+            ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, c_max);
     u4_bits <<= (32 - c_max);
     do
     {
@@ -621,9 +619,9 @@ UWORD32 ihevcd_cabac_decode_bypass_bins_tunary(cab_ctxt_t *ps_cabac,
             u4_ofst -= u4_range;
         }
         u4_sym++;
-    }while(((WORD32)u4_sym < c_max) && bin);
+    }while((u4_sym < c_max) && bin);
     BITS_FLUSH(ps_bitstrm->pu4_buf, ps_bitstrm->u4_bit_ofst,
-                    ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, u4_sym);
+            ps_bitstrm->u4_cur_word, ps_bitstrm->u4_nxt_word, u4_sym);
 
     u4_sym = u4_sym - 1 + bin;
     /* Update the cabac context */
@@ -655,8 +653,8 @@ UWORD32 ihevcd_cabac_decode_bypass_bins_tunary(cab_ctxt_t *ps_cabac,
  ******************************************************************************
  */
 UWORD32 ihevcd_cabac_decode_bypass_bins_egk(cab_ctxt_t *ps_cabac,
-                                            bitstrm_t *ps_bitstrm,
-                                            WORD32 k)
+                               bitstrm_t *ps_bitstrm,
+                               WORD32 k)
 {
 
     UWORD32 u4_sym;
@@ -717,9 +715,9 @@ UWORD32 ihevcd_cabac_decode_bypass_bins_egk(cab_ctxt_t *ps_cabac,
  ******************************************************************************
  */
 UWORD32 ihevcd_cabac_decode_bypass_bins_trunc_rice(cab_ctxt_t *ps_cabac,
-                                                   bitstrm_t *ps_bitstrm,
-                                                   WORD32 c_rice_param,
-                                                   WORD32 c_rice_max)
+                                      bitstrm_t *ps_bitstrm,
+                                      WORD32 c_rice_param,
+                                      WORD32 c_rice_max)
 {
     UWORD32 u4_sym;
     WORD32 bin;
@@ -737,7 +735,7 @@ UWORD32 ihevcd_cabac_decode_bypass_bins_trunc_rice(cab_ctxt_t *ps_cabac,
         IHEVCD_CABAC_DECODE_BYPASS_BIN(bin, ps_cabac, ps_bitstrm);
         u4_sym++;
 
-    }while(((WORD32)u4_sym < c_max) && bin);
+    }while((u4_sym < c_max) && bin);
     u4_sym = u4_sym - 1 + bin;
 
     /* If suffix is present, then decode c_rice_param number of bins */
@@ -749,97 +747,3 @@ UWORD32 ihevcd_cabac_decode_bypass_bins_trunc_rice(cab_ctxt_t *ps_cabac,
     }
     return (u4_sym);
 }
-#if 0
-/**
- ******************************************************************************
- *
- *  @brief Flushes the cabac decoder engine as per section 9.3.4 figure 9-12
- *
- *  @par   Description
- *
- *
- *  @param[in,out]   ps_cabac
- *  pointer to cabac context (handle)
- *
- *  @return      success or failure error code
- *
- ******************************************************************************
- */
-IHEVCD_ERROR_T ihevcd_cabac_flush(cab_ctxt_t *ps_cabac)
-{
-    UWORD32 u4_ofst = ps_cabac->u4_ofst;
-    UWORD32 u4_bits_gen = ps_cabac->u4_bits_gen;
-
-    UWORD8 *pu1_strm_buf = ps_cabac->pu1_strm_buffer;
-    UWORD32 u4_strm_buf_offset = ps_cabac->u4_strm_buf_offset;
-    WORD32 zero_run = ps_cabac->i4_zero_bytes_run;
-    UWORD32 u4_out_standing_bytes = ps_cabac->u4_out_standing_bytes;
-
-    /************************************************************************/
-    /* Insert the carry (propogated in previous byte) along with            */
-    /* outstanding bytes (if any) and flush remaining bits                  */
-    /************************************************************************/
-    //TODO: Review this function
-    {
-        /* carry = 1 => putbit(1); carry propogated due to L renorm */
-        WORD32 carry = (u4_ofst >> (u4_bits_gen + CABAC_BITS)) & 0x1;
-        WORD32 last_byte;
-        WORD32 bits_left;
-        WORD32 rem_bits;
-
-        /*********************************************************************/
-        /* Bitstream overflow check                                          */
-        /* NOTE: corner case of epb bytes (max 2 for 32bit word) not handled */
-        /*********************************************************************/
-        if((u4_strm_buf_offset + u4_out_standing_bytes + 1)
-                        >= ps_cabac->u4_max_strm_size)
-        {
-            /* return without corrupting the buffer beyond its size */
-            return (IHEVCD_BITSTREAM_BUFFER_OVERFLOW);
-        }
-
-        if(carry)
-        {
-            /* previous byte carry add will not result in overflow to        */
-            /* u4_strm_buf_offset - 2 as we track 0xff as outstanding bytes  */
-            pu1_strm_buf[u4_strm_buf_offset - 1] += carry;
-            zero_run = 0;
-        }
-
-        /*        Insert outstanding bytes (if any)         */
-        while(u4_out_standing_bytes)
-        {
-            UWORD8 u1_0_or_ff = carry ? 0 : 0xFF;
-
-            PUTBYTE_EPB(pu1_strm_buf, u4_strm_buf_offset, u1_0_or_ff, zero_run);
-
-            u4_out_standing_bytes--;
-        }
-
-        /*  clear the carry in low */
-        u4_ofst &= ((1 << (u4_bits_gen + CABAC_BITS)) - 1);
-
-        /* extract the remaining bits;                                   */
-        /* includes addtitional msb 2 bits of low as per Figure 9-12     */
-        bits_left = u4_bits_gen + 2;
-        rem_bits = (u4_ofst >> (u4_bits_gen + CABAC_BITS - bits_left));
-
-        if(bits_left >= 8)
-        {
-            last_byte = (rem_bits >> (bits_left - 8)) & 0xFF;
-            PUTBYTE_EPB(pu1_strm_buf, u4_strm_buf_offset, last_byte, zero_run);
-            bits_left -= 8;
-        }
-
-        /* insert last byte along with rbsp stop bit(1) and 0's in the end */
-        last_byte = (rem_bits << (8 - bits_left)) | (1 << (bits_left - 1));
-        last_byte &= 0xFF;
-        PUTBYTE_EPB(pu1_strm_buf, u4_strm_buf_offset, last_byte, zero_run);
-
-        /* update the state variables and return success */
-        ps_cabac->u4_strm_buf_offset = u4_strm_buf_offset;
-        ps_cabac->i4_zero_bytes_run = zero_run;
-        return (IHEVCD_SUCCESS);
-    }
-}
-#endif

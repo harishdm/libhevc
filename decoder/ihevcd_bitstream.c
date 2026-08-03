@@ -103,8 +103,8 @@
 *******************************************************************************
 */
 void ihevcd_bits_init(bitstrm_t *ps_bitstrm,
-                      UWORD8 *pu1_buf,
-                      UWORD32 u4_numbytes)
+                         UWORD8 *pu1_buf,
+                         UWORD32 u4_numbytes)
 {
     UWORD32 u4_cur_word;
     UWORD32 u4_nxt_word;
@@ -334,12 +334,12 @@ UWORD32 ihevcd_bits_nxt(bitstrm_t *ps_bitstrm, UWORD32 u4_numbits)
 UWORD32 ihevcd_bits_nxt32(bitstrm_t *ps_bitstrm, UWORD32 u4_numbits)
 {
     UWORD32 u4_bits_read;
-    UNUSED(u4_numbits);
+
     BITS_NXT32(u4_bits_read,
-               ps_bitstrm->pu4_buf,
-               ps_bitstrm->u4_bit_ofst,
-               ps_bitstrm->u4_cur_word,
-               ps_bitstrm->u4_nxt_word);
+             ps_bitstrm->pu4_buf,
+             ps_bitstrm->u4_bit_ofst,
+             ps_bitstrm->u4_cur_word,
+             ps_bitstrm->u4_nxt_word);
     return u4_bits_read;
 }
 
@@ -411,10 +411,10 @@ UWORD32  ihevcd_bits_num_bits_remaining(bitstrm_t *ps_bitstrm)
     /* subtract 8 bytes */
     u4_bits_consumed = (UWORD32)(((UWORD8 *)ps_bitstrm->pu4_buf -
                                   (UWORD8 *)ps_bitstrm->pu1_buf_base - 8) <<
-                                 3) + ps_bitstrm->u4_bit_ofst;
+                                  3) + ps_bitstrm->u4_bit_ofst;
 
     u4_size_in_bits = (UWORD32)(ps_bitstrm->pu1_buf_max -
-                    ps_bitstrm->pu1_buf_base);
+                                ps_bitstrm->pu1_buf_base);
     return (u4_size_in_bits - u4_bits_consumed);
 }
 
@@ -447,7 +447,7 @@ UWORD32  ihevcd_bits_num_bits_consumed(bitstrm_t *ps_bitstrm)
 
     u4_bits_consumed = (UWORD32)(((UWORD8 *)ps_bitstrm->pu4_buf -
                                   (UWORD8 *)ps_bitstrm->pu1_buf_base - 8) <<
-                                 3) + ps_bitstrm->u4_bit_ofst;
+                                  3) + ps_bitstrm->u4_bit_ofst;
     return u4_bits_consumed;
 }
 
@@ -491,10 +491,10 @@ UWORD32 ihevcd_uev(bitstrm_t *ps_bitstrm)
     u4_clz = CLZ(u4_bits_read);
 
     BITS_FLUSH(ps_bitstrm->pu4_buf,
-               ps_bitstrm->u4_bit_ofst,
-               ps_bitstrm->u4_cur_word,
-               ps_bitstrm->u4_nxt_word,
-               (u4_clz + 1));
+             ps_bitstrm->u4_bit_ofst,
+             ps_bitstrm->u4_cur_word,
+             ps_bitstrm->u4_nxt_word,
+             (u4_clz + 1));
 
     u4_bits_read = 0;
     if(u4_clz)
@@ -506,7 +506,7 @@ UWORD32 ihevcd_uev(bitstrm_t *ps_bitstrm)
                  ps_bitstrm->u4_nxt_word,
                  u4_clz);
     }
-    return ((1 << u4_clz) + u4_bits_read - 1);
+    return((1 << u4_clz) + u4_bits_read - 1);
 
 }
 
@@ -551,10 +551,10 @@ WORD32 ihevcd_sev(bitstrm_t *ps_bitstrm)
     u4_clz = CLZ(u4_bits_read);
 
     BITS_FLUSH(ps_bitstrm->pu4_buf,
-               ps_bitstrm->u4_bit_ofst,
-               ps_bitstrm->u4_cur_word,
-               ps_bitstrm->u4_nxt_word,
-               (u4_clz + 1));
+             ps_bitstrm->u4_bit_ofst,
+             ps_bitstrm->u4_cur_word,
+             ps_bitstrm->u4_nxt_word,
+             (u4_clz + 1));
 
     u4_bits_read = 0;
     if(u4_clz)
@@ -568,9 +568,9 @@ WORD32 ihevcd_sev(bitstrm_t *ps_bitstrm)
     }
     u4_abs_val = ((1 << u4_clz) + u4_bits_read) >> 1;
     if(u4_bits_read & 0x1)
-        return (-(WORD32)u4_abs_val);
+        return(-(WORD32)u4_abs_val);
     else
-        return (u4_abs_val);
+        return(u4_abs_val);
 }
 
 

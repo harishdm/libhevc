@@ -57,6 +57,10 @@
 #include "ihevcd_defs.h"
 #include "ihevcd_function_selector.h"
 #include "ihevcd_structs.h"
+#include "ihevcd_hbd_func_tables.h"
+//#include "ihevcd_deblk.h"
+#include "ihevc_inter_pred.h"
+//#include "ihevc_padding.h"
 
 void ihevcd_init_function_ptr_av8(codec_t *ps_codec)
 {
@@ -157,4 +161,31 @@ void ihevcd_init_function_ptr_av8(codec_t *ps_codec)
     ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_420p_fptr                =  &ihevcd_fmt_conv_420sp_to_420p_av8;
     ps_codec->s_func_selector.ihevcd_itrans_recon_dc_luma_fptr                  =  &ihevcd_itrans_recon_dc_luma_av8;
     ps_codec->s_func_selector.ihevcd_itrans_recon_dc_chroma_fptr                =  &ihevcd_itrans_recon_dc_chroma_av8;
+    ps_codec->s_func_selector.pf_hbd_ip_luma_ref_sub                            = &ihevc_hbd_intra_pred_luma_ref_substitution;
+    ps_codec->s_func_selector.pf_hbd_ip_ref_filt                                = &ihevc_hbd_intra_pred_ref_filtering;
+    ps_codec->s_func_selector.pf_hbd_ip_chroma_ref_sub                          = &ihevc_hbd_intra_pred_chroma_ref_substitution;
+    ps_codec->s_func_selector.ppv_ihevcd_hbd_intra_pred_luma                    = (void **)gafp_ihevcd_hbd_intra_pred_luma_neonintr;
+    ps_codec->s_func_selector.ppv_ihevcd_hbd_intra_pred_chroma                  = (void **)gafp_ihevcd_hbd_intra_pred_chroma_neonintr;
+    ps_codec->s_func_selector.ppv_ihevcd_hbd_itrans_recon                       = (void **)gafp_ihevcd_hbd_itrans_recon_av8;
+    ps_codec->s_func_selector.ppv_ihevcd_hbd_itrans_recon_dc                    = (void **)gafp_ihevcd_hbd_itrans_recon_dc;
+    ps_codec->s_func_selector.ppv_ihevcd_hbd_recon                              = (void **)gafp_ihevcd_hbd_recon;
+    ps_codec->s_func_selector.pf_hbd_deblk_luma_vert                            = &ihevc_hbd_deblk_luma_vert;
+    ps_codec->s_func_selector.pf_hbd_deblk_luma_horz                            = &ihevc_hbd_deblk_luma_horz;
+    ps_codec->s_func_selector.pf_hbd_deblk_chroma_vert                          = &ihevc_hbd_deblk_chroma_vert;
+    ps_codec->s_func_selector.pf_hbd_deblk_chroma_horz                          = &ihevc_hbd_deblk_chroma_horz;
+    ps_codec->s_func_selector.ppv_ihevcd_hbd_sao_luma                           = (void **)gapf_hbd_sao_luma_neonintr;
+    ps_codec->s_func_selector.pf_hbd_sao_bo_luma                                = &ihevc_hbd_sao_band_offset_luma;
+    ps_codec->s_func_selector.pf_hbd_sao_bo_chroma                              = &ihevc_hbd_sao_band_offset_chroma;
+    ps_codec->s_func_selector.ppv_ihevcd_hbd_sao_chroma                         = (void **)gapf_hbd_sao_chroma;
+    ps_codec->s_func_selector.ppv_ihevcd_hbd_inter_pred                         = (void **)gapf_hbd_inter_pred_neonintr;
+    ps_codec->s_func_selector.pf_hbd_wt_pred_uni                                = &ihevc_hbd_weighted_pred_uni_neonintr;
+    ps_codec->s_func_selector.pf_hbd_wt_pred_bi                                 = &ihevc_hbd_weighted_pred_bi_neonintr;
+    ps_codec->s_func_selector.pf_hbd_wt_pred_bi_dflt                            = &ihevc_hbd_weighted_pred_bi_default;
+    ps_codec->s_func_selector.pf_hbd_wt_pred_chrm_uni                           = &ihevc_hbd_weighted_pred_chroma_uni_neonintr;
+    ps_codec->s_func_selector.pf_hbd_wt_pred_chrm_bi                            = &ihevc_hbd_weighted_pred_chroma_bi_neonintr;
+    ps_codec->s_func_selector.pf_hbd_wt_pred_chrm_bi_dflt                       = &ihevc_hbd_weighted_pred_chroma_bi_default;
+    ps_codec->s_func_selector.ihevcd_hbd_fmt_conv_420sp_to_420p_fptr            = &ihevcd_hbd_fmt_conv_420sp_to_420p;
+    ps_codec->s_func_selector.ihevc_hbd_pad_left_luma_fptr                      = &ihevc_hbd_pad_left_luma_av8;
+    ps_codec->s_func_selector.ihevc_hbd_pad_right_luma_fptr                     = &ihevc_hbd_pad_right_luma_av8;
+    ps_codec->s_func_selector.ihevc_hbd_pad_left_chroma_fptr                    = &ihevc_hbd_pad_left_chroma_av8;
 }

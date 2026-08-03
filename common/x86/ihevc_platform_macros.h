@@ -36,7 +36,7 @@
 #ifndef _IHEVC_PLATFORM_MACROS_H_
 #define _IHEVC_PLATFORM_MACROS_H_
 
-//#include <immintrin.h>
+#include <immintrin.h>
 
 
 #define CLIP_U8(x) CLIP3((x), 0,     255)
@@ -66,7 +66,9 @@
                             ((UWORD32)x >> 24);
 
 
-#define NOP(nop_cnt)    {UWORD32 nop_i; for (nop_i = 0; nop_i < nop_cnt; nop_i++);}
+#define NOP(nop_cnt)    {UWORD32 nop_i; for (nop_i = 0; nop_i < nop_cnt; nop_i++)  asm("nop");}
+
+#define POPCNT_U32(x)       __builtin_popcount(x)
 
 #define PLD(a)
 #define INLINE inline
@@ -78,7 +80,10 @@ static INLINE UWORD32 CLZ(UWORD32 u4_word)
     else
         return 32;
 }
-
+static INLINE UWORD32 CLZNZ(UWORD32 u4_word)
+{
+   return (__builtin_clz(u4_word));
+}
 static INLINE UWORD32 CTZ(UWORD32 u4_word)
 {
     if(0 == u4_word)
@@ -91,9 +96,69 @@ static INLINE UWORD32 CTZ(UWORD32 u4_word)
     }
 }
 
+#define DATA_SYNC()  __sync_synchronize()
+
+/**
+******************************************************************************
+ *  @brief  returns postion of msb bit for 32bit input
+******************************************************************************
+ */
+#define GET_POS_MSB_32(r,word)                         \
+{                                                       \
+    if(word)                                           \
+    {                                                   \
+        r = 31 - __builtin_clz(word);                  \
+    }                                                   \
+    else                                                \
+    {                                                   \
+        r = -1;                                         \
+    }                                                   \
+}
+
+/**
+******************************************************************************
+ *  @brief  returns postion of msb bit for 64bit input
+******************************************************************************
+ */
+#define GET_POS_MSB_64(r,word)                          \
+{                                                       \
+    if(word)                                            \
+    {                                                   \
+        r = 63 - __builtin_clzll(word);                 \
+    }                                                   \
+    else                                                \
+    {                                                   \
+        r = -1;                                         \
+    }                                                   \
+}
+
+
+/**
+******************************************************************************
+ *  @brief  returns max number of bits required to represent input word (max 32bits)
+******************************************************************************
+ */
+#define GETRANGE(r,word)                                \
+{                                                       \
+    if(word)                                            \
+    {                                                   \
+        r = 32 - __builtin_clz(word);                   \
+    }                                                   \
+    else                                                \
+    {                                                   \
+        r = 1;                                          \
+    }                                                   \
+}
 #define GCC_ENABLE 1
 
+#if GCC_ENABLE
+#define _mm256_loadu2_m128i(X,Y) _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_loadu_si128((Y))), _mm_loadu_si128((X)),1);
 
+#define _mm256_storeu2_m128i(X,Y,Z) {_mm_storeu_si128 ((Y), _mm256_castsi256_si128((Z)));_mm_storeu_si128 ((X), _mm256_extracti128_si256((Z),1));}
+
+#define _mm256_set_m128i(X,Y) _mm256_insertf128_si256(_mm256_castsi128_si256((Y)),(X),1);
+
+#endif
 
 
 #define PREFETCH_ENABLE 1

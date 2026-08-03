@@ -63,6 +63,7 @@
 #include "ihevcd_nal.h"
 #include "ihevcd_bitstream.h"
 #include "ihevcd_fmt_conv.h"
+#include "ihevcd_func_selector.h"
 #include "ihevcd_profile.h"
 
 /**
@@ -112,14 +113,14 @@
 *******************************************************************************
 */
 void ihevcd_fmt_conv_420sp_to_rgb565(UWORD8 *pu1_y_src,
-                                     UWORD8 *pu1_uv_src,
-                                     UWORD16 *pu2_rgb_dst,
-                                     WORD32 wd,
-                                     WORD32 ht,
-                                     WORD32 src_y_strd,
-                                     WORD32 src_uv_strd,
-                                     WORD32 dst_strd,
-                                     WORD32 is_u_first)
+                                    UWORD8 *pu1_uv_src,
+                                    UWORD16 *pu2_rgb_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_strd,
+                                    WORD32 is_u_first)
 {
 
 
@@ -167,7 +168,7 @@ void ihevcd_fmt_conv_420sp_to_rgb565(UWORD8 *pu1_y_src,
             u4_r >>= 3;
 
             pu1_y_src++;
-            *pu2_rgb_dst++ = ((u4_r << 11) | (u4_g << 5) | u4_b);
+            *pu2_rgb_dst++  = ((u4_r << 11) | (u4_g << 5) | u4_b);
 
             /* pixel 1 */
             /* B */
@@ -181,7 +182,7 @@ void ihevcd_fmt_conv_420sp_to_rgb565(UWORD8 *pu1_y_src,
             u4_r >>= 3;
 
             pu1_y_src++;
-            *pu2_rgb_dst++ = ((u4_r << 11) | (u4_g << 5) | u4_b);
+            *pu2_rgb_dst++  = ((u4_r << 11) | (u4_g << 5) | u4_b);
 
             /* pixel 2 */
             /* B */
@@ -219,7 +220,7 @@ void ihevcd_fmt_conv_420sp_to_rgb565(UWORD8 *pu1_y_src,
         pu1_y_src = pu1_y_src + (src_y_strd << 1) - wd;
         pu1_y_src_nxt = pu1_y_src_nxt + (src_y_strd << 1) - wd;
 
-        pu2_rgb_dst = pu2_rgb_dst_NextRow - wd + dst_strd;
+        pu2_rgb_dst = pu2_rgb_dst_NextRow - wd + dst_strd ;
         pu2_rgb_dst_NextRow = pu2_rgb_dst_NextRow + (dst_strd << 1) - wd;
     }
 
@@ -227,14 +228,14 @@ void ihevcd_fmt_conv_420sp_to_rgb565(UWORD8 *pu1_y_src,
 }
 
 void ihevcd_fmt_conv_420sp_to_rgba8888(UWORD8 *pu1_y_src,
-                                       UWORD8 *pu1_uv_src,
-                                       UWORD32 *pu4_rgba_dst,
-                                       WORD32 wd,
-                                       WORD32 ht,
-                                       WORD32 src_y_strd,
-                                       WORD32 src_uv_strd,
-                                       WORD32 dst_strd,
-                                       WORD32 is_u_first)
+                                    UWORD8 *pu1_uv_src,
+                                    UWORD32 *pu4_rgba_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_strd,
+                                    WORD32 is_u_first)
 {
 
 
@@ -279,7 +280,7 @@ void ihevcd_fmt_conv_420sp_to_rgba8888(UWORD8 *pu1_y_src,
             u4_r = CLIP_U8(*pu1_y_src + i2_r);
 
             pu1_y_src++;
-            *pu4_rgba_dst++ = ((u4_r << 16) | (u4_g << 8) | (u4_b << 0));
+            *pu4_rgba_dst++  = ((u4_r << 16) | (u4_g << 8) | (u4_b << 0));
 
             /* pixel 1 */
             /* B */
@@ -290,7 +291,7 @@ void ihevcd_fmt_conv_420sp_to_rgba8888(UWORD8 *pu1_y_src,
             u4_r = CLIP_U8(*pu1_y_src + i2_r);
 
             pu1_y_src++;
-            *pu4_rgba_dst++ = ((u4_r << 16) | (u4_g << 8) | (u4_b << 0));
+            *pu4_rgba_dst++  = ((u4_r << 16) | (u4_g << 8) | (u4_b << 0));
 
             /* pixel 2 */
             /* B */
@@ -322,13 +323,122 @@ void ihevcd_fmt_conv_420sp_to_rgba8888(UWORD8 *pu1_y_src,
         pu1_y_src = pu1_y_src + (src_y_strd << 1) - wd;
         pu1_y_src_nxt = pu1_y_src_nxt + (src_y_strd << 1) - wd;
 
-        pu4_rgba_dst = pu4_rgba_dst_NextRow - wd + dst_strd;
+        pu4_rgba_dst = pu4_rgba_dst_NextRow - wd + dst_strd ;
         pu4_rgba_dst_NextRow = pu4_rgba_dst_NextRow + (dst_strd << 1) - wd;
     }
 
 
 }
+void ihevcd_hbd_fmt_conv_420sp_to_rgba8888(UWORD16 *pu2_y_src,
+                                    UWORD16 *pu2_uv_src,
+                                    UWORD32 *pu4_rgba_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_strd,
+                                    WORD32 is_u_first,
+                                    WORD32 i4_bit_depth_luma)
+{
 
+
+    WORD16  i2_r, i2_g, i2_b;
+    UWORD32  u4_r, u4_g, u4_b;
+    WORD16  i2_i, i2_j;
+    UWORD16  *pu2_y_src_nxt;
+    UWORD32 *pu4_rgba_dst_NextRow;
+    UWORD32 *pu4_rgba_dst_back;
+
+    UWORD16 *pu2_u_src, *pu2_v_src;
+    UWORD32 normalise_val,clip_val;
+
+
+    clip_val = (i4_bit_depth_luma-8);
+    normalise_val = 128<<(clip_val);
+
+    if(is_u_first)
+    {
+        pu2_u_src = (UWORD16 *)pu2_uv_src;
+        pu2_v_src = (UWORD16 *)pu2_uv_src + 1;
+    }
+    else
+    {
+        pu2_u_src = (UWORD16 *)pu2_uv_src + 1;
+        pu2_v_src = (UWORD16 *)pu2_uv_src;
+    }
+
+    pu2_y_src_nxt   = pu2_y_src + src_y_strd;
+    pu4_rgba_dst_NextRow = pu4_rgba_dst + dst_strd;
+    pu4_rgba_dst_back = pu4_rgba_dst;
+
+    for(i2_i = 0; i2_i < (ht >> 1); i2_i++)
+    {
+        for(i2_j = (wd >> 1); i2_j > 0; i2_j--)
+        {
+            i2_b = ((*pu2_u_src - normalise_val) * 16530 >> 13);
+            i2_g = ((*pu2_u_src - normalise_val) * COEFF2 + (*pu2_v_src - normalise_val) * COEFF3) >> 13;
+            i2_r = ((*pu2_v_src - normalise_val) * COEFF1) >> 13;
+
+            pu2_u_src += 2;
+            pu2_v_src += 2;
+            /* pixel 0 */
+            /* B */
+            u4_b = CLIP_U8((*pu2_y_src + i2_b) >> clip_val);
+            /* G */
+            u4_g = CLIP_U8((*pu2_y_src + i2_g) >> clip_val);
+            /* R */
+            u4_r = CLIP_U8((*pu2_y_src + i2_r) >> clip_val);
+
+            pu2_y_src++;
+            *pu4_rgba_dst++  = ((u4_r << 16) | (u4_g << 8) | (u4_b << 0));
+
+            /* pixel 1 */
+            /* B */
+            u4_b = CLIP_U8((*pu2_y_src + i2_b) >> clip_val);
+            /* G */
+            u4_g = CLIP_U8((*pu2_y_src + i2_g) >> clip_val);
+            /* R */
+            u4_r = CLIP_U8((*pu2_y_src + i2_r) >> clip_val);
+
+            pu2_y_src++;
+            *pu4_rgba_dst++  = ((u4_r << 16) | (u4_g << 8) | (u4_b << 0));
+
+            /* pixel 2 */
+            /* B */
+            u4_b = CLIP_U8((*pu2_y_src_nxt + i2_b) >> clip_val);
+            /* G */
+            u4_g = CLIP_U8((*pu2_y_src_nxt + i2_g) >> clip_val);
+            /* R */
+            u4_r = CLIP_U8((*pu2_y_src_nxt + i2_r) >> clip_val);
+
+            pu2_y_src_nxt++;
+            *pu4_rgba_dst_NextRow++ = ((u4_r << 16) | (u4_g << 8) | (u4_b << 0));
+
+            /* pixel 3 */
+            /* B */
+            u4_b = CLIP_U8((*pu2_y_src_nxt + i2_b) >> clip_val);
+            /* G */
+            u4_g = CLIP_U8((*pu2_y_src_nxt + i2_g) >> clip_val);
+            /* R */
+            u4_r = CLIP_U8((*pu2_y_src_nxt + i2_r) >> clip_val);
+
+            pu2_y_src_nxt++;
+            *pu4_rgba_dst_NextRow++ = ((u4_r << 16) | (u4_g << 8) | (u4_b << 0));
+
+        }
+
+        pu2_u_src = pu2_u_src + src_uv_strd - wd;
+        pu2_v_src = pu2_v_src + src_uv_strd - wd;
+
+        pu2_y_src = pu2_y_src + (src_y_strd << 1) - wd;
+        pu2_y_src_nxt = pu2_y_src_nxt + (src_y_strd << 1) - wd;
+
+        pu4_rgba_dst = pu4_rgba_dst_NextRow - wd + dst_strd ;
+        pu4_rgba_dst_NextRow = pu4_rgba_dst_NextRow + (dst_strd << 1) - wd;
+    }
+
+
+}
 /**
 *******************************************************************************
 *
@@ -387,8 +497,8 @@ void ihevcd_fmt_conv_420sp_to_420sp(UWORD8 *pu1_y_src,
                                     WORD32 dst_y_strd,
                                     WORD32 dst_uv_strd)
 {
-    UWORD8 *pu1_src, *pu1_dst;
-    WORD32 num_rows, num_cols, src_strd, dst_strd;
+    UWORD8 *pu1_src,*pu1_dst;
+    WORD32 num_rows,num_cols,src_strd,dst_strd;
     WORD32 i;
 
     /* copy luma */
@@ -401,9 +511,9 @@ void ihevcd_fmt_conv_420sp_to_420sp(UWORD8 *pu1_y_src,
     src_strd = src_y_strd;
     dst_strd = dst_y_strd;
 
-    for(i = 0; i < num_rows; i++)
+    for(i = 0;i < num_rows ; i++)
     {
-        memcpy(pu1_dst, pu1_src, num_cols);
+        memcpy(pu1_dst,pu1_src,num_cols);
         pu1_dst += dst_strd;
         pu1_src += src_strd;
     }
@@ -418,15 +528,65 @@ void ihevcd_fmt_conv_420sp_to_420sp(UWORD8 *pu1_y_src,
     src_strd = src_uv_strd;
     dst_strd = dst_uv_strd;
 
-    for(i = 0; i < num_rows; i++)
+    for(i = 0;i < num_rows ; i++)
     {
-        memcpy(pu1_dst, pu1_src, num_cols);
+        memcpy(pu1_dst,pu1_src,num_cols);
         pu1_dst += dst_strd;
         pu1_src += src_strd;
     }
     return;
 }
 
+void ihevcd_hbd_fmt_conv_420sp_to_420sp(UWORD16 *pu2_y_src,
+                                        UWORD16 *pu2_uv_src,
+                                        UWORD16 *pu2_y_dst,
+                                        UWORD16 *pu2_uv_dst,
+                                        WORD32 wd,
+                                        WORD32 ht,
+                                        WORD32 src_y_strd,
+                                        WORD32 src_uv_strd,
+                                        WORD32 dst_y_strd,
+                                        WORD32 dst_uv_strd)
+{
+    UWORD8 *pu1_src,*pu1_dst;
+    WORD32 num_rows,num_cols,src_strd,dst_strd;
+    WORD32 i;
+
+    /* copy luma */
+    pu1_src = (UWORD8 *)pu2_y_src;
+    pu1_dst = (UWORD8 *)pu2_y_dst;
+
+    num_rows = ht;
+    num_cols = wd * sizeof(UWORD16);
+
+    src_strd = src_y_strd * sizeof(UWORD16);
+    dst_strd = dst_y_strd * sizeof(UWORD16);
+
+    for(i = 0;i < num_rows ; i++)
+    {
+        memcpy(pu1_dst,pu1_src,num_cols);
+        pu1_dst += dst_strd;
+        pu1_src += src_strd;
+    }
+
+    /* copy U and V */
+    pu1_src = (UWORD8 *)pu2_uv_src;
+    pu1_dst = (UWORD8 *)pu2_uv_dst;
+
+    num_rows = ht >> 1;
+    num_cols = wd * sizeof(UWORD16);
+
+    src_strd = src_uv_strd * sizeof(UWORD16);
+    dst_strd = dst_uv_strd * sizeof(UWORD16);
+
+    for(i = 0;i < num_rows ; i++)
+    {
+        memcpy(pu1_dst,pu1_src,num_cols);
+        pu1_dst += dst_strd;
+        pu1_src += src_strd;
+    }
+    return;
+}
 
 
 /**
@@ -476,18 +636,18 @@ void ihevcd_fmt_conv_420sp_to_420sp(UWORD8 *pu1_y_src,
 *******************************************************************************
 */
 void ihevcd_fmt_conv_420sp_to_420sp_swap_uv(UWORD8 *pu1_y_src,
-                                            UWORD8 *pu1_uv_src,
-                                            UWORD8 *pu1_y_dst,
-                                            UWORD8 *pu1_uv_dst,
-                                            WORD32 wd,
-                                            WORD32 ht,
-                                            WORD32 src_y_strd,
-                                            WORD32 src_uv_strd,
-                                            WORD32 dst_y_strd,
-                                            WORD32 dst_uv_strd)
+                                    UWORD8 *pu1_uv_src,
+                                    UWORD8 *pu1_y_dst,
+                                    UWORD8 *pu1_uv_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_y_strd,
+                                    WORD32 dst_uv_strd)
 {
-    UWORD8 *pu1_src, *pu1_dst;
-    WORD32 num_rows, num_cols, src_strd, dst_strd;
+    UWORD8 *pu1_src,*pu1_dst;
+    WORD32 num_rows,num_cols,src_strd,dst_strd;
     WORD32 i;
 
     /* copy luma */
@@ -500,9 +660,9 @@ void ihevcd_fmt_conv_420sp_to_420sp_swap_uv(UWORD8 *pu1_y_src,
     src_strd = src_y_strd;
     dst_strd = dst_y_strd;
 
-    for(i = 0; i < num_rows; i++)
+    for(i = 0;i < num_rows ; i++)
     {
-        memcpy(pu1_dst, pu1_src, num_cols);
+        memcpy(pu1_dst,pu1_src,num_cols);
         pu1_dst += dst_strd;
         pu1_src += src_strd;
     }
@@ -517,10 +677,10 @@ void ihevcd_fmt_conv_420sp_to_420sp_swap_uv(UWORD8 *pu1_y_src,
     src_strd = src_uv_strd;
     dst_strd = dst_uv_strd;
 
-    for(i = 0; i < num_rows; i++)
+    for(i = 0;i < num_rows ; i++)
     {
         WORD32 j;
-        for(j = 0; j < num_cols; j += 2)
+        for(j = 0; j < num_cols; j+=2)
         {
             pu1_dst[j + 0] = pu1_src[j + 1];
             pu1_dst[j + 1] = pu1_src[j + 0];
@@ -530,6 +690,64 @@ void ihevcd_fmt_conv_420sp_to_420sp_swap_uv(UWORD8 *pu1_y_src,
     }
     return;
 }
+
+void ihevcd_hbd_fmt_conv_420sp_to_420sp_swap_uv(UWORD16 *pu2_y_src,
+                                                UWORD16 *pu2_uv_src,
+                                                UWORD16 *pu2_y_dst,
+                                                UWORD16 *pu2_uv_dst,
+                                                WORD32 wd,
+                                                WORD32 ht,
+                                                WORD32 src_y_strd,
+                                                WORD32 src_uv_strd,
+                                                WORD32 dst_y_strd,
+                                                WORD32 dst_uv_strd)
+{
+    UWORD8 *pu1_src,*pu1_dst;
+    UWORD16 *pu2_src, *pu2_dst;
+    WORD32 num_rows,num_cols,src_strd,dst_strd;
+    WORD32 i;
+
+    /* copy luma */
+    pu1_src = (UWORD8 *)pu2_y_src;
+    pu1_dst = (UWORD8 *)pu2_y_dst;
+
+    num_rows = ht;
+    num_cols = wd * sizeof(UWORD16);
+
+    src_strd = src_y_strd * sizeof(UWORD16);
+    dst_strd = dst_y_strd * sizeof(UWORD16);
+
+    for(i = 0;i < num_rows ; i++)
+    {
+        memcpy(pu1_dst,pu1_src,num_cols);
+        pu1_dst += dst_strd;
+        pu1_src += src_strd;
+    }
+
+    /* copy U and V */
+    pu2_src = pu2_uv_src;
+    pu2_dst = pu2_uv_dst;
+
+    num_rows = ht >> 1;
+    num_cols = wd;
+
+    src_strd = src_uv_strd;
+    dst_strd = dst_uv_strd;
+
+    for(i = 0;i < num_rows ; i++)
+    {
+        WORD32 j;
+        for(j = 0; j < num_cols; j+=2)
+        {
+            pu2_dst[j + 0] = pu2_src[j + 1];
+            pu2_dst[j + 1] = pu2_src[j + 0];
+        }
+        pu2_dst += dst_strd;
+        pu2_src += src_strd;
+    }
+    return;
+}
+
 /**
 *******************************************************************************
 *
@@ -585,22 +803,22 @@ void ihevcd_fmt_conv_420sp_to_420sp_swap_uv(UWORD8 *pu1_y_src,
 
 
 void ihevcd_fmt_conv_420sp_to_420p(UWORD8 *pu1_y_src,
-                                   UWORD8 *pu1_uv_src,
-                                   UWORD8 *pu1_y_dst,
-                                   UWORD8 *pu1_u_dst,
-                                   UWORD8 *pu1_v_dst,
-                                   WORD32 wd,
-                                   WORD32 ht,
-                                   WORD32 src_y_strd,
-                                   WORD32 src_uv_strd,
-                                   WORD32 dst_y_strd,
-                                   WORD32 dst_uv_strd,
-                                   WORD32 is_u_first,
-                                   WORD32 disable_luma_copy)
+                                    UWORD8 *pu1_uv_src,
+                                    UWORD8 *pu1_y_dst,
+                                    UWORD8 *pu1_u_dst,
+                                    UWORD8 *pu1_v_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_y_strd,
+                                    WORD32 dst_uv_strd,
+                                    WORD32 is_u_first,
+                                    WORD32 disable_luma_copy)
 {
-    UWORD8 *pu1_src, *pu1_dst;
-    UWORD8 *pu1_u_src, *pu1_v_src;
-    WORD32 num_rows, num_cols, src_strd, dst_strd;
+    UWORD8 *pu1_src,*pu1_dst;
+    UWORD8 *pu1_u_src,*pu1_v_src;
+    WORD32 num_rows,num_cols,src_strd,dst_strd;
     WORD32 i, j;
 
     if(0 == disable_luma_copy)
@@ -615,9 +833,9 @@ void ihevcd_fmt_conv_420sp_to_420p(UWORD8 *pu1_y_src,
         src_strd = src_y_strd;
         dst_strd = dst_y_strd;
 
-        for(i = 0; i < num_rows; i++)
+        for(i = 0;i < num_rows ; i++)
         {
-            memcpy(pu1_dst, pu1_src, num_cols);
+            memcpy(pu1_dst,pu1_src,num_cols);
             pu1_dst += dst_strd;
             pu1_src += src_strd;
         }
@@ -641,7 +859,7 @@ void ihevcd_fmt_conv_420sp_to_420p(UWORD8 *pu1_y_src,
     src_strd = src_uv_strd;
     dst_strd = dst_uv_strd;
 
-    for(i = 0; i < num_rows; i++)
+    for(i = 0; i < num_rows ; i++)
     {
         for(j = 0; j < num_cols; j++)
         {
@@ -657,6 +875,78 @@ void ihevcd_fmt_conv_420sp_to_420p(UWORD8 *pu1_y_src,
     return;
 }
 
+void ihevcd_hbd_fmt_conv_420sp_to_420p(UWORD16 *pu2_y_src,
+                                       UWORD16 *pu2_uv_src,
+                                       UWORD16 *pu2_y_dst,
+                                       UWORD16 *pu2_u_dst,
+                                       UWORD16 *pu2_v_dst,
+                                       WORD32 wd,
+                                       WORD32 ht,
+                                       WORD32 src_y_strd,
+                                       WORD32 src_uv_strd,
+                                       WORD32 dst_y_strd,
+                                       WORD32 dst_uv_strd,
+                                       WORD32 is_u_first,
+                                       WORD32 disable_luma_copy)
+{
+    UWORD16 *pu2_src,*pu2_dst;
+    UWORD16 *pu2_u_src,*pu2_v_src;
+    WORD32 num_rows,num_cols,src_strd,dst_strd;
+    WORD32 i, j;
+
+    if(0 == disable_luma_copy)
+    {
+        /* copy luma */
+        pu2_src = (UWORD16 *)pu2_y_src;
+        pu2_dst = (UWORD16 *)pu2_y_dst;
+
+        num_rows = ht;
+        num_cols = wd;
+
+        src_strd = src_y_strd;
+        dst_strd = dst_y_strd;
+
+        for(i = 0;i < num_rows ; i++)
+        {
+            memcpy(pu2_dst,pu2_src,num_cols*sizeof(UWORD16));
+            pu2_dst += dst_strd;
+            pu2_src += src_strd;
+        }
+    }
+    /* de-interleave U and V and copy to destination */
+    if(is_u_first)
+    {
+        pu2_u_src = (UWORD16 *)pu2_uv_src;
+        pu2_v_src = (UWORD16 *)pu2_uv_src + 1;
+    }
+    else
+    {
+        pu2_u_src = (UWORD16 *)pu2_uv_src + 1;
+        pu2_v_src = (UWORD16 *)pu2_uv_src;
+    }
+
+
+    num_rows = ht >> 1;
+    num_cols = wd >> 1;
+
+    src_strd = src_uv_strd;
+    dst_strd = dst_uv_strd;
+
+    for(i = 0; i < num_rows ; i++)
+    {
+        for(j = 0; j < num_cols; j++)
+        {
+            pu2_u_dst[j] = pu2_u_src[j * 2];
+            pu2_v_dst[j] = pu2_v_src[j * 2];
+        }
+
+        pu2_u_dst += dst_strd;
+        pu2_v_dst += dst_strd;
+        pu2_u_src += src_strd;
+        pu2_v_src += src_strd;
+    }
+    return;
+}
 
 
 /**
@@ -689,13 +979,13 @@ void ihevcd_fmt_conv_420sp_to_420p(UWORD8 *pu1_y_src,
 */
 IHEVCD_ERROR_T ihevcd_fmt_conv(codec_t *ps_codec,
                                process_ctxt_t *ps_proc,
-                               UWORD8 *pu1_y_dst,
-                               UWORD8 *pu1_u_dst,
-                               UWORD8 *pu1_v_dst,
-                               WORD32 cur_row,
-                               WORD32 num_rows)
+                             UWORD8 *pu1_y_dst,
+                             UWORD8 *pu1_u_dst,
+                             UWORD8 *pu1_v_dst,
+                             WORD32 cur_row,
+                             WORD32 num_rows)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     pic_buf_t *ps_disp_pic;
     UWORD8 *pu1_y_src, *pu1_uv_src;
     UWORD8 *pu1_y_dst_tmp, *pu1_uv_dst_tmp;
@@ -725,17 +1015,25 @@ IHEVCD_ERROR_T ihevcd_fmt_conv(codec_t *ps_codec,
         crop_unit_y = 2;
     }
 
+    if (CHROMA_FMT_IDC_YUV422 == ps_sps->i1_chroma_format_idc)
+    {
+        crop_unit_x = 2;
+        crop_unit_y = 1;
+    }
+
     ps_disp_pic = ps_codec->ps_disp_buf;
     pu1_luma = ps_disp_pic->pu1_luma;
     pu1_chroma = ps_disp_pic->pu1_chroma;
 
 
     /* Take care of cropping */
-    pu1_luma    += ps_codec->i4_strd * ps_sps->i2_pic_crop_top_offset * crop_unit_y + ps_sps->i2_pic_crop_left_offset * crop_unit_x;
+    pu1_luma    +=
+        (ps_codec->i4_strd * ps_sps->i2_pic_crop_top_offset * crop_unit_y + ps_sps->i2_pic_crop_left_offset * crop_unit_x) *
+        ps_codec->i4_pixel_size_y;
 
     /* Left offset is multiplied by 2 because buffer is UV interleaved */
-    pu1_chroma  += ps_codec->i4_strd * ps_sps->i2_pic_crop_top_offset + ps_sps->i2_pic_crop_left_offset * 2;
-
+    pu1_chroma  += (ps_codec->i4_strd * ps_sps->i2_pic_crop_top_offset + ps_sps->i2_pic_crop_left_offset * 2) *
+                        ps_codec->i4_pixel_size_uv;
 
     is_u_first = (IV_YUV_420SP_UV == ps_codec->e_ref_chroma_fmt) ? 1 : 0;
 
@@ -749,17 +1047,17 @@ IHEVCD_ERROR_T ihevcd_fmt_conv(codec_t *ps_codec,
 
 
     {
-        pu1_y_src   = pu1_luma + cur_row * ps_codec->i4_strd;
-        pu1_uv_src  = pu1_chroma + (cur_row / 2) * ps_codec->i4_strd;
+        pu1_y_src   = pu1_luma + cur_row * ps_codec->i4_strd * ps_codec->i4_pixel_size_y;
+        pu1_uv_src  = pu1_chroma + (cur_row / crop_unit_y) * ps_codec->i4_strd * ps_codec->i4_pixel_size_uv;
 
         pu2_rgb_dst_tmp  = (UWORD16 *)pu1_y_dst;
         pu2_rgb_dst_tmp  += cur_row * ps_codec->i4_disp_strd;
         pu4_rgb_dst_tmp  = (UWORD32 *)pu1_y_dst;
         pu4_rgb_dst_tmp  += cur_row * ps_codec->i4_disp_strd;
-        pu1_y_dst_tmp  = pu1_y_dst  + cur_row * ps_codec->i4_disp_strd;
-        pu1_uv_dst_tmp = pu1_u_dst  + (cur_row / 2) * ps_codec->i4_disp_strd;
-        pu1_u_dst_tmp = pu1_u_dst  + (cur_row / 2) * ps_codec->i4_disp_strd / 2;
-        pu1_v_dst_tmp = pu1_v_dst  + (cur_row / 2) * ps_codec->i4_disp_strd / 2;
+        pu1_y_dst_tmp  = pu1_y_dst  + cur_row * ps_codec->i4_disp_strd * ps_codec->i4_pixel_size_y;
+        pu1_uv_dst_tmp = pu1_u_dst  + (cur_row / crop_unit_y) * ps_codec->i4_disp_strd * ps_codec->i4_pixel_size_uv;
+        pu1_u_dst_tmp = pu1_u_dst  + (cur_row / crop_unit_y)* (ps_codec->i4_disp_strd / 2) * ps_codec->i4_pixel_size_uv;
+        pu1_v_dst_tmp = pu1_v_dst  + (cur_row / crop_unit_y)* (ps_codec->i4_disp_strd / 2) * ps_codec->i4_pixel_size_uv;
 
         /* In case of multi threaded implementation, format conversion might be called
          * before reconstruction is completed. If the frame being converted/copied
@@ -792,7 +1090,7 @@ IHEVCD_ERROR_T ihevcd_fmt_conv(codec_t *ps_codec,
 
                 /*Check if the row below is completely processed before proceeding with format conversion*/
                 status = 1;
-                for(ctb_in_row = 0; (WORD32)ctb_in_row < ps_sps->i2_pic_wd_in_ctb; ctb_in_row++)
+                for( ctb_in_row = 0; ctb_in_row < ps_sps->i2_pic_wd_in_ctb ; ctb_in_row++)
                 {
 #ifdef GPU_BUILD
                     //TODO GPU : Later define it for ARM only version as well
@@ -800,7 +1098,7 @@ IHEVCD_ERROR_T ihevcd_fmt_conv(codec_t *ps_codec,
 #else
                     pu1_buf = (ps_codec->pu1_proc_map + idx + ctb_in_row);
 #endif
-                    status &= *pu1_buf;
+                    status &= *pu1_buf ;
                 }
 
                 if(status)
@@ -814,33 +1112,28 @@ IHEVCD_ERROR_T ihevcd_fmt_conv(codec_t *ps_codec,
             }
         }
 
-
         if((IV_YUV_420SP_UV == ps_codec->e_chroma_fmt) || (IV_YUV_420SP_VU == ps_codec->e_chroma_fmt))
         {
-
-            ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_420sp_fptr(pu1_y_src, pu1_uv_src,
-                                                                          pu1_y_dst_tmp, pu1_uv_dst_tmp,
-                                                                          ps_codec->i4_disp_wd,
-                                                                          num_rows,
-                                                                          ps_codec->i4_strd,
-                                                                          ps_codec->i4_strd,
-                                                                          ps_codec->i4_disp_strd,
-                                                                          ps_codec->i4_disp_strd);
+            if (1 == ps_codec->i4_pixel_size_y)
+            {
+                ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_420sp_fptr(pu1_y_src, pu1_uv_src,
+                                                                           pu1_y_dst_tmp, pu1_uv_dst_tmp,
+                                                                           ps_codec->i4_disp_wd,
+                                                                           num_rows,
+                                                                           ps_codec->i4_strd,
+                                                                           ps_codec->i4_strd,
+                                                                           ps_codec->i4_disp_strd,
+                                                                           ps_codec->i4_disp_strd);
+            }
+            else
+            {
+                ihevcd_hbd_fmt_conv_420sp_to_420sp((UWORD16 *)pu1_y_src, (UWORD16 *)pu1_uv_src,
+                                                   (UWORD16 *)pu1_y_dst_tmp, (UWORD16 *)pu1_uv_dst_tmp,
+                                                   ps_codec->i4_disp_wd, num_rows,
+                                                   ps_codec->i4_strd, ps_codec->i4_strd,
+                                                   ps_codec->i4_disp_strd, ps_codec->i4_disp_strd);
+            }
         }
-#if 0
-        else if(IV_YUV_420SP_VU == ps_codec->e_chroma_fmt)
-        {
-
-            ihevcd_fmt_conv_420sp_to_420sp_swap_uv(pu1_y_src, pu1_uv_src,
-                                                   pu1_y_dst_tmp, pu1_uv_dst_tmp,
-                                                   ps_codec->i4_disp_wd,
-                                                   num_rows,
-                                                   ps_codec->i4_strd,
-                                                   ps_codec->i4_strd,
-                                                   ps_codec->i4_disp_strd,
-                                                   ps_codec->i4_disp_strd);
-        }
-#endif
         else if(IV_YUV_420P == ps_codec->e_chroma_fmt)
         {
 
@@ -848,35 +1141,53 @@ IHEVCD_ERROR_T ihevcd_fmt_conv(codec_t *ps_codec,
             {
                 // copy luma
                 WORD32 i;
-                WORD32 num_cols = ps_codec->i4_disp_wd;
+                WORD32 num_cols = ps_codec->i4_disp_wd * ps_codec->i4_pixel_size_y;
 
-                for(i = 0; i < num_rows; i++)
+                for(i = 0;i < num_rows ; i++)
                 {
                     memcpy(pu1_y_dst_tmp, pu1_y_src, num_cols);
-                    pu1_y_dst_tmp += ps_codec->i4_disp_strd;
-                    pu1_y_src += ps_codec->i4_strd;
+                    pu1_y_dst_tmp += ps_codec->i4_disp_strd * ps_codec->i4_pixel_size_y;
+                    pu1_y_src += ps_codec->i4_strd * ps_codec->i4_pixel_size_y;
                 }
 
                 disable_luma_copy = 1;
             }
 
-            ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_420p_fptr(pu1_y_src, pu1_uv_src,
-                                                                         pu1_y_dst_tmp, pu1_u_dst_tmp, pu1_v_dst_tmp,
-                                                                         ps_codec->i4_disp_wd,
-                                                                         num_rows,
-                                                                         ps_codec->i4_strd,
-                                                                         ps_codec->i4_strd,
-                                                                         ps_codec->i4_disp_strd,
-                                                                         (ps_codec->i4_disp_strd / 2),
-                                                                         is_u_first,
-                                                                         disable_luma_copy);
+            if (1 == ps_codec->i4_pixel_size_y)
+            {
+                ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_420p_fptr(pu1_y_src, pu1_uv_src,
+                                                                          pu1_y_dst_tmp, pu1_u_dst_tmp, pu1_v_dst_tmp,
+                                                                           ps_codec->i4_disp_wd,
+                                                                           num_rows,
+                                                                           ps_codec->i4_strd,
+                                                                           ps_codec->i4_strd,
+                                                                           ps_codec->i4_disp_strd,
+                                                                           (ps_codec->i4_disp_strd / 2),
+                                                                           is_u_first,
+                                                                           disable_luma_copy);
+            }
+            else
+            {
+                ps_codec->s_func_selector.ihevcd_hbd_fmt_conv_420sp_to_420p_fptr((UWORD16 *)pu1_y_src, (UWORD16 *)pu1_uv_src,
+                                              (UWORD16 *)pu1_y_dst_tmp, (UWORD16 *)pu1_u_dst_tmp,
+                                              (UWORD16 *)pu1_v_dst_tmp,
+                                               ps_codec->i4_disp_wd,
+                                               num_rows,
+                                               ps_codec->i4_strd,
+                                               ps_codec->i4_strd,
+                                               ps_codec->i4_disp_strd,
+                                               (ps_codec->i4_disp_strd / 2),
+                                               is_u_first,
+                                               disable_luma_copy);
+
+            }
 
         }
         else if(IV_RGB_565 == ps_codec->e_chroma_fmt)
         {
 
             ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_rgb565_fptr(pu1_y_src, pu1_uv_src,
-                                                                           pu2_rgb_dst_tmp,
+                                                                            pu2_rgb_dst_tmp,
                                                                            ps_codec->i4_disp_wd,
                                                                            num_rows,
                                                                            ps_codec->i4_strd,
@@ -888,22 +1199,36 @@ IHEVCD_ERROR_T ihevcd_fmt_conv(codec_t *ps_codec,
         else if(IV_RGBA_8888 == ps_codec->e_chroma_fmt)
         {
             ASSERT(is_u_first == 1);
-
-            ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_rgba8888_fptr(pu1_y_src,
-                                                                             pu1_uv_src,
-                                                                             pu4_rgb_dst_tmp,
-                                                                             ps_codec->i4_disp_wd,
-                                                                             num_rows,
-                                                                             ps_codec->i4_strd,
-                                                                             ps_codec->i4_strd,
-                                                                             ps_codec->i4_disp_strd,
-                                                                             is_u_first);
+            if (ps_codec->i4_bit_depth_luma == 8 )
+            {
+                ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_rgba8888_fptr(pu1_y_src,
+                                                                              pu1_uv_src,
+                                                                              pu4_rgb_dst_tmp,
+                                                                              ps_codec->i4_disp_wd,
+                                                                              num_rows,
+                                                                              ps_codec->i4_strd,
+                                                                              ps_codec->i4_strd,
+                                                                              ps_codec->i4_disp_strd,
+                                                                              is_u_first);
+            }
+            else
+            {
+                ps_codec->s_func_selector.ihevcd_hbd_fmt_conv_420sp_to_rgba8888_fptr((UWORD16 *) pu1_y_src,
+                                        (UWORD16 *)pu1_uv_src,
+                                          pu4_rgb_dst_tmp,
+                                          ps_codec->i4_disp_wd,
+                                          num_rows,
+                                          ps_codec->i4_strd,
+                                          ps_codec->i4_strd,
+                                          ps_codec->i4_disp_strd,
+                                          is_u_first,ps_codec->i4_bit_depth_luma);
+            }
 
         }
 
 
+    } /* End of format conversion block */
 
-    }
-    return (ret);
+    return(ret);
 }
 

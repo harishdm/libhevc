@@ -86,33 +86,33 @@ const UWORD8 gau1_ihevcd_sigcoeff_ctxtinc[3][4][16] =
 
     {
         /* nbr csbf = 0:  sigCtx = (xP+yP == 0) ? 2 : (xP+yP < 3) ? 1: 0 */
-        { 2,    1,    1,    1,    1,    1,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0 },
+        {2,    1,    1,    1,    1,    1,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
         /* nbr csbf = 1:  sigCtx = (yP == 0) ? 2 : (yP == 1) ? 1: 0      */
-        { 2,    1,    2,    0,    1,    2,    0,    0,    1,    2,    0,    0,    1,    0,    0,    0 },
+        {2,    1,    2,    0,    1,    2,    0,    0,    1,    2,    0,    0,    1,    0,    0,    0},
         /* nbr csbf = 2:  sigCtx = (xP == 0) ? 2 : (xP == 1) ? 1: 0      */
-        { 2,    2,    1,    2,    1,    0,    2,    1,    0,    0,    1,    0,    0,    0,    0,    0 },
+        {2,    2,    1,    2,    1,    0,    2,    1,    0,    0,    1,    0,    0,    0,    0,    0},
         /* nbr csbf = 3:  sigCtx = 2                                     */
-        { 2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2 },
+        {2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2},
     },
     {
         /* nbr csbf = 0:  sigCtx = (xP+yP == 0) ? 2 : (xP+yP < 3) ? 1: 0 */
-        { 2,    1,    1,    0,    1,    1,    0,    0,    1,    0,    0,    0,    0,    0,    0,    0 },
+        {2,    1,    1,    0,    1,    1,    0,    0,    1,    0,    0,    0,    0,    0,    0,    0},
         /* nbr csbf = 1:  sigCtx = (yP == 0) ? 2 : (yP == 1) ? 1: 0      */
-        { 2,    2,    2,    2,    1,    1,    1,    1,    0,    0,    0,    0,    0,    0,    0,    0 },
+        {2,    2,    2,    2,    1,    1,    1,    1,    0,    0,    0,    0,    0,    0,    0,    0},
         /* nbr csbf = 2:  sigCtx = (xP == 0) ? 2 : (xP == 1) ? 1: 0      */
-        { 2,    1,    0,    0,    2,    1,    0,    0,    2,    1,    0,    0,    2,    1,    0,    0 },
+        {2,    1,    0,    0,    2,    1,    0,    0,    2,    1,    0,    0,    2,    1,    0,    0},
         /* nbr csbf = 3:  sigCtx = 2                                     */
-        { 2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2 },
+        {2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2},
     },
     {
         /* nbr csbf = 0:  sigCtx = (xP+yP == 0) ? 2 : (xP+yP < 3) ? 1: 0 */
-        { 2,    1,    1,    0,    1,    1,    0,    0,    1,    0,    0,    0,    0,    0,    0,    0 },
+        {2,    1,    1,    0,    1,    1,    0,    0,    1,    0,    0,    0,    0,    0,    0,    0},
         /* nbr csbf = 1:  sigCtx = (yP == 0) ? 2 : (yP == 1) ? 1: 0      */
-        { 2,    1,    0,    0,    2,    1,    0,    0,    2,    1,    0,    0,    2,    1,    0,    0 },
+        {2,    1,    0,    0,    2,    1,    0,    0,    2,    1,    0,    0,    2,    1,    0,    0},
         /* nbr csbf = 2:  sigCtx = (xP == 0) ? 2 : (xP == 1) ? 1: 0      */
-        { 2,    2,    2,    2,    1,    1,    1,    1,    0,    0,    0,    0,    0,    0,    0,    0 },
+        {2,    2,    2,    2,    1,    1,    1,    1,    0,    0,    0,    0,    0,    0,    0,    0},
         /* nbr csbf = 3:  sigCtx = 2                                     */
-        { 2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2 },
+        {2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2,    2},
     },
 
 
@@ -131,9 +131,9 @@ const UWORD8 gau1_ihevcd_sigcoeff_ctxtinc[3][4][16] =
   *
   *****************************************************************************
   */
-const UWORD8 gau1_ihevcd_sigcoeff_ctxtinc_tr4[3][16] =
+  const UWORD8 gau1_ihevcd_sigcoeff_ctxtinc_tr4[3][16] =
 {
-    /* Upright diagonal scan */
+     /* Upright diagonal scan */
     {
         0,    2,    1,    6,
         3,    4,    7,    6,
@@ -177,13 +177,13 @@ const UWORD8 gau1_ihevcd_sigcoeff_ctxtinc_tr4[3][16] =
 *******************************************************************************
 */
 
-WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
-                                    WORD32 x0, WORD32 y0,
-                                    WORD32 log2_trafo_size,
-                                    WORD32 c_idx,
-                                    WORD32 intra_pred_mode)
+WORD32 ihevcd_parse_residual_coding (codec_t *ps_codec,
+                                     WORD32 x0, WORD32 y0,
+                                     WORD32 log2_trafo_size,
+                                     WORD32 c_idx,
+                                     WORD32 intra_pred_mode)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 transform_skip_flag;
     WORD32 value;
     pps_t *ps_pps;
@@ -203,8 +203,6 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
     WORD8 *pi1_num_coded_subblks;
     WORD32 num_subblks;
     WORD32 sig_coeff_base_ctxt, abs_gt1_base_ctxt;
-    UNUSED(x0);
-    UNUSED(y0);
     ps_pps = ps_codec->s_parse.ps_pps;
 
     sign_data_hiding_flag = ps_pps->i1_sign_data_hiding_flag;
@@ -235,11 +233,11 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
     {
         WORD32 ctxt_idx_x, ctxt_idx_y, ctx_shift;
         WORD32 ctx_offset;
-        c_max = (log2_trafo_size << 1) - 1;
+        c_max = ( log2_trafo_size << 1) - 1;
 
         if(!c_idx)
         {
-            ctx_offset = (3 * (log2_trafo_size - 2)) + ((log2_trafo_size - 1) >> 2);
+            ctx_offset = (3 * (log2_trafo_size-2)) + ((log2_trafo_size-1) >> 2);
             ctxt_idx_x = IHEVC_CAB_COEFFX_PREFIX + ctx_offset;
             ctxt_idx_y = IHEVC_CAB_COEFFY_PREFIX + ctx_offset;
             ctx_shift  = (log2_trafo_size + 1) >> 2;
@@ -259,7 +257,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
                                                                           ctx_shift,
                                                                           c_max);
 
-        AEV_TRACE("last_coeff_x_prefix", last_significant_coeff_x_prefix, ps_cabac->u4_range);
+        AEV_TRACE("last_coeff_x_prefix", last_significant_coeff_x_prefix , ps_cabac->u4_range);
 
         TRACE_CABAC_CTXT("last_coeff_y_prefix", ps_cabac->u4_range, ctxt_idx_y);
         last_significant_coeff_y_prefix = ihevcd_cabac_decode_bins_tunary(ps_cabac,
@@ -269,7 +267,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
                                                                           ctx_shift,
                                                                           c_max);
 
-        AEV_TRACE("last_coeff_y_prefix", last_significant_coeff_y_prefix, ps_cabac->u4_range);
+        AEV_TRACE("last_coeff_y_prefix", last_significant_coeff_y_prefix , ps_cabac->u4_range);
 
 
         last_significant_coeff_x = last_significant_coeff_x_prefix;
@@ -278,8 +276,8 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
             WORD32 suf_length = ((last_significant_coeff_x_prefix - 2) >> 1);
 
             value = ihevcd_cabac_decode_bypass_bins(ps_cabac,
-                                                    ps_bitstrm,
-                                                    suf_length);
+                                                   ps_bitstrm,
+                                                   suf_length);
 
             AEV_TRACE("last_coeff_x_suffix", value, ps_cabac->u4_range);
 
@@ -295,8 +293,8 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
         {
             WORD32 suf_length = ((last_significant_coeff_y_prefix - 2) >> 1);
             value = ihevcd_cabac_decode_bypass_bins(ps_cabac,
-                                                    ps_bitstrm,
-                                                    suf_length);
+                                                   ps_bitstrm,
+                                                   suf_length);
 
             AEV_TRACE("last_coeff_y_suffix", value, ps_cabac->u4_range);
             last_significant_coeff_y =
@@ -311,19 +309,19 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
     scan_idx = SCAN_DIAG_UPRIGHT;
     if(PRED_MODE_INTRA == ps_codec->s_parse.s_cu.i4_pred_mode)
     {
-        if((2 == log2_trafo_size) || ((3 == log2_trafo_size) && (0 == c_idx)))
-        {
-            if((6 <= intra_pred_mode) &&
-               (14 >= intra_pred_mode))
-            {
-                scan_idx = SCAN_VERT;
-            }
-            else if((22 <= intra_pred_mode) &&
-                    (30 >= intra_pred_mode))
-            {
-                scan_idx = SCAN_HORZ;
-            }
-        }
+       if((2 == log2_trafo_size) || ((3 == log2_trafo_size) && (0 == c_idx)))
+       {
+           if((6 <= intra_pred_mode) &&
+              (14 >= intra_pred_mode))
+           {
+               scan_idx = SCAN_VERT;
+           }
+           else if((22 <= intra_pred_mode) &&
+                   (30 >= intra_pred_mode))
+           {
+               scan_idx = SCAN_HORZ;
+           }
+       }
     }
 
     /* In case the scan is vertical, then swap  X and Y positions */
@@ -333,24 +331,24 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
     }
 
     {
-        WORD8 *pi1_scan_idx;
-        WORD8 *pi1_buf = (WORD8 *)ps_codec->s_parse.pv_tu_coeff_data;
+         WORD8 *pi1_scan_idx;
+         WORD8 *pi1_buf = (WORD8 *)ps_codec->s_parse.pv_tu_coeff_data;
 
-        /* First WORD8 gives number of coded subblocks */
-        pi1_num_coded_subblks = pi1_buf++;
+         /* First WORD8 gives number of coded subblocks */
+         pi1_num_coded_subblks = pi1_buf++;
 
-        /* Set number of coded subblocks in the current TU to zero */
-        /* This will be updated later */
-        *pi1_num_coded_subblks = 0;
+         /* Set number of coded subblocks in the current TU to zero */
+         /* This will be updated later */
+         *pi1_num_coded_subblks = 0;
 
-        /* Second WORD8 gives (scan idx << 1) | trans_skip */
-        pi1_scan_idx = pi1_buf++;
-        *pi1_scan_idx = (scan_idx << 1) | transform_skip_flag;
+         /* Second WORD8 gives (scan idx << 1) | trans_skip */
+         pi1_scan_idx = pi1_buf++;
+         *pi1_scan_idx = (scan_idx << 1) | transform_skip_flag;
 
-        /* Store the incremented pointer in pv_tu_coeff_data */
-        ps_codec->s_parse.pv_tu_coeff_data = pi1_buf;
+         /* Store the incremented pointer in pv_tu_coeff_data */
+         ps_codec->s_parse.pv_tu_coeff_data = pi1_buf;
 
-    }
+     }
     /**
      * Given last_significant_coeff_y and last_significant_coeff_x find last sub block
      * This is done by ignoring lower two bits of last_significant_coeff_y and last_significant_coeff_x
@@ -373,7 +371,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
         /* This will be size of scan matrix to be used for subblock scanning */
         scan_mat_size = 1 << (log2_trafo_size - 2);
         scan_pos = ((last_significant_coeff_y >> 2) * scan_mat_size) +
-                        (last_significant_coeff_x >> 2);
+                    (last_significant_coeff_x >> 2);
 
         last_sub_blk = pu1_scan_blk[scan_pos];
     }
@@ -383,7 +381,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
         WORD32 scan_pos;
 
         scan_pos = ((last_significant_coeff_y & 3) << 2) +
-                        (last_significant_coeff_x & 3);
+                    (last_significant_coeff_x & 3);
 
         last_scan_pos = pu1_scan_coeff[scan_pos];
     }
@@ -393,7 +391,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
     /* Set CSBF array to zero */
     {
         UWORD32 *pu4_csbf;
-        pu4_csbf = (void *)au2_csbf;
+        pu4_csbf = (UWORD32 *)au2_csbf;
         *pu4_csbf++ = 0;
         *pu4_csbf++ = 0;
         *pu4_csbf++ = 0;
@@ -464,6 +462,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
         UWORD32 u4_coeff_abs_level_greater2_map;
         UWORD32 u4_coeff_sign_map;
         WORD32 first_sig_scan_pos, last_sig_scan_pos, num_greater1_flag, first_greater1_scan_pos;
+
         WORD32  num_sig_coeff, sum_abs_level;
         WORD32 nbr_csbf;
 
@@ -549,7 +548,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
         if(i == last_sub_blk)
         {
             WORD32 pos = ((last_significant_coeff_y & 3) << 2) +
-                            (last_significant_coeff_x & 3);
+                          (last_significant_coeff_x & 3);
             n = (last_scan_pos - 1);
             /* Set Significant coeff map for last significant coeff flag as 1 */
             u4_sig_coeff_map_raster = 1 << pos;
@@ -590,14 +589,14 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
                 {
                     /* DC coeff has fixed context for luma and chroma */
                     sig_coeff_base_ctxt = (0 == c_idx) ? IHEVC_CAB_COEFF_FLAG :
-                                                         (IHEVC_CAB_COEFF_FLAG + 27);
+                                                    (IHEVC_CAB_COEFF_FLAG + 27);
                 }
 
                 ctxt_idx = sig_ctxinc + sig_coeff_base_ctxt;
                 TRACE_CABAC_CTXT("significant_coeff_flag", ps_cabac->u4_range, ctxt_idx);
                 IHEVCD_CABAC_DECODE_BIN(significant_coeff_flag, ps_cabac,
-                                        ps_bitstrm,
-                                        ctxt_idx);
+                                                                 ps_bitstrm,
+                                                                 ctxt_idx);
                 AEV_TRACE("significant_coeff_flag", significant_coeff_flag, ps_cabac->u4_range);
 
 
@@ -607,7 +606,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
                     infer_sig_coeff_flag = 0;
 
 //                u4_sig_coeff_map_raster |= significant_coeff_flag
-//                              << coeff_pos;
+  //                              << coeff_pos;
                 u4_sig_coeff_map |= significant_coeff_flag << n;
                 num_coeff += significant_coeff_flag;
             }
@@ -621,7 +620,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
         /*********************************************************************/
         if(infer_sig_coeff_flag)
         {
-            u4_sig_coeff_map_raster |= 1;
+            u4_sig_coeff_map_raster |= 1 ;
             u4_sig_coeff_map |= 1;
             num_coeff++;
         }
@@ -693,15 +692,10 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
 
                         /* first_greater1_scan_pos is obtained using CLZ on u4_coeff_abs_level_greater1_map*/
                         /*  outside the loop instead of the following check inside the loop                */
-                        /* if( coeff_abs_level_greater1_flag && first_greater1_scan_pos == -1) */
-                        /*    first_greater1_scan_pos = n;                                     */
 
-                        if(coeff_abs_level_greater1_flag)
-                        {
+                        if(coeff_abs_level_greater1_flag) {
                             gt1_ctxt = 0;
-                        }
-                        else if(gt1_ctxt && (gt1_ctxt < 3))
-                        {
+                        } else if(gt1_ctxt && (gt1_ctxt < 3)) {
                             gt1_ctxt++;
                         }
 
@@ -745,7 +739,6 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
             AEV_TRACE("coeff_abs_level_greater2_flag", coeff_abs_level_greater2_flag, ps_cabac->u4_range);
             u4_coeff_abs_level_greater2_map = coeff_abs_level_greater2_flag << first_greater1_scan_pos;
         }
-
 
         u4_coeff_sign_map = 0;
 
@@ -807,7 +800,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
                             IHEVCD_CABAC_DECODE_BYPASS_BIN(bin, ps_cabac, ps_bitstrm);
                             u4_prefix++;
 
-                            if((WORD32)u4_prefix == 19 - rice_param)
+                            if(u4_prefix == 19 - rice_param)
                             {
                                 bin = 1;
                                 break;
@@ -816,7 +809,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
                         }while(bin);
 
                         u4_prefix = u4_prefix - 1;
-                        if(u4_prefix < 3)
+                        if (u4_prefix < 3 )
                         {
                             UWORD32 u4_suffix;
 
@@ -836,7 +829,7 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
                             //u4_prefix = CLIP3(u4_prefix, 0, 19 - rice_param);
 
                             u4_numbins = (u4_prefix - 3 + rice_param);
-                            coeff_abs_level_remaining = (((1 << (u4_prefix - 3)) + 3 - 1) << rice_param);
+                            coeff_abs_level_remaining = (((1<<(u4_prefix-3))+3-1)<<rice_param);
                             if(u4_numbins)
                             {
                                 IHEVCD_CABAC_DECODE_BYPASS_BINS(u4_suffix, ps_cabac, ps_bitstrm, u4_numbins);
@@ -903,3 +896,5 @@ WORD32 ihevcd_parse_residual_coding(codec_t *ps_codec,
 
     return ret;
 }
+
+

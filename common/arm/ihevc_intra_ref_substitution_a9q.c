@@ -444,7 +444,6 @@ void ihevc_intra_pred_luma_ref_substitution_a9q(UWORD8 *pu1_top_left,
             top = (nbr_flags & 0x100) >> 8;
             tp_right = (nbr_flags & 0x1000) >> 12;
 
-#if 1
             /* Else fill the corresponding samples */
             if(tp_left)
                 pu1_dst[two_nt] = *pu1_top_left;
@@ -491,7 +490,6 @@ void ihevc_intra_pred_luma_ref_substitution_a9q(UWORD8 *pu1_top_left,
             {
                 ihevc_memset_a9q(&pu1_dst[two_nt + 1 + nt], 0, nt);
             }
-#endif
             next = 1;
 
             /* If bottom -left is not available, reverse substitution process*/
@@ -557,7 +555,6 @@ void ihevc_intra_pred_luma_ref_substitution_a9q(UWORD8 *pu1_top_left,
                             + ((nbr_flags & 0x3000) >> 6)
                             + ((nbr_flags & 0x10000) >> 8);
 
-#if 1
             /* Else fill the corresponding samples */
             if(nbr_flags & 0x10000)
                 pu1_dst[two_nt] = *pu1_top_left;
@@ -574,14 +571,27 @@ void ihevc_intra_pred_luma_ref_substitution_a9q(UWORD8 *pu1_top_left,
                 ihevc_memset_mul_8_a9q(&pu1_dst[two_nt - 1 - (nt - 1)], 0, nt);
             }
 
-            if(nbr_flags & 0xC)
+            /* Bottom - left availability is checked for every 8x8 TU position and set accordingly */
             {
-                for(i = nt; i < two_nt; i++)
+                if(nbr_flags & 0x8)
+                {
+                    for(i = nt; i < (nt + 8); i++)
                     pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
-            }
-            else
-            {
-                ihevc_memset_mul_8_a9q(&pu1_dst[two_nt - 1 - (two_nt - 1)], 0, nt);
+                }
+                else
+                {
+                    ihevc_memset_mul_8_a9q(&pu1_dst[nt - 8], 0, 8);
+                }
+
+                if(nbr_flags & 0x4)
+                {
+                    for(i = (nt + 8); i < two_nt; i++)
+                        pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
+                }
+                else
+                {
+                    ihevc_memset_mul_8_a9q(&pu1_dst[0], 0, 8);
+                }
             }
 
 
@@ -602,7 +612,6 @@ void ihevc_intra_pred_luma_ref_substitution_a9q(UWORD8 *pu1_top_left,
             {
                 ihevc_memset_mul_8_a9q(&pu1_dst[two_nt + 1 + nt], 0, nt);
             }
-#endif
             /* compute trailing zeors based on nbr_flag for substitution process of below left see section .*/
             /* as each bit in nbr flags corresponds to 8 pels for bot_left, left, top and topright but 1 pel for topleft */
             {
@@ -670,7 +679,6 @@ void ihevc_intra_pred_luma_ref_substitution_a9q(UWORD8 *pu1_top_left,
 
         if(nt == 32)
         {
-#if 1
             /* Else fill the corresponding samples */
             if(nbr_flags & 0x10000)
                 pu1_dst[two_nt] = *pu1_top_left;
@@ -687,16 +695,48 @@ void ihevc_intra_pred_luma_ref_substitution_a9q(UWORD8 *pu1_top_left,
                 ihevc_memset_mul_8_a9q(&pu1_dst[two_nt - 1 - (nt - 1)], 0, nt);
             }
 
-            if(nbr_flags & 0xF)
+            /* Bottom - left availability is checked for every 8x8 TU position and set accordingly */
             {
-                for(i = nt; i < two_nt; i++)
+                if(nbr_flags & 0x8)
+                {
+                    for(i = nt; i < (nt + 8); i++)
                     pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
-            }
-            else
-            {
-                ihevc_memset_mul_8_a9q(&pu1_dst[two_nt - 1 - (two_nt - 1)], 0, nt);
-            }
+                }
+                else
+                {
+                    ihevc_memset_mul_8_a9q(&pu1_dst[24], 0, 8);
+                }
 
+                if(nbr_flags & 0x4)
+                {
+                    for(i = (nt + 8); i < (nt + 16); i++)
+                        pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
+                }
+                else
+                {
+                    ihevc_memset_mul_8_a9q(&pu1_dst[16], 0, 8);
+                }
+
+                if(nbr_flags & 0x2)
+                {
+                    for(i = (nt + 16); i < (nt + 24); i++)
+                        pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
+                }
+                else
+                {
+                    ihevc_memset_mul_8_a9q(&pu1_dst[8], 0, 8);
+                }
+
+                if(nbr_flags & 0x1)
+                {
+                    for(i = (nt + 24); i < (two_nt); i++)
+                        pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
+                }
+                else
+                {
+                    ihevc_memset_mul_8_a9q(&pu1_dst[0], 0, 8);
+                }
+            }
 
             if(nbr_flags & 0xF00)
             {
@@ -715,7 +755,6 @@ void ihevc_intra_pred_luma_ref_substitution_a9q(UWORD8 *pu1_top_left,
             {
                 ihevc_memset_mul_8_a9q(&pu1_dst[two_nt + 1 + nt], 0, nt);
             }
-#endif
             /* compute trailing ones based on mbr_flag for substitution process of below left see section .*/
             /* as each bit in nbr flags corresponds to 8 pels for bot_left, left, top and topright but 1 pel for topleft */
             {

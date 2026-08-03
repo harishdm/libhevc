@@ -70,7 +70,7 @@
 #include "ihevcd_error.h"
 
 
-mv_buf_t* ihevcd_mv_mgr_get_poc(buf_mgr_t *ps_mv_buf_mgr, UWORD32 abs_poc)
+mv_buf_t *ihevcd_mv_mgr_get_poc(buf_mgr_t *ps_mv_buf_mgr, UWORD32 abs_poc)
 {
     UWORD32 i;
     mv_buf_t *ps_mv_buf = NULL;
@@ -80,7 +80,7 @@ mv_buf_t* ihevcd_mv_mgr_get_poc(buf_mgr_t *ps_mv_buf_mgr, UWORD32 abs_poc)
     for(i = 0; i < ps_mv_buf_mgr->u4_max_buf_cnt; i++)
     {
         ps_mv_buf = (mv_buf_t *)ps_mv_buf_mgr->apv_ptr[i];
-        if(ps_mv_buf && (ps_mv_buf->i4_abs_poc == (WORD32)abs_poc))
+        if(ps_mv_buf && (ps_mv_buf->i4_abs_poc == abs_poc))
         {
             break;
         }
@@ -103,7 +103,7 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
     UWORD32 r_idx;
 
     dpb_mgr_t *ps_dpb_mgr = (dpb_mgr_t *)ps_codec->pv_dpb_mgr;
-    buf_mgr_t *ps_mv_buf_mgr = (buf_mgr_t *)ps_codec->pv_mv_buf_mgr;
+    buf_mgr_t *ps_mv_buf_mgr = (buf_mgr_t*)ps_codec->pv_mv_buf_mgr;
 
     WORD32 ai4_poc_st_curr_before[MAX_DPB_SIZE], ai4_poc_st_foll[MAX_DPB_SIZE], ai4_poc_st_curr_after[MAX_DPB_SIZE];
     WORD32 ai4_poc_lt_curr[MAX_DPB_SIZE], ai4_poc_lt_foll[MAX_DPB_SIZE];
@@ -126,7 +126,6 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
     WORD32 i4_poc_lt;
     UNUSED(as_ref_pic_lt_foll);
     UNUSED(as_ref_pic_st_foll);
-    UNUSED(ps_pps);
 
     RETURN_IF_NAL_INFO;
 
@@ -317,13 +316,13 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
         }
     }
 
-    for(i = 0; i < (WORD32)u4_num_lt_curr; i++)
+    for(i = 0; i < u4_num_lt_curr; i++)
     {
         if(0 == ai1_curr_delta_poc_msb_present_flag[i])
         {
             ps_pic_buf = ihevc_dpb_mgr_get_ref_by_poc_lsb(ps_dpb_mgr, ai4_poc_lt_curr[i]);
             if(NULL != ps_pic_buf)
-                ps_pic_buf->u1_used_as_ref = LONG_TERM_REF;
+            ps_pic_buf->u1_used_as_ref = LONG_TERM_REF;
 
             as_ref_pic_lt_curr[i] = ps_pic_buf;
         }
@@ -331,13 +330,13 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
         {
             ps_pic_buf = ihevc_dpb_mgr_get_ref_by_poc(ps_dpb_mgr, ai4_poc_lt_curr[i]);
             if(NULL != ps_pic_buf)
-                ps_pic_buf->u1_used_as_ref = LONG_TERM_REF;
+            ps_pic_buf->u1_used_as_ref = LONG_TERM_REF;
 
             as_ref_pic_lt_curr[i] = ps_pic_buf;
         }
     }
 
-    for(i = 0; i < (WORD32)u4_num_lt_foll; i++)
+    for(i = 0; i < u4_num_lt_foll; i++)
     {
         if(0 == ai1_foll_delta_poc_msb_present_flag[i])
         {
@@ -358,26 +357,26 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
     }
 
 
-    for(i = 0; i < (WORD32)u4_num_st_curr_before; i++)
+    for(i = 0; i < u4_num_st_curr_before; i++)
     {
 
         ps_pic_buf = ihevc_dpb_mgr_get_ref_by_poc(ps_dpb_mgr, ai4_poc_st_curr_before[i]);
         if(NULL != ps_pic_buf)
-            ps_pic_buf->u1_used_as_ref = SHORT_TERM_REF;
+        ps_pic_buf->u1_used_as_ref = SHORT_TERM_REF;
 
         as_ref_pic_st_curr_before[i] = ps_pic_buf;
     }
 
-    for(i = 0; i < (WORD32)u4_num_st_curr_after; i++)
+    for(i = 0; i < u4_num_st_curr_after; i++)
     {
         ps_pic_buf = ihevc_dpb_mgr_get_ref_by_poc(ps_dpb_mgr, ai4_poc_st_curr_after[i]);
         if(NULL != ps_pic_buf)
-            ps_pic_buf->u1_used_as_ref = SHORT_TERM_REF;
+        ps_pic_buf->u1_used_as_ref = SHORT_TERM_REF;
 
         as_ref_pic_st_curr_after[i] = ps_pic_buf;
     }
 
-    for(i = 0; i < (WORD32)u4_num_st_foll; i++)
+    for(i = 0; i < u4_num_st_foll; i++)
     {
         ps_pic_buf = ihevc_dpb_mgr_get_ref_by_poc(ps_dpb_mgr, ai4_poc_st_foll[i]);
         if(NULL != ps_pic_buf)
@@ -388,7 +387,7 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
 
     //TODO: Bit stream conformance tests to be included
 
-    u4_num_rps_curr_temp_list0 = (WORD32)u4_num_total_curr > ps_slice_hdr->i1_num_ref_idx_l0_active ? (WORD32)u4_num_total_curr : ps_slice_hdr->i1_num_ref_idx_l0_active;
+    u4_num_rps_curr_temp_list0 = u4_num_total_curr > ps_slice_hdr->i1_num_ref_idx_l0_active ? u4_num_total_curr : ps_slice_hdr->i1_num_ref_idx_l0_active;
 
     r_idx = 0;
     if((PSLICE == ps_slice_hdr->i1_slice_type) ||
@@ -396,7 +395,7 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
     {
         while(r_idx < u4_num_rps_curr_temp_list0)
         {
-            for(i = 0; (i < (WORD32)u4_num_st_curr_before) && (r_idx < u4_num_rps_curr_temp_list0); r_idx++, i++)
+            for( i = 0; (i < u4_num_st_curr_before) && (r_idx < u4_num_rps_curr_temp_list0); r_idx++, i++ )
             {
                 if(NULL == as_ref_pic_st_curr_before[i])
                 {
@@ -405,7 +404,7 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
                 as_ref_pic_list_temp0[r_idx] = as_ref_pic_st_curr_before[i];
             }
 
-            for(i = 0; (i < (WORD32)u4_num_st_curr_after) && (r_idx < u4_num_rps_curr_temp_list0); r_idx++, i++)
+            for( i = 0; (i < u4_num_st_curr_after) && (r_idx < u4_num_rps_curr_temp_list0); r_idx++, i++ )
             {
                 if(NULL == as_ref_pic_st_curr_after[i])
                 {
@@ -414,7 +413,7 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
                 as_ref_pic_list_temp0[r_idx] = as_ref_pic_st_curr_after[i];
             }
 
-            for(i = 0; (i < (WORD32)u4_num_lt_curr) && (r_idx < u4_num_rps_curr_temp_list0); r_idx++, i++)
+            for( i = 0; (i < u4_num_lt_curr) && (r_idx < u4_num_rps_curr_temp_list0); r_idx++, i++ )
             {
                 if(NULL == as_ref_pic_lt_curr[i])
                 {
@@ -424,28 +423,28 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
             }
         }
 
-        for(r_idx = 0; (WORD32)r_idx < ps_slice_hdr->i1_num_ref_idx_l0_active; r_idx++)
+        for( r_idx = 0; r_idx < ps_slice_hdr->i1_num_ref_idx_l0_active; r_idx++)
         {
             pic_buf_t *ps_pic_buf;
-            ps_slice_hdr->as_ref_pic_list0[r_idx].pv_pic_buf = ps_slice_hdr->s_rplm.i1_ref_pic_list_modification_flag_l0 ?  (void *)as_ref_pic_list_temp0[ps_slice_hdr->s_rplm.i1_list_entry_l0[r_idx]] :  (void *)as_ref_pic_list_temp0[r_idx];
-            ps_pic_buf = (pic_buf_t *)ps_slice_hdr->as_ref_pic_list0[r_idx].pv_pic_buf;
+            ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_pic_buf = ps_slice_hdr->s_rplm.i1_ref_pic_list_modification_flag_l0 ?  (void*)as_ref_pic_list_temp0[ ps_slice_hdr->s_rplm.i1_list_entry_l0[ r_idx ] ] :  (void*)as_ref_pic_list_temp0[ r_idx ];
+            ps_pic_buf = (pic_buf_t *)ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_pic_buf;
 
             if(ps_pic_buf == NULL)
                 return IHEVCD_REF_PIC_NOT_FOUND;
 
             ps_mv_buf = ihevcd_mv_mgr_get_poc(ps_mv_buf_mgr, ps_pic_buf->i4_abs_poc);
-            ps_slice_hdr->as_ref_pic_list0[r_idx].pv_mv_buf = ps_mv_buf;
+            ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_mv_buf = ps_mv_buf;
         }
 
 
         if(ps_slice_hdr->i1_slice_type  == BSLICE)
         {
-            u4_num_rps_curr_temp_list1 = (WORD32)u4_num_total_curr > ps_slice_hdr->i1_num_ref_idx_l1_active ? (WORD32)u4_num_total_curr : ps_slice_hdr->i1_num_ref_idx_l1_active;
+            u4_num_rps_curr_temp_list1 = u4_num_total_curr > ps_slice_hdr->i1_num_ref_idx_l1_active ? u4_num_total_curr : ps_slice_hdr->i1_num_ref_idx_l1_active;
 
             r_idx = 0;
             while(r_idx < u4_num_rps_curr_temp_list1)
             {
-                for(i = 0; (i < (WORD32)u4_num_st_curr_after) && (r_idx < u4_num_rps_curr_temp_list1); r_idx++, i++)
+                for( i = 0; (i < u4_num_st_curr_after) && (r_idx < u4_num_rps_curr_temp_list1); r_idx++, i++ )
                 {
                     if(NULL == as_ref_pic_st_curr_after[i])
                     {
@@ -454,7 +453,7 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
                     as_ref_pic_list_temp1[r_idx] = as_ref_pic_st_curr_after[i];
                 }
 
-                for(i = 0; (i < (WORD32)u4_num_st_curr_before) && (r_idx < u4_num_rps_curr_temp_list1); r_idx++, i++)
+                for( i = 0; (i < u4_num_st_curr_before) && (r_idx < u4_num_rps_curr_temp_list1); r_idx++, i++ )
                 {
                     if(NULL == as_ref_pic_st_curr_before[i])
                     {
@@ -463,7 +462,7 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
                     as_ref_pic_list_temp1[r_idx] = as_ref_pic_st_curr_before[i];
                 }
 
-                for(i = 0; (i < (WORD32)u4_num_lt_curr) && (r_idx < u4_num_rps_curr_temp_list1); r_idx++, i++)
+                for( i = 0; (i < u4_num_lt_curr) && (r_idx < u4_num_rps_curr_temp_list1); r_idx++, i++ )
                 {
                     if(NULL == as_ref_pic_lt_curr[i])
                     {
@@ -473,17 +472,17 @@ WORD32 ihevcd_ref_list(codec_t *ps_codec, pps_t *ps_pps, sps_t *ps_sps, slice_he
                 }
             }
 
-            for(r_idx = 0; (WORD32)r_idx < ps_slice_hdr->i1_num_ref_idx_l1_active; r_idx++)
+            for( r_idx = 0; r_idx < ps_slice_hdr->i1_num_ref_idx_l1_active; r_idx++)
             {
-                pic_buf_t *ps_pic_buf;
-                ps_slice_hdr->as_ref_pic_list1[r_idx].pv_pic_buf = ps_slice_hdr->s_rplm.i1_ref_pic_list_modification_flag_l1 ?  (void *)as_ref_pic_list_temp1[ps_slice_hdr->s_rplm.i1_list_entry_l1[r_idx]] :  (void *)as_ref_pic_list_temp1[r_idx];
-                ps_pic_buf = (pic_buf_t *)ps_slice_hdr->as_ref_pic_list1[r_idx].pv_pic_buf;
+                    pic_buf_t *ps_pic_buf;
+                    ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_pic_buf = ps_slice_hdr->s_rplm.i1_ref_pic_list_modification_flag_l1 ?  (void*)as_ref_pic_list_temp1[ ps_slice_hdr->s_rplm.i1_list_entry_l1[ r_idx ] ] :  (void*)as_ref_pic_list_temp1[ r_idx ];
+                    ps_pic_buf = (pic_buf_t *)ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_pic_buf;
 
-                if(ps_pic_buf == NULL)
-                    return IHEVCD_REF_PIC_NOT_FOUND;
+                    if(ps_pic_buf == NULL)
+                        return IHEVCD_REF_PIC_NOT_FOUND;
 
-                ps_mv_buf = ihevcd_mv_mgr_get_poc(ps_mv_buf_mgr, ps_pic_buf->i4_abs_poc);
-                ps_slice_hdr->as_ref_pic_list1[r_idx].pv_mv_buf = ps_mv_buf;
+                    ps_mv_buf = ihevcd_mv_mgr_get_poc(ps_mv_buf_mgr, ps_pic_buf->i4_abs_poc);
+                    ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_mv_buf = ps_mv_buf;
             }
         }
     }

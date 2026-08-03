@@ -45,7 +45,6 @@
 #include "ihevc_typedefs.h"
 #include "iv.h"
 #include "ivd.h"
-#include "ihevcd_cxa.h"
 #include "ithread.h"
 #include "ihevc_platform_macros.h"
 
@@ -102,9 +101,9 @@ IHEVCD_ERROR_T ihevcd_jobq_lock(jobq_t *ps_jobq)
     retval = ithread_mutex_lock(ps_jobq->pv_mutex);
     if(retval)
     {
-        return (IHEVCD_ERROR_T)IHEVCD_FAIL;
+        return IHEVCD_FAIL;
     }
-    return (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    return IHEVCD_SUCCESS;
 }
 
 /**
@@ -132,9 +131,9 @@ IHEVCD_ERROR_T ihevcd_jobq_unlock(jobq_t *ps_jobq)
     retval = ithread_mutex_unlock(ps_jobq->pv_mutex);
     if(retval)
     {
-        return (IHEVCD_ERROR_T)IHEVCD_FAIL;
+        return IHEVCD_FAIL;
     }
-    return (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    return IHEVCD_SUCCESS;
 
 }
 /**
@@ -162,11 +161,11 @@ IHEVCD_ERROR_T ihevcd_jobq_unlock(jobq_t *ps_jobq)
 IHEVCD_ERROR_T ihevcd_jobq_yield(jobq_t *ps_jobq)
 {
 
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
 
     IHEVCD_ERROR_T rettmp;
     rettmp = ihevcd_jobq_unlock(ps_jobq);
-    RETURN_IF((rettmp != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), rettmp);
+    RETURN_IF((rettmp != IHEVCD_SUCCESS), rettmp);
 
 #ifdef GPU_CIRCULAR_QUEUE
     usleep(1000);
@@ -174,9 +173,8 @@ IHEVCD_ERROR_T ihevcd_jobq_yield(jobq_t *ps_jobq)
     //NOP(1024 * 8);
     ithread_yield();
 #endif
-
     rettmp = ihevcd_jobq_lock(ps_jobq);
-    RETURN_IF((rettmp != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), rettmp);
+    RETURN_IF((rettmp != IHEVCD_SUCCESS), rettmp);
     return ret;
 }
 
@@ -205,9 +203,9 @@ IHEVCD_ERROR_T ihevcd_jobq_free(jobq_t *ps_jobq)
     ret = ithread_mutex_destroy(ps_jobq->pv_mutex);
 
     if(0 == ret)
-        return (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+        return IHEVCD_SUCCESS;
     else
-        return (IHEVCD_ERROR_T)IHEVCD_FAIL;
+        return IHEVCD_FAIL;
 }
 
 /**
@@ -283,9 +281,9 @@ void* ihevcd_jobq_init(void *pv_buf, WORD32 buf_size)
 */
 IHEVCD_ERROR_T ihevcd_jobq_reset(jobq_t *ps_jobq)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     ret = ihevcd_jobq_lock(ps_jobq);
-    RETURN_IF((ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), ret);
+    RETURN_IF((ret != IHEVCD_SUCCESS), ret);
 
     ps_jobq->pv_buf_wr      = ps_jobq->pv_buf_base;
     ps_jobq->pv_buf_rd      = ps_jobq->pv_buf_base;
@@ -294,7 +292,7 @@ IHEVCD_ERROR_T ihevcd_jobq_reset(jobq_t *ps_jobq)
     ps_jobq->i4_wrapped_around = 0;
 #endif
     ret = ihevcd_jobq_unlock(ps_jobq);
-    RETURN_IF((ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), ret);
+    RETURN_IF((ret != IHEVCD_SUCCESS), ret);
 
     return ret;
 }
@@ -321,18 +319,18 @@ IHEVCD_ERROR_T ihevcd_jobq_reset(jobq_t *ps_jobq)
 IHEVCD_ERROR_T ihevcd_jobq_deinit(jobq_t *ps_jobq)
 {
     WORD32 retval;
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
 
     ret = ihevcd_jobq_reset(ps_jobq);
-    RETURN_IF((ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), ret);
+    RETURN_IF((ret != IHEVCD_SUCCESS), ret);
 
     retval = ithread_mutex_destroy(ps_jobq->pv_mutex);
     if(retval)
     {
-        return (IHEVCD_ERROR_T)IHEVCD_FAIL;
+        return IHEVCD_FAIL;
     }
 
-    return (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    return IHEVCD_SUCCESS;
 }
 
 
@@ -357,14 +355,14 @@ IHEVCD_ERROR_T ihevcd_jobq_deinit(jobq_t *ps_jobq)
 
 IHEVCD_ERROR_T ihevcd_jobq_terminate(jobq_t *ps_jobq)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     ret = ihevcd_jobq_lock(ps_jobq);
-    RETURN_IF((ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), ret);
+    RETURN_IF((ret != IHEVCD_SUCCESS), ret);
 
     ps_jobq->i4_terminate = 1;
 
     ret = ihevcd_jobq_unlock(ps_jobq);
-    RETURN_IF((ret != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), ret);
+    RETURN_IF((ret != IHEVCD_SUCCESS), ret);
     return ret;
 }
 
@@ -401,13 +399,14 @@ IHEVCD_ERROR_T ihevcd_jobq_terminate(jobq_t *ps_jobq)
 */
 IHEVCD_ERROR_T ihevcd_jobq_queue(jobq_t *ps_jobq, void *pv_job, WORD32 job_size, WORD32 blocking)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     IHEVCD_ERROR_T rettmp;
     UWORD8 *pu1_buf;
-    UNUSED(blocking);
+
+
 
     rettmp = ihevcd_jobq_lock(ps_jobq);
-    RETURN_IF((rettmp != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), rettmp);
+    RETURN_IF((rettmp != IHEVCD_SUCCESS), rettmp);
 
     pu1_buf = (UWORD8 *)ps_jobq->pv_buf_wr;
 #ifdef GPU_CIRCULAR_QUEUE
@@ -423,7 +422,7 @@ IHEVCD_ERROR_T ihevcd_jobq_queue(jobq_t *ps_jobq, void *pv_job, WORD32 job_size,
         /* Wait for pv_buf_rd to consume first job_size number of bytes
          * from the beginning of job queue
          */
-        //ret = (IHEVCD_ERROR_T)IHEVCD_FAIL;
+        //ret = IHEVCD_FAIL;
         ps_jobq->pv_buf_wr = ps_jobq->pv_buf_base;
         memcpy(ps_jobq->pv_buf_wr, pv_job, job_size);
         ps_jobq->pv_buf_wr = (UWORD8 *)ps_jobq->pv_buf_wr + job_size;
@@ -435,7 +434,7 @@ IHEVCD_ERROR_T ihevcd_jobq_queue(jobq_t *ps_jobq, void *pv_job, WORD32 job_size,
     {
         memcpy(ps_jobq->pv_buf_wr, pv_job, job_size);
         ps_jobq->pv_buf_wr = (UWORD8 *)ps_jobq->pv_buf_wr + job_size;
-        ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+        ret = IHEVCD_SUCCESS;
     }
     else
     {
@@ -443,14 +442,14 @@ IHEVCD_ERROR_T ihevcd_jobq_queue(jobq_t *ps_jobq, void *pv_job, WORD32 job_size,
         /* Wait for pv_buf_rd to consume first job_size number of bytes
          * from the beginning of job queue
          */
-        ret = (IHEVCD_ERROR_T)IHEVCD_FAIL;
+        ret = IHEVCD_FAIL;
     }
 #endif
 
     ps_jobq->i4_terminate = 0;
 
     rettmp = ihevcd_jobq_unlock(ps_jobq);
-    RETURN_IF((rettmp != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), rettmp);
+    RETURN_IF((rettmp != IHEVCD_SUCCESS), rettmp);
 
     return ret;
 }
@@ -493,10 +492,10 @@ IHEVCD_ERROR_T ihevcd_jobq_dequeue(jobq_t *ps_jobq, void *pv_job, WORD32 job_siz
     volatile UWORD8 *pu1_buf;
 
     rettmp = ihevcd_jobq_lock(ps_jobq);
-    RETURN_IF((rettmp != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), rettmp);
+    RETURN_IF((rettmp != IHEVCD_SUCCESS), rettmp);
 #ifdef GPU_CIRCULAR_QUEUE
     if(((UWORD8 *)ps_jobq->pv_buf_end <= (ps_jobq->pv_buf_rd + job_size)) &&
-                    (ps_jobq->i4_wrapped_around == 1))
+        (ps_jobq->i4_wrapped_around == 1))
     {
         ps_jobq->pv_buf_rd = ps_jobq->pv_buf_base;
         ps_jobq->i4_wrapped_around = 0;
@@ -509,11 +508,11 @@ IHEVCD_ERROR_T ihevcd_jobq_dequeue(jobq_t *ps_jobq, void *pv_job, WORD32 job_siz
     {
         pu1_buf = (UWORD8 *)ps_jobq->pv_buf_rd;
         if(((UWORD8 *)ps_jobq->pv_buf_wr >= (pu1_buf + job_size)) ||
-                        (ps_jobq->i4_wrapped_around == 1))
+        (ps_jobq->i4_wrapped_around == 1))
         {
             memcpy(pv_job, ps_jobq->pv_buf_rd, job_size);
             ps_jobq->pv_buf_rd = (UWORD8 *)ps_jobq->pv_buf_rd + job_size;
-            ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+            ret = IHEVCD_SUCCESS;
             break;
         }
         else
@@ -521,7 +520,7 @@ IHEVCD_ERROR_T ihevcd_jobq_dequeue(jobq_t *ps_jobq, void *pv_job, WORD32 job_siz
             /* If all the entries have been dequeued, then break and return */
             if(1 == ps_jobq->i4_terminate)
             {
-                ret = (IHEVCD_ERROR_T)IHEVCD_FAIL;
+                ret = IHEVCD_FAIL;
                 break;
             }
 
@@ -533,7 +532,7 @@ IHEVCD_ERROR_T ihevcd_jobq_dequeue(jobq_t *ps_jobq, void *pv_job, WORD32 job_siz
             {
                 /* If there is no job available,
                  * and this is non blocking call then return fail */
-                ret = (IHEVCD_ERROR_T)IHEVCD_FAIL;
+                ret = IHEVCD_FAIL;
                 break;
             }
         }
@@ -551,7 +550,7 @@ IHEVCD_ERROR_T ihevcd_jobq_dequeue(jobq_t *ps_jobq, void *pv_job, WORD32 job_siz
             {
                 memcpy(pv_job, ps_jobq->pv_buf_rd, job_size);
                 ps_jobq->pv_buf_rd = (UWORD8 *)ps_jobq->pv_buf_rd + job_size;
-                ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+                ret = IHEVCD_SUCCESS;
                 break;
             }
             else
@@ -559,20 +558,19 @@ IHEVCD_ERROR_T ihevcd_jobq_dequeue(jobq_t *ps_jobq, void *pv_job, WORD32 job_siz
                 /* If all the entries have been dequeued, then break and return */
                 if(1 == ps_jobq->i4_terminate)
                 {
-                    ret = (IHEVCD_ERROR_T)IHEVCD_FAIL;
+                    ret = IHEVCD_FAIL;
                     break;
                 }
 
                 if(1 == blocking)
                 {
                     ihevcd_jobq_yield(ps_jobq);
-
                 }
                 else
                 {
                     /* If there is no job available,
                      * and this is non blocking call then return fail */
-                    ret = (IHEVCD_ERROR_T)IHEVCD_FAIL;
+                    ret = IHEVCD_FAIL;
                 }
             }
         }
@@ -583,11 +581,11 @@ IHEVCD_ERROR_T ihevcd_jobq_dequeue(jobq_t *ps_jobq, void *pv_job, WORD32 job_siz
         /* Wait for pv_buf_rd to consume first job_size number of bytes
          * from the beginning of job queue
          */
-        ret = (IHEVCD_ERROR_T)IHEVCD_FAIL;
+        ret = IHEVCD_FAIL;
     }
 #endif
     rettmp = ihevcd_jobq_unlock(ps_jobq);
-    RETURN_IF((rettmp != (IHEVCD_ERROR_T)IHEVCD_SUCCESS), rettmp);
+    RETURN_IF((rettmp != IHEVCD_SUCCESS), rettmp);
 
     return ret;
 }

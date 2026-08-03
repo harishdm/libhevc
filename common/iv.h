@@ -57,7 +57,7 @@
 /* IV_API_CALL_STATUS_T:This is only to return the FAIL/PASS status to the  */
 /* application for the current API call                                     */
 
-typedef enum {
+typedef enum{
     IV_STATUS_NA                                = 0x7FFFFFFF,
     IV_SUCCESS                                  = 0x0,
     IV_FAIL                                     = 0x1,
@@ -95,7 +95,9 @@ typedef enum {
     IV_RGB_24                               = 0xa,
     IV_YUV_420SP_UV                         = 0xb,
     IV_YUV_420SP_VU                         = 0xc,
-    IV_RGBA_8888                            = 0xd
+    IV_RGBA_8888                            = 0xd,
+    IV_YUV_422SP_UV                         = 0xe,
+    IV_YUV_422SP_VU                         = 0xf
 }IV_COLOR_FORMAT_T;
 
 /* IV_PICTURE_CODING_TYPE_T: VOP/Frame coding type Enumeration              */
@@ -161,7 +163,7 @@ typedef enum {
 
 /* IV_OBJ_T: This structure defines the handle for the codec instance        */
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -275,6 +277,16 @@ typedef struct {
      * Stride/Pitch of the Chroma (Cr) Buffer
      */
     UWORD32                                     u4_v_strd;
+
+    /**
+     * Bit depth of the Luma (Y) Buffer
+     */
+    UWORD32                                     u4_y_bit_depth;
+
+    /**
+     * Bit depth of the Chroma (U and V) Buffers
+     */
+    UWORD32                                     u4_uv_bit_depth;
 }iv_yuv_buf_t;
 
 /*****************************************************************************/
@@ -297,7 +309,7 @@ typedef struct {
 }iv_num_mem_rec_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -351,7 +363,7 @@ typedef struct {
 }iv_fill_mem_rec_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */
@@ -395,7 +407,7 @@ typedef struct {
 }iv_retrieve_mem_rec_ip_t;
 
 
-typedef struct {
+typedef struct{
     /**
      * u4_size of the structure
      */

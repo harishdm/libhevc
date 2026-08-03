@@ -93,7 +93,7 @@
  */
 WORD32 ihevcd_compare_pu_t(pu_t *ps_pu_1, pu_t *ps_pu_2)
 {
-    WORD32 l0_match = 0, l1_match = 0;
+    WORD32 l0_match = 0,l1_match = 0;
     pu_mv_t *ps_mv_1, *ps_mv_2;
     WORD32 pred_mode_1, pred_mode_2;
 
@@ -149,12 +149,12 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
     ref_list_t *ps_ref_list[2];
     mv_buf_t *ps_mv_buf_col;
     WORD32 xp_col, yp_col;
-    WORD32 col_ctb_x, col_ctb_y;
+    WORD32 col_ctb_x,col_ctb_y;
     mv_t as_mv_col[2];
     WORD32 log2_ctb_size;
     WORD32 ctb_size;
     WORD32 avail_col;
-    WORD32 col_ctb_idx, pu_cnt;
+    WORD32 col_ctb_idx,pu_cnt;
     WORD32 au4_list_col[2];
     WORD32 num_minpu_in_ctb;
     UWORD8 *pu1_pic_pu_map_ctb;
@@ -178,13 +178,13 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
     if((ps_slice_hdr->i1_slice_type == BSLICE) && (ps_slice_hdr->i1_collocated_from_l0_flag == 0))
     {
         /* L1 */
-        ps_mv_buf_col = (mv_buf_t *)ps_ref_list[1][ps_slice_hdr->i1_collocated_ref_idx].pv_mv_buf;
+        ps_mv_buf_col = (mv_buf_t*)ps_ref_list[1][ps_slice_hdr->i1_collocated_ref_idx].pv_mv_buf;
 
     }
     else
     {
         /* L0 */
-        ps_mv_buf_col = (mv_buf_t *)ps_ref_list[0][ps_slice_hdr->i1_collocated_ref_idx].pv_mv_buf;
+        ps_mv_buf_col = (mv_buf_t*)ps_ref_list[0][ps_slice_hdr->i1_collocated_ref_idx].pv_mv_buf;
 
     }
     num_minpu_in_ctb = (ctb_size / MIN_PU_SIZE) * (ctb_size / MIN_PU_SIZE);
@@ -198,7 +198,7 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
         yp_col = ((y_col >> 4) << 4);
         col_ctb_x = ps_mv_ctxt->i4_ctb_x + (xp_col >> log2_ctb_size);
         col_ctb_y = ps_mv_ctxt->i4_ctb_y + (yp_col >> log2_ctb_size);
-        col_ctb_idx = col_ctb_x + (col_ctb_y)*(ps_sps->i2_pic_wd_in_ctb);
+        col_ctb_idx = col_ctb_x + (col_ctb_y) * (ps_sps->i2_pic_wd_in_ctb);
         pu_cnt = ps_mv_buf_col->pu4_pic_pu_idx[col_ctb_idx];
         pu1_pic_pu_map_ctb = ps_mv_buf_col->pu1_pic_pu_map
                         + col_ctb_idx * num_minpu_in_ctb;
@@ -224,7 +224,7 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
     else
     {
         WORD32 au4_ref_idx_col[2];
-        WORD32 pred_flag_l0, pred_flag_l1;
+        WORD32 pred_flag_l0,pred_flag_l1;
         pred_flag_l0 = (ps_col_pu->b2_pred_mode != PRED_L1);
         pred_flag_l1 = (ps_col_pu->b2_pred_mode != PRED_L0);
 
@@ -290,7 +290,7 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
         {
             WORD32 cur_poc, col_poc, col_ref_poc_l0, cur_ref_poc;
             WORD32 col_ref_poc_l0_lt, cur_ref_poc_lt;
-            WORD32 ref_idx_l0, ref_idx_l1;
+            WORD32 ref_idx_l0,ref_idx_l1;
             WORD32 slice_idx;
             pic_buf_t *ps_pic_buf;
 
@@ -308,7 +308,7 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
             col_poc = ps_mv_buf_col->i4_abs_poc;
             cur_poc = ps_slice_hdr->i4_abs_pic_order_cnt;
 
-            slice_idx = *(ps_mv_buf_col->pu1_pic_slice_map + col_ctb_x + col_ctb_y * ps_sps->i2_pic_wd_in_ctb);
+            slice_idx = *(ps_mv_buf_col->pu1_pic_slice_map + col_ctb_x + col_ctb_y * ps_sps->i2_pic_wd_in_ctb );
 
             if(au4_list_col[0] == 0)
             {
@@ -325,7 +325,7 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
                                 (ps_mv_buf_col->u1_l1_collocated_poc_lt[slice_idx][au4_ref_idx_col[0]] == LONG_TERM_REF);
             }
             /* L0 collocated mv */
-            ps_pic_buf = (pic_buf_t *)((ps_ref_list[0][ref_idx_l0].pv_pic_buf));
+            ps_pic_buf = (pic_buf_t*)((ps_ref_list[0][ref_idx_l0].pv_pic_buf));
             cur_ref_poc = ps_pic_buf->i4_abs_poc;
             cur_ref_poc_lt = (ps_pic_buf->u1_used_as_ref == LONG_TERM_REF);
 
@@ -341,8 +341,8 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
                 {
                     ps_mv_col[0] = as_mv_col[0];
                     if(col_ref_poc_l0 != col_poc)
-                        ihevcd_scale_collocated_mv((mv_t *)(&ps_mv_col[0]), cur_ref_poc,
-                                                   col_ref_poc_l0, col_poc, cur_poc);
+                    ihevcd_scale_collocated_mv((mv_t *)(&ps_mv_col[0]), cur_ref_poc,
+                                               col_ref_poc_l0, col_poc, cur_poc);
                 }
             }
             else
@@ -371,7 +371,7 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
                 }
 
                 /* L1 collocated mv */
-                ps_pic_buf = (pic_buf_t *)((ps_ref_list[1][ref_idx_l1].pv_pic_buf));
+                ps_pic_buf = (pic_buf_t*)((ps_ref_list[1][ref_idx_l1].pv_pic_buf));
                 cur_ref_poc = ps_pic_buf->i4_abs_poc;
                 cur_ref_poc_lt = (ps_pic_buf->u1_used_as_ref == LONG_TERM_REF);
 
@@ -387,8 +387,8 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
                     {
                         ps_mv_col[1] = as_mv_col[1];
                         if(col_ref_poc_l1 != col_poc)
-                            ihevcd_scale_collocated_mv((mv_t *)&ps_mv_col[1], cur_ref_poc,
-                                                       col_ref_poc_l1, col_poc, cur_poc);
+                        ihevcd_scale_collocated_mv((mv_t *)&ps_mv_col[1], cur_ref_poc,
+                                                   col_ref_poc_l1, col_poc, cur_poc);
                     }
                 }
                 else
@@ -460,22 +460,22 @@ void ihevcd_collocated_mvp(mv_ctxt_t *ps_mv_ctxt,
  *******************************************************************************
  */
 void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
-                     UWORD32 *pu4_top_pu_idx,
-                     UWORD32 *pu4_left_pu_idx,
-                     WORD32 left_nbr_4x4_strd,
-                     pu_t *ps_pu,
-                     WORD32 part_mode,
-                     WORD32 part_idx,
-                     WORD32 part_wd,
-                     WORD32 part_ht,
-                     WORD32 part_pos_x,
-                     WORD32 part_pos_y,
-                     WORD32 single_mcl_flag,
-                     WORD32 lb_avail,
-                     WORD32 l_avail,
-                     WORD32 tr_avail,
-                     WORD32 t_avail,
-                     WORD32 tl_avail)
+                       UWORD32 *pu4_top_pu_idx,
+                       UWORD32 *pu4_left_pu_idx,
+                       WORD32 left_nbr_4x4_strd,
+                       pu_t *ps_pu,
+                       WORD32 part_mode,
+                       WORD32 part_idx,
+                       WORD32 part_wd,
+                       WORD32 part_ht,
+                       WORD32 part_pos_x,
+                       WORD32 part_pos_y,
+                       WORD32 single_mcl_flag,
+                       WORD32 lb_avail,
+                       WORD32 l_avail,
+                       WORD32 tr_avail,
+                       WORD32 t_avail,
+                       WORD32 tl_avail)
 {
     /******************************************************/
     /*      Spatial Merge Candidates                      */
@@ -552,8 +552,8 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
 
             /* if single MCL is 0 , second part of 2 part in CU */
             else if((single_mcl_flag == 0) && (part_idx == 1) &&
-                            ((part_mode == PART_Nx2N) || (part_mode == PART_nLx2N) ||
-                                            (part_mode == PART_nRx2N)))
+                ((part_mode == PART_Nx2N) || (part_mode == PART_nLx2N) ||
+                (part_mode == PART_nRx2N)))
             {
                 nbr_avail[NBR_A1] = 0;
             }
@@ -564,8 +564,8 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
                 candidate_cnt++;
                 if(candidate_cnt == max_num_merge_cand)
                 {
-                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt - 1].mv;
-                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt - 1].b2_pred_mode;
+                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt-1].mv;
+                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt-1].b2_pred_mode;
                     return;
                 }
             }
@@ -580,7 +580,7 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
     ps_nbr_pu[NBR_B1] = ps_mv_ctxt->ps_pic_pu + nbr_pu_idx;
 
     nbr_avail[NBR_B1] = t_avail
-                    && (!ps_nbr_pu[NBR_B1]->b1_intra_flag); /* B1 */
+                    && (!ps_nbr_pu[NBR_B1]->b1_intra_flag);/* B1 */
 
     {
         WORD32 avail_flag;
@@ -598,8 +598,8 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
 
             /* if single MCL is 0 , second part of 2 part in CU */
             else if((single_mcl_flag == 0) && (part_idx == 1) &&
-                            ((part_mode == PART_2NxN) || (part_mode == PART_2NxnU) ||
-                                            (part_mode == PART_2NxnD)))
+                ((part_mode == PART_2NxN) || (part_mode == PART_2NxnU) ||
+                (part_mode == PART_2NxnD)))
             {
                 nbr_avail[NBR_B1] = 0;
                 avail_flag = 0;
@@ -617,8 +617,8 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
                 candidate_cnt++;
                 if(candidate_cnt == max_num_merge_cand)
                 {
-                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt - 1].mv;
-                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt - 1].b2_pred_mode;
+                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt-1].mv;
+                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt-1].b2_pred_mode;
                     return;
                 }
             }
@@ -632,7 +632,7 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
     ps_nbr_pu[NBR_B0] = ps_mv_ctxt->ps_pic_pu + nbr_pu_idx;
 
     nbr_avail[NBR_B0] = tr_avail
-                    && (!ps_nbr_pu[NBR_B0]->b1_intra_flag); /* B0 */
+                    && (!ps_nbr_pu[NBR_B0]->b1_intra_flag);/* B0 */
 
     {
         WORD32 avail_flag;
@@ -659,8 +659,8 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
                 candidate_cnt++;
                 if(candidate_cnt == max_num_merge_cand)
                 {
-                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt - 1].mv;
-                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt - 1].b2_pred_mode;
+                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt-1].mv;
+                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt-1].b2_pred_mode;
                     return;
                 }
             }
@@ -683,7 +683,7 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
         {
             /* if at same merge level */
             if(pos_x_merge_shift == (nbr_x >> merge_shift) &&
-                            (pos_y_merge_shift == (nbr_y >> merge_shift)))
+                (pos_y_merge_shift == (nbr_y >> merge_shift)))
             {
                 nbr_avail[NBR_A0] = 0;
                 avail_flag = 0;
@@ -700,8 +700,8 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
                 candidate_cnt++;
                 if(candidate_cnt == max_num_merge_cand)
                 {
-                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt - 1].mv;
-                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt - 1].b2_pred_mode;
+                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt-1].mv;
+                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt-1].b2_pred_mode;
                     return;
                 }
             }
@@ -716,7 +716,7 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
     ps_nbr_pu[NBR_B2] = ps_mv_ctxt->ps_pic_pu + nbr_pu_idx;
 
     nbr_avail[NBR_B2] = tl_avail
-                    && (!ps_nbr_pu[NBR_B2]->b1_intra_flag); /* B2 */
+                    && (!ps_nbr_pu[NBR_B2]->b1_intra_flag);/* B2 */
 
     {
         WORD32 avail_flag;
@@ -725,13 +725,13 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
         if(nbr_avail[NBR_B2])
         {
             /* if at same merge level */
-            if(pos_x_merge_shift == (nbr_x >> merge_shift) &&
-                            (pos_y_merge_shift == (nbr_y >> merge_shift)))
+            if(pos_x_merge_shift == (nbr_x >> merge_shift)&&
+                (pos_y_merge_shift == (nbr_y >> merge_shift)))
             {
                 nbr_avail[NBR_B2] = 0;
                 avail_flag = 0;
             }
-            else if(4 == sum_avail_a0_a1_b0_b1)
+            else if(4 == sum_avail_a0_a1_b0_b1 )
             {
                 avail_flag = 0;
             }
@@ -755,8 +755,8 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
                 candidate_cnt++;
                 if(candidate_cnt == max_num_merge_cand)
                 {
-                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt - 1].mv;
-                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt - 1].b2_pred_mode;
+                    ps_pu[0].mv = as_pu_merge_list[candidate_cnt-1].mv;
+                    ps_pu[0].b2_pred_mode = as_pu_merge_list[candidate_cnt-1].b2_pred_mode;
                     return;
                 }
             }
@@ -766,22 +766,21 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
     /***********************************************************/
     /*          Collocated MV prediction                       */
     /***********************************************************/
-#if 1
     {
         mv_t as_mv_col[2];
-        WORD32 avail_col_flag[2] = { 0 }, x_col, y_col;
+        WORD32 avail_col_flag[2]={0}, x_col, y_col;
         WORD32 avail_col_l0, avail_col_l1;
 //        ihevcd_collocated_mvp(ps_mv_ctxt,ps_pu,part_pos_x,part_pos_y,part_wd,part_ht,as_mv_col,avail_col_flag,0);
 
         /* Checking Collocated MV availability at Bottom right of PU*/
         x_col = part_pos_x + part_wd;
         y_col = part_pos_y + part_ht;
-        ihevcd_collocated_mvp(ps_mv_ctxt, ps_pu, as_mv_col, avail_col_flag, 0, x_col, y_col);
+        ihevcd_collocated_mvp(ps_mv_ctxt,ps_pu,as_mv_col,avail_col_flag,0, x_col, y_col);
 
         avail_col_l0 = avail_col_flag[0];
         avail_col_l1 = avail_col_flag[1];
 
-        if(avail_col_l0 || avail_col_l1)
+        if(avail_col_l0 || avail_col_l1 )
         {
             as_pu_merge_list[candidate_cnt].mv.s_l0_mv = as_mv_col[0];
             as_pu_merge_list[candidate_cnt].mv.s_l1_mv = as_mv_col[1];
@@ -792,13 +791,13 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
             /* Checking Collocated MV availability at Center of PU */
             x_col = part_pos_x + (part_wd >> 1);
             y_col = part_pos_y + (part_ht >> 1);
-            ihevcd_collocated_mvp(ps_mv_ctxt, ps_pu, as_mv_col, avail_col_flag, 0, x_col, y_col);
+            ihevcd_collocated_mvp(ps_mv_ctxt,ps_pu,as_mv_col,avail_col_flag,0, x_col, y_col);
 
-            if(avail_col_l0 == 0)
+            if(avail_col_l0 == 0 )
             {
                 as_pu_merge_list[candidate_cnt].mv.s_l0_mv = as_mv_col[0];
             }
-            if(avail_col_l1 == 0)
+            if(avail_col_l1 == 0 )
             {
                 as_pu_merge_list[candidate_cnt].mv.s_l1_mv = as_mv_col[1];
             }
@@ -821,7 +820,6 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
         }
 
     }
-#endif
     {
         WORD32 slice_type;
 
@@ -842,7 +840,7 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
                 WORD32 l0_cand, l1_cand;
                 WORD32 bi_pred_idx = 0;
                 WORD32 total_bi_pred_cand =
-                                candidate_cnt * (candidate_cnt - 1);
+                         candidate_cnt * (candidate_cnt - 1);
 
                 while(bi_pred_idx < total_bi_pred_cand)
                 {
@@ -855,12 +853,12 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
                     {
                         WORD8 i1_l0_ref_idx, i1_l1_ref_idx;
                         mv_t s_l0_mv, s_l1_mv;
-                        pic_buf_t *ps_pic_buf_l0, *ps_pic_buf_l1;
+                        pic_buf_t *ps_pic_buf_l0,*ps_pic_buf_l1;
 
                         i1_l0_ref_idx = as_pu_merge_list[l0_cand].mv.i1_l0_ref_idx;
                         i1_l1_ref_idx = as_pu_merge_list[l1_cand].mv.i1_l1_ref_idx;
-                        ps_pic_buf_l0 = (pic_buf_t *)((ps_ref_list[0][i1_l0_ref_idx].pv_pic_buf));
-                        ps_pic_buf_l1 = (pic_buf_t *)((ps_ref_list[1][i1_l1_ref_idx].pv_pic_buf));
+                        ps_pic_buf_l0 = (pic_buf_t*)((ps_ref_list[0][i1_l0_ref_idx].pv_pic_buf));
+                        ps_pic_buf_l1 = (pic_buf_t*)((ps_ref_list[1][i1_l1_ref_idx].pv_pic_buf));
                         s_l0_mv = as_pu_merge_list[l0_cand].mv.s_l0_mv;
                         s_l1_mv = as_pu_merge_list[l1_cand].mv.s_l1_mv;
 
@@ -871,8 +869,8 @@ void ihevcd_mv_merge(mv_ctxt_t *ps_mv_ctxt,
                             candidate_cnt++;
                             if(candidate_cnt == max_num_merge_cand)
                             {
-                                ps_pu[0].mv.s_l0_mv = s_l0_mv;
-                                ps_pu[0].mv.s_l1_mv = s_l1_mv;
+                                ps_pu[0].mv.s_l0_mv =s_l0_mv;
+                                ps_pu[0].mv.s_l1_mv =s_l1_mv;
                                 ps_pu[0].mv.i1_l0_ref_idx = i1_l0_ref_idx;
                                 ps_pu[0].mv.i1_l1_ref_idx = i1_l1_ref_idx;
                                 ps_pu[0].b2_pred_mode = PRED_BI;

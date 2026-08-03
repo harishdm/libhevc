@@ -175,7 +175,7 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
             }
         }
         au4_nbr_avail[0] |= ((u4_top_rt_ctb_avail << 31)
-                        >> (1 + ctb_size_in_min_pu)); /* 1+ctb_size/4 position bit pos from msb */
+                        >> (1 + ctb_size_in_min_pu));/* 1+ctb_size/4 position bit pos from msb */
 
         au4_nbr_avail[0] |= (u4_top_lt_ctb_avail << 31);
         {
@@ -201,16 +201,16 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
         /* In case of a  tile boundary, left and top arrays must change*/
         /*Left*/
         /* If start of tile row*/
-        if(((ps_tile->u1_pos_x) == (ps_mv_ctxt->i4_ctb_x)) && (ps_mv_ctxt->i4_ctb_x != 0))
+        if( ( (ps_tile->u1_pos_x) == (ps_mv_ctxt->i4_ctb_x) ) && (ps_mv_ctxt->i4_ctb_x != 0))
         {
             WORD32 index_pic_map;
             WORD32 ctb_pu_idx;
-            UWORD8 *pu1_pic_pu_map;
+            UWORD8 *pu1_pic_pu_map ;
 
             /* Goto the left ctb which belongs to another tile */
-            index_pic_map = ((ps_mv_ctxt->i4_ctb_x - 1) + ps_mv_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb);
+            index_pic_map = ( (ps_mv_ctxt->i4_ctb_x - 1 ) + ps_mv_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb);
             ctb_pu_idx = ps_mv_ctxt->pu4_pic_pu_idx[index_pic_map];
-            index_pic_map *= num_minpu_in_ctb;
+            index_pic_map *= num_minpu_in_ctb ;
 
             /*Replicate the PUs of the last column of the left ctb*/
             pu1_pic_pu_map = ps_mv_ctxt->pu1_pic_pu_map + index_pic_map + ctb_size_in_min_pu - 1;
@@ -222,7 +222,7 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
             }
 
 
-            index_pic_map = ((ps_mv_ctxt->i4_ctb_x - 1) + (ps_mv_ctxt->i4_ctb_y - 1) * ps_sps->i2_pic_wd_in_ctb);
+            index_pic_map = ( (ps_mv_ctxt->i4_ctb_x - 1) + (ps_mv_ctxt->i4_ctb_y-1) * ps_sps->i2_pic_wd_in_ctb);
             ctb_pu_idx = ps_mv_ctxt->pu4_pic_pu_idx[index_pic_map];
             index_pic_map *= num_minpu_in_ctb;
             index_pic_map += (num_minpu_in_ctb - 1);
@@ -230,19 +230,19 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
         }
         /*Top*/
         /* If start of tile column*/
-        if(((ps_tile->u1_pos_y) == (ps_mv_ctxt->i4_ctb_y)) && (ps_mv_ctxt->i4_ctb_y != 0))
+        if( ( (ps_tile->u1_pos_y) == (ps_mv_ctxt->i4_ctb_y) ) && (ps_mv_ctxt->i4_ctb_y != 0))
         {
             WORD32 index_pic_map;
             WORD32 ctb_pu_idx;
-            UWORD8 *pu1_pic_pu_map;
+            UWORD8 *pu1_pic_pu_map ;
 
             /* Goto the top ctb which belongs to another tile */
-            index_pic_map =  (ps_mv_ctxt->i4_ctb_x) + ((ps_mv_ctxt->i4_ctb_y - 1) * ps_sps->i2_pic_wd_in_ctb);
+            index_pic_map =  (ps_mv_ctxt->i4_ctb_x ) + ( (ps_mv_ctxt->i4_ctb_y - 1 ) * ps_sps->i2_pic_wd_in_ctb);
             ctb_pu_idx = ps_mv_ctxt->pu4_pic_pu_idx[index_pic_map];
-            index_pic_map *= num_minpu_in_ctb;
+            index_pic_map *= num_minpu_in_ctb ;
 
             /*Replicate the PUs of the last row of the top ctb*/
-            pu1_pic_pu_map = ps_mv_ctxt->pu1_pic_pu_map + index_pic_map + (ctb_size_in_min_pu * (ctb_size_in_min_pu - 1));
+            pu1_pic_pu_map = ps_mv_ctxt->pu1_pic_pu_map + index_pic_map + (ctb_size_in_min_pu * (ctb_size_in_min_pu - 1 )) ;
             for(i = 0; i < ctb_size_in_min_pu; i++)
             {
                 /* Top neighbors change*/
@@ -350,30 +350,18 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
                 WORD32 pred_flag_l0, pred_flag_l1;
                 WORD32 tmp_x, tmp_y, mvd_x, mvd_y, mvp_x, mvp_y;
                 WORD32 two_pow_16, two_pow_15;
-#if 0
-                if( !pred_flag_l0 )
-                {
-                    s_pu_temp.mv.i1_l0_ref_idx = -1;
-                    s_pu_temp.b2_pred_mode = 3;
-                }
-                if( !pred_flag_l1 )
-                {
-                    s_pu_temp.mv.i1_l1_ref_idx = -1;
-                    s_pu_temp.b2_pred_mode = 3;
-                }
-#endif
 
                 ihevcd_mv_pred(ps_mv_ctxt, pu4_top_pu_idx, pu4_left_pu_idx,
                                pu4_top_left_pu_idx, nbr_pu_idx_strd,
                                ps_pu, u1_lb_avail, u1_l_avail,
                                u1_tr_avail, u1_t_avail, u1_tl_avail,
-                               &s_pred_mv);
+                           &s_pred_mv);
 
                 pred_flag_l0 = (ps_pu->b2_pred_mode != PRED_L1);
                 pred_flag_l1 = (ps_pu->b2_pred_mode != PRED_L0);
 
-                two_pow_16 = (1 << 16);
-                two_pow_15 = (1 << 15);
+                two_pow_16 = (1<<16);
+                two_pow_15 = (1<<15);
 
                 /* L0 MV */
                 if(pred_flag_l0)
@@ -414,45 +402,13 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
             {
                 WORD32 part_mode;
                 WORD32 part_idx;
-#if 0
-                /* For all part_modes other than PART_2Nx2N, max of PU width and PU height gives
-                 * Coding block size.
-                 * To differentiate between PART_2Nx2N and PART_NxN
-                 * PART_NxN is possible only when CB size is min CB size
-                 * So if pu width and pu height are equal and they are half of min CB size, then current is PART_NxN
-                 */
-                if(pu_wd == pu_ht)
-                {
-                    part_mode = PART_2Nx2N;
-                    if(2 * pu_wd == (ps_sps->i1_log2_min_coding_block_size << 2))
-                    part_mode = PART_NxN;
-                }
-                else
-                {
-
-                    if(pu_wd == cb_size)
-                    {
-                        /* Part Mode is either PART_2NxN or PART_2NxnU or PART_2NxnD */
-                        /* Since the exact mode is not really needed, it is set to PART_2NxN */
-                        part_mode = PART_2NxN;
-                    }
-                    else
-                    {
-                        /* Part Mode is either PART_Nx2N or PART_nLx2N or PART_nRx2N */
-                        /* Since the exact mode is not really needed, it is set to PART_Nx2N */
-                        part_mode = PART_Nx2N;
-                    }
-
-                }
-#else
                 part_mode = ps_pu->b3_part_mode;
-#endif
                 //TODO: Get part_idx
                 part_idx = ps_pu->b2_part_idx;
 
                 ihevcd_mv_merge(ps_mv_ctxt, pu4_top_pu_idx, pu4_left_pu_idx,
                                 nbr_pu_idx_strd, ps_pu, part_mode,
-                                part_idx, pu_wd_single_mcl, pu_ht_single_mcl,
+                                part_idx,pu_wd_single_mcl,pu_ht_single_mcl,
                                 pu_x_in_4x4_single_mcl << 2, pu_y_in_4x4_single_mcl << 2,
                                 single_mcl_flag, u1_lb_avail, u1_l_avail, u1_tr_avail,
                                 u1_t_avail, u1_tl_avail);
@@ -475,13 +431,13 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
                    (pu_x_in_4x4 * 4), (pu_y_in_4x4 * 4));
             printf("\n pu_wd = %d, pu_ht = %d", pu_wd, pu_ht);
             if(ps_pu->b2_pred_mode == PRED_L0)
-                printf("\n Pred = 0,Ref_idx = %d, MV l0 = %4d %4d", ps_pu->mv.i1_l0_ref_idx, ps_pu->mv.s_l0_mv.i2_mvx,
+                printf("\n Pred = 0,Ref_idx = %d, MV l0 = %4d %4d",ps_pu->mv.i1_l0_ref_idx, ps_pu->mv.s_l0_mv.i2_mvx,
                        ps_pu->mv.s_l0_mv.i2_mvy);
             else if(ps_pu->b2_pred_mode == PRED_L1)
-                printf("\n Pred = 1,Ref_idx = %d,  MV l1 = %4d %4d", ps_pu->mv.i1_l1_ref_idx, ps_pu->mv.s_l1_mv.i2_mvx,
+                printf("\n Pred = 1,Ref_idx = %d,  MV l1 = %4d %4d",ps_pu->mv.i1_l1_ref_idx, ps_pu->mv.s_l1_mv.i2_mvx,
                        ps_pu->mv.s_l1_mv.i2_mvy);
             else
-                printf("\n Pred = 2,Ref_idx = %d,Ref_idx = %d, MV l0 = %4d %4d, MV l1 = %4d %4d", ps_pu->mv.i1_l0_ref_idx, ps_pu->mv.i1_l1_ref_idx,
+                printf("\n Pred = 2,Ref_idx = %d,Ref_idx = %d, MV l0 = %4d %4d, MV l1 = %4d %4d",ps_pu->mv.i1_l0_ref_idx,ps_pu->mv.i1_l1_ref_idx,
                        ps_pu->mv.s_l0_mv.i2_mvx, ps_pu->mv.s_l0_mv.i2_mvy,
                        ps_pu->mv.s_l1_mv.i2_mvx, ps_pu->mv.s_l1_mv.i2_mvy);
 
@@ -490,10 +446,10 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
 
         {
             slice_header_t *ps_slice_hdr;
-            pic_buf_t *ps_pic_buf_l0, *ps_pic_buf_l1;
+            pic_buf_t *ps_pic_buf_l0,*ps_pic_buf_l1;
             ps_slice_hdr = ps_mv_ctxt->ps_slice_hdr;
-            ps_pic_buf_l0 = (pic_buf_t *)((ps_slice_hdr->as_ref_pic_list0[ps_pu->mv.i1_l0_ref_idx].pv_pic_buf));
-            ps_pic_buf_l1 = (pic_buf_t *)((ps_slice_hdr->as_ref_pic_list1[ps_pu->mv.i1_l1_ref_idx].pv_pic_buf));
+            ps_pic_buf_l0 = (pic_buf_t*)((ps_slice_hdr->as_ref_pic_list0[ps_pu->mv.i1_l0_ref_idx].pv_pic_buf));
+            ps_pic_buf_l1 = (pic_buf_t*)((ps_slice_hdr->as_ref_pic_list1[ps_pu->mv.i1_l1_ref_idx].pv_pic_buf));
             ps_pu->mv.i1_l0_ref_pic_buf_id = ps_pic_buf_l0->u1_buf_id;
             if(BSLICE == ps_slice_hdr->i1_slice_type)
             {
@@ -567,10 +523,9 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
         }
     }
 
-#if 1
     /* Updating the CTB level PU idx (Used for collocated MV pred)*/
     {
-        WORD32 ctb_row, ctb_col, index_pic_map, index_nbr_map;
+        WORD32 ctb_row,ctb_col,index_pic_map,index_nbr_map ;
         WORD32 first_pu_of_ctb;
         first_pu_of_ctb = pu4_nbr_pu_idx[1 + nbr_pu_idx_strd];
 
@@ -588,6 +543,5 @@ WORD32 ihevcd_get_mv_ctb(mv_ctxt_t *ps_mv_ctxt,
             index_nbr_map += nbr_pu_idx_strd;
         }
     }
-#endif
     return num_pu_per_ctb;
 }

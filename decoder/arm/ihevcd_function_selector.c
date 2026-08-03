@@ -64,7 +64,7 @@ void ihevcd_init_function_ptr_a9q(codec_t *ps_codec);
 void ihevcd_init_function_ptr_av8(codec_t *ps_codec);
 void ihevcd_init_function_ptr(void *pv_codec)
 {
-    codec_t *ps_codec = (codec_t *)pv_codec;
+    codec_t *ps_codec = (codec_t*)pv_codec;
 
 #ifndef ARMV8
     switch(ps_codec->e_processor_arch)
@@ -90,14 +90,14 @@ void ihevcd_init_function_ptr(void *pv_codec)
 #endif
             break;
     }
+
     switch(ps_codec->e_processor_soc)
     {
-
         case SOC_HISI_37X:
 #ifndef DISABLE_NEON
-            ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_420sp_fptr               =  &ihevcd_fmt_conv_420sp_to_420sp_a9q;
+        ps_codec->s_func_selector.ihevcd_fmt_conv_420sp_to_420sp_fptr               =  &ihevcd_fmt_conv_420sp_to_420sp_a9q;
 #endif
-            break;
+        break;
         case SOC_GENERIC:
         default:
             break;
@@ -118,7 +118,7 @@ void ihevcd_init_function_ptr(void *pv_codec)
 
 void ihevcd_init_arch(void *pv_codec)
 {
-    codec_t *ps_codec = (codec_t *)pv_codec;
+    codec_t *ps_codec = (codec_t*) pv_codec;
 #ifdef DEFAULT_ARCH
 #if DEFAULT_ARCH == D_ARCH_ARM_NONEON
     ps_codec->e_processor_arch = ARCH_ARM_NONEON;

@@ -123,13 +123,14 @@ col_for_intra_chroma_addr_3:
 ihevc_intra_pred_chroma_mode_11_to_17_a9q:
 
     stmfd       sp!, {r4-r12, r14}          @stack stores the values of the arguments
+    vpush        {d8 - d15}
 
-    ldr         r4,[sp,#40]                 @loads nt
+    ldr         r4,[sp,#104]                @loads wd
     ldr         r7, gai4_ihevc_ang_table_addr
 ulbl1:
     add         r7,r7,pc
 
-    ldr         r5,[sp,#44]                 @mode (11 to 17)
+    ldr         r5,[sp,#108]                 @mode (11 to 17)
     ldr         r8, gai4_ihevc_inv_ang_table_addr
 ulbl2:
     add         r8,r8,pc
@@ -607,6 +608,7 @@ epil_8_16_32:
 
 end_func:
     add         sp, sp, #132
+    vpop        {d8 - d15}
     ldmfd       sp!,{r4-r12,r15}            @reload the registers from sp
 
 

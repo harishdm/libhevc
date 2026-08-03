@@ -127,7 +127,7 @@ void ihevcd_intra_pred_mode_prediction(codec_t *ps_codec,
                     + (ps_cu->i4_pos_x * 2);
 
     pu1_luma_intra_pred_mode_left = ps_parse->pu1_luma_intra_pred_mode_left
-                    + (ps_cu->i4_pos_y * 2);
+                + (ps_cu->i4_pos_y * 2);
 
 /*
     if(0 == ps_cu->i4_pos_y)
@@ -140,6 +140,7 @@ void ihevcd_intra_pred_mode_prediction(codec_t *ps_codec,
         memset(pu1_luma_intra_pred_mode_left, INTRA_DC, 16);
     }
 */
+
     if(ps_cu->i4_pos_y)
     {
         UWORD8 *pu1_pic_intra_flag = ps_codec->s_parse.pu1_pic_intra_flag;
@@ -160,8 +161,8 @@ void ihevcd_intra_pred_mode_prediction(codec_t *ps_codec,
         available_t = 0;
 
 
-    if((0 == ps_cu->i4_pos_x) && (((0 == ps_codec->s_parse.i4_ctb_slice_x) && (0 == ps_codec->s_parse.i4_ctb_slice_y)) ||
-                                  (0 == ps_codec->s_parse.i4_ctb_tile_x)))
+    if((0 == ps_cu->i4_pos_x) && (((0 == ps_codec->s_parse.i4_ctb_slice_x) && (0 == ps_codec->s_parse.i4_ctb_slice_y) )||
+                                   (0 == ps_codec->s_parse.i4_ctb_tile_x)))
     {
         available_l = 0;
     }
@@ -215,7 +216,7 @@ void ihevcd_intra_pred_mode_prediction(codec_t *ps_codec,
                 if(available_t)
                 {
                     cand_intra_pred_mode_t =
-                                    pu1_luma_intra_pred_mode_top[block_offset];
+                                pu1_luma_intra_pred_mode_top[block_offset];
                 }
             }
 
@@ -259,10 +260,10 @@ void ihevcd_intra_pred_mode_prediction(codec_t *ps_codec,
             }
 
             /* Computing Intra pred mode */
-            if(ps_cu->ai4_prev_intra_luma_pred_flag[2 * i + j] == 1)
+            if(ps_cu->ai4_prev_intra_luma_pred_flag[2*i + j] == 1)
             {
-                ps_cu->ai4_intra_luma_pred_mode[2 * i + j] =
-                                cand_mode_list[ps_cu->ai4_mpm_idx[2 * i + j]];
+                ps_cu->ai4_intra_luma_pred_mode[2*i + j] =
+                                cand_mode_list[ps_cu->ai4_mpm_idx[2*i + j]];
             }
             else
             {
@@ -281,7 +282,7 @@ void ihevcd_intra_pred_mode_prediction(codec_t *ps_codec,
                     SWAP(cand_mode_list[1], cand_mode_list[2]);
                 }
 
-                intra_pred_mode = ps_cu->ai4_rem_intra_luma_pred_mode[2 * i + j];
+                intra_pred_mode = ps_cu->ai4_rem_intra_luma_pred_mode[2*i + j];
 
                 if(intra_pred_mode >= cand_mode_list[0])
                     intra_pred_mode++;
@@ -292,7 +293,7 @@ void ihevcd_intra_pred_mode_prediction(codec_t *ps_codec,
                 if(intra_pred_mode >= cand_mode_list[2])
                     intra_pred_mode++;
 
-                ps_cu->ai4_intra_luma_pred_mode[2 * i + j] = intra_pred_mode;
+                ps_cu->ai4_intra_luma_pred_mode[2*i + j] = intra_pred_mode;
             }
             /* Update Top and Left intra pred mode */
             {

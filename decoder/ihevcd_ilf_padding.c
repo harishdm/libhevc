@@ -83,11 +83,15 @@ void ihevcd_ilf_pad_frame(deblk_ctxt_t *ps_deblk_ctxt, sao_ctxt_t *ps_sao_ctxt)
     codec_t *ps_codec;
     WORD32 i4_ctb_x, i4_ctb_y;
     WORD32 ctb_size;
+    WORD32 i4_pixel_size_y;
+    WORD32 i4_pixel_size_uv;
 
     ps_sps = ps_deblk_ctxt->ps_sps;
     ps_slice_hdr = ps_deblk_ctxt->ps_slice_hdr;
     ps_codec = ps_deblk_ctxt->ps_codec;
     ctb_size = (1 << ps_sps->i1_log2_ctb_size);
+    i4_pixel_size_y     = ps_codec->i4_pixel_size_y;
+    i4_pixel_size_uv    = ps_codec->i4_pixel_size_uv;
 
     for(i4_ctb_y = 0; i4_ctb_y < ps_sps->i2_pic_ht_in_ctb; i4_ctb_y++)
     {
@@ -143,22 +147,22 @@ void ihevcd_ilf_pad_frame(deblk_ctxt_t *ps_deblk_ctxt, sao_ctxt_t *ps_sao_ctxt)
                         ihevcd_deblk_ctb(ps_deblk_ctxt, i4_is_last_ctb_x, i4_is_last_ctb_y);
                     }
                 }
-            }
+
+            } /* End of deblock */
 
             if(ps_slice_hdr->i1_slice_sao_luma_flag || ps_slice_hdr->i1_slice_sao_chroma_flag)
             {
-                ihevcd_sao_ctb(ps_sao_ctxt);
+                ftype_sao_ctb   *pf_sao_ctb = (ftype_sao_ctb *)(ps_sao_ctxt->pf_sao_ctb);
+                pf_sao_ctb(ps_sao_ctxt);
             }
 
             /* Call padding if required */
             {
-                UWORD8 *pu1_cur_ctb_luma = ps_deblk_ctxt->pu1_cur_pic_luma
-                                + (i4_ctb_x * ctb_size
-                                                + i4_ctb_y * ctb_size
-                                                                * ps_codec->i4_strd);
-                UWORD8 *pu1_cur_ctb_chroma = ps_deblk_ctxt->pu1_cur_pic_chroma
-                                + i4_ctb_x * ctb_size
-                                + (i4_ctb_y * ctb_size * ps_codec->i4_strd / 2);
+                UWORD8 *pu1_cur_ctb_luma = ps_deblk_ctxt->pu1_cur_pic_luma +
+                        (i4_ctb_x * ctb_size + i4_ctb_y * ctb_size * ps_codec->i4_strd) * i4_pixel_size_y;
+                WORD32  i4_sub_ht_c = 2;
+                UWORD8 *pu1_cur_ctb_chroma = ps_deblk_ctxt->pu1_cur_pic_chroma +
+                        (i4_ctb_x * ctb_size + (i4_ctb_y * ctb_size * ps_codec->i4_strd / i4_sub_ht_c)) * i4_pixel_size_uv;
 
                 if(0 == i4_ctb_x)
                 {
@@ -167,11 +171,25 @@ void ihevcd_ilf_pad_frame(deblk_ctxt_t *ps_deblk_ctxt, sao_ctxt_t *ps_sao_ctxt)
 
                     pad_ht_luma = ctb_size;
                     pad_ht_luma += (ps_sps->i2_pic_ht_in_ctb - 1) == i4_ctb_y ? 8 : 0;
-                    pad_ht_chroma = ctb_size / 2;
+                    pad_ht_chroma = ctb_size / i4_sub_ht_c;
                     pad_ht_chroma += (ps_sps->i2_pic_ht_in_ctb - 1) == i4_ctb_y ? 8 : 0;
                     /* Pad left after 1st CTB is processed */
-                    ps_codec->s_func_selector.ihevc_pad_left_luma_fptr(pu1_cur_ctb_luma - 8 * ps_codec->i4_strd, ps_codec->i4_strd, pad_ht_luma, PAD_LEFT);
-                    ps_codec->s_func_selector.ihevc_pad_left_chroma_fptr(pu1_cur_ctb_chroma - 8 * ps_codec->i4_strd, ps_codec->i4_strd, pad_ht_chroma, PAD_LEFT);
+                    if (1 == i4_pixel_size_y)
+                    {
+                        ps_codec->s_func_selector.ihevc_pad_left_luma_fptr(pu1_cur_ctb_luma - 8 * ps_codec->i4_strd,
+                            ps_codec->i4_strd, pad_ht_luma, PAD_LEFT);
+                    } else {
+                        ps_codec->s_func_selector.ihevc_hbd_pad_left_luma_fptr((UWORD16 *)pu1_cur_ctb_luma - 8 * ps_codec->i4_strd,
+                                                ps_codec->i4_strd, pad_ht_luma, PAD_LEFT);
+                    }
+                    if (1 == i4_pixel_size_uv)
+                    {
+                        ps_codec->s_func_selector.ihevc_pad_left_chroma_fptr(pu1_cur_ctb_chroma - 8 * ps_codec->i4_strd,
+                            ps_codec->i4_strd, pad_ht_chroma, PAD_LEFT);
+                    } else {
+                        ps_codec->s_func_selector.ihevc_hbd_pad_left_chroma_fptr((UWORD16 *)pu1_cur_ctb_chroma - 8 * ps_codec->i4_strd, ps_codec->i4_strd,
+                                                pad_ht_chroma, PAD_LEFT);
+                    }
                 }
                 else if((ps_sps->i2_pic_wd_in_ctb - 1) == i4_ctb_x)
                 {
@@ -181,11 +199,23 @@ void ihevcd_ilf_pad_frame(deblk_ctxt_t *ps_deblk_ctxt, sao_ctxt_t *ps_sao_ctxt)
 
                     pad_ht_luma = ctb_size;
                     pad_ht_luma += (ps_sps->i2_pic_ht_in_ctb - 1) == i4_ctb_y ? 8 : 0;
-                    pad_ht_chroma = ctb_size / 2;
+                    pad_ht_chroma = ctb_size / i4_sub_ht_c;
                     pad_ht_chroma += (ps_sps->i2_pic_ht_in_ctb - 1) == i4_ctb_y ? 8 : 0;
                     /* Pad right after last CTB in the current row is processed */
-                    ps_codec->s_func_selector.ihevc_pad_right_luma_fptr(pu1_cur_ctb_luma + cols_remaining - 8 * ps_codec->i4_strd, ps_codec->i4_strd, pad_ht_luma, PAD_RIGHT);
-                    ps_codec->s_func_selector.ihevc_pad_right_chroma_fptr(pu1_cur_ctb_chroma + cols_remaining - 8 * ps_codec->i4_strd, ps_codec->i4_strd, pad_ht_chroma, PAD_RIGHT);
+                    if (1 == i4_pixel_size_y) {
+                        ps_codec->s_func_selector.ihevc_pad_right_luma_fptr(pu1_cur_ctb_luma + cols_remaining - 8 * ps_codec->i4_strd,
+                            ps_codec->i4_strd, pad_ht_luma, PAD_RIGHT);
+                    } else {
+                        ps_codec->s_func_selector.ihevc_hbd_pad_right_luma_fptr((UWORD16 *)pu1_cur_ctb_luma + cols_remaining - 8 * ps_codec->i4_strd,
+                                                    ps_codec->i4_strd, pad_ht_luma, PAD_RIGHT);
+                    }
+                    if (1 == i4_pixel_size_uv) {
+                        ps_codec->s_func_selector.ihevc_pad_right_chroma_fptr(pu1_cur_ctb_chroma + cols_remaining - 8 * ps_codec->i4_strd,
+                            ps_codec->i4_strd, pad_ht_chroma, PAD_RIGHT);
+                    } else {
+                        ihevc_hbd_pad_right_chroma((UWORD16 *)pu1_cur_ctb_chroma + cols_remaining - 8 * ps_codec->i4_strd,
+                                                    ps_codec->i4_strd, pad_ht_chroma, PAD_RIGHT);
+                    }
 
 
                     if((ps_sps->i2_pic_ht_in_ctb - 1) == i4_ctb_y)
@@ -194,21 +224,50 @@ void ihevcd_ilf_pad_frame(deblk_ctxt_t *ps_deblk_ctxt, sao_ctxt_t *ps_sao_ctxt)
                         /* Since SAO is shifted by 8x8, chroma padding can not be done till second row is processed */
                         /* Hence moving top padding to to end of frame, Moving it to second row also results in problems when there is only one row */
                         /* Pad top after padding left and right for current rows after processing 1st CTB row */
-                        ihevc_pad_top(ps_deblk_ctxt->pu1_cur_pic_luma - PAD_LEFT, ps_codec->i4_strd, ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_TOP);
-                        ihevc_pad_top(ps_deblk_ctxt->pu1_cur_pic_chroma - PAD_LEFT, ps_codec->i4_strd, ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_TOP / 2);
+                        if (1 == i4_pixel_size_y) {
+                            ihevc_pad_top(ps_deblk_ctxt->pu1_cur_pic_luma - PAD_LEFT, ps_codec->i4_strd,
+                                            ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_TOP);
+                        } else {
+                            ihevc_hbd_pad_top((UWORD16 *)ps_deblk_ctxt->pu1_cur_pic_luma - PAD_LEFT, ps_codec->i4_strd,
+                                            ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_TOP);
+                        }
+                        if (1 == i4_pixel_size_uv) {
+                            ihevc_pad_top(ps_deblk_ctxt->pu1_cur_pic_chroma - PAD_LEFT, ps_codec->i4_strd,
+                                            ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_TOP / i4_sub_ht_c);
+                        }
+                        else {
+                            ihevc_hbd_pad_top((UWORD16 *)ps_deblk_ctxt->pu1_cur_pic_chroma - PAD_LEFT, ps_codec->i4_strd,
+                                            ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_TOP / i4_sub_ht_c);
+                        }
 
-                        pu1_buf = ps_deblk_ctxt->pu1_cur_pic_luma + ps_codec->i4_strd * ps_sps->i2_pic_height_in_luma_samples - PAD_LEFT;
+                        pu1_buf = ps_deblk_ctxt->pu1_cur_pic_luma +
+                            (ps_codec->i4_strd * ps_sps->i2_pic_height_in_luma_samples - PAD_LEFT) * i4_pixel_size_y;
                         /* Pad top after padding left and right for current rows after processing 1st CTB row */
-                        ihevc_pad_bottom(pu1_buf, ps_codec->i4_strd, ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_BOT);
+                        if (1 == i4_pixel_size_y) {
+                            ihevc_pad_bottom(pu1_buf, ps_codec->i4_strd, ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_BOT);
+                        } else {
+                            ihevc_hbd_pad_bottom((UWORD16 *)pu1_buf, ps_codec->i4_strd,
+                                                    ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_BOT);
+                        }
 
-                        pu1_buf = ps_deblk_ctxt->pu1_cur_pic_chroma + ps_codec->i4_strd * (ps_sps->i2_pic_height_in_luma_samples / 2) - PAD_LEFT;
-                        ihevc_pad_bottom(pu1_buf, ps_codec->i4_strd, ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_BOT / 2);
-                    }
-                }
-            }
+                        pu1_buf = ps_deblk_ctxt->pu1_cur_pic_chroma +
+                            (ps_codec->i4_strd * (ps_sps->i2_pic_height_in_luma_samples / i4_sub_ht_c) - PAD_LEFT) * i4_pixel_size_uv;
+                        if (1 == i4_pixel_size_uv) {
+                            ihevc_pad_bottom(pu1_buf, ps_codec->i4_strd,
+                                                ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_BOT / i4_sub_ht_c);
+                        } else {
+                            ihevc_hbd_pad_bottom((UWORD16 *)pu1_buf, ps_codec->i4_strd,
+                                                    ps_sps->i2_pic_width_in_luma_samples + PAD_WD, PAD_BOT / i4_sub_ht_c);
+                        }
 
+                    } /* End of if ctb in last row */
 
-        }
-    }
+                } /* End of if last ctb in a row */
 
-}
+            } /* End of padding */
+
+        } /* End of loop over ctb_x */
+
+    } /* End of loop over ctb_y */
+
+} /* End of ihevcd_ilf_pad_frame */

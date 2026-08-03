@@ -73,13 +73,14 @@ ihevc_sao_edge_offset_class1_chroma_a9q:
 
 
     STMFD       sp!, {r4-r12, r14}          @stack stores the values of the arguments
-    LDR         r7,[sp,#60]                 @Loads wd
-    LDR         r4,[sp,#40]                 @Loads pu1_src_top_left
-    LDR         r5,[sp,#52]                 @Loads pu1_avail
-    LDR         r6,[sp,#56]                 @Loads pi1_sao_offset_u
-    LDR         r7,[sp,#60]                 @Loads pi1_sao_offset_v
-    LDR         r8,[sp,#64]                 @Loads wd
-    LDR         r9,[sp,#68]                 @Loads ht
+    vpush       {d8  -  d15}
+    LDR         r7,[sp,#124]                 @Loads wd
+    LDR         r4,[sp,#104]                 @Loads pu1_src_top_left
+    LDR         r5,[sp,#116]                 @Loads pu1_avail
+    LDR         r6,[sp,#120]                 @Loads pi1_sao_offset_u
+    LDR         r7,[sp,#124]                 @Loads pi1_sao_offset_v
+    LDR         r8,[sp,#128]                 @Loads wd
+    LDR         r9,[sp,#132]                 @Loads ht
 
     SUB         r10,r8,#2                   @wd - 2
     LDRH        r11,[r3,r10]                @pu1_src_top[wd - 2]
@@ -398,6 +399,7 @@ PU1_SRC_LOOP_RESIDUE:
     VST1.8      {D30},[r10],r1              @vst1q_u8(pu1_src_cpy, pu1_cur_row)
 
 END_LOOPS:
+    vpop        {d8  -  d15}
     LDMFD       sp!,{r4-r12,r15}            @Reload the registers from SP
 
 

@@ -248,7 +248,6 @@ void ihevc_itrans_recon_4x4_ttype1_sse42(WORD16 *pi2_src,
 
         m_temp_reg_20 = _mm_unpacklo_epi32(m_temp_reg_24, m_temp_reg_25);
         m_temp_reg_21 = _mm_unpackhi_epi32(m_temp_reg_24, m_temp_reg_25);
-
     }
 
     /* Stage 2 */
@@ -448,8 +447,6 @@ void ihevc_itrans_recon_4x4_sse42(WORD16 *pi2_src,
                                   WORD32 zero_cols,
                                   WORD32 zero_rows)
 {
-
-
     __m128i m_temp_reg_0;
     __m128i m_temp_reg_1;
     __m128i m_temp_reg_2;
@@ -474,12 +471,10 @@ void ihevc_itrans_recon_4x4_sse42(WORD16 *pi2_src,
     __m128i m_rdng_factor;
     __m128i m_count;
 
-
     WORD32 i4_shift = IT_SHIFT_STAGE_1;
     UNUSED(zero_rows);
     UNUSED(zero_cols);
     UNUSED(pi2_tmp);
-
 
     m_temp_reg_0 = _mm_loadl_epi64((__m128i *)pi2_src);
     pi2_src += src_strd;
@@ -494,7 +489,6 @@ void ihevc_itrans_recon_4x4_sse42(WORD16 *pi2_src,
 
     m_temp_reg_1 = _mm_cvtepi16_epi32(m_temp_reg_1);
     m_temp_reg_3 = _mm_cvtepi16_epi32(m_temp_reg_3);
-
 
     m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai4_ihevc_trans_4_ttype0[0][0]); //36
     m_coeff3 = _mm_loadu_si128((__m128i *)&g_ai4_ihevc_trans_4_ttype0[2][0]); //83
@@ -844,8 +838,8 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
     __m128i m_temp_reg_77;
     __m128i m_coeff1, m_coeff2, m_coeff3, m_coeff4;
 
-    WORD32 check_row_stage_1;   /* Lokesh */
-    WORD32 check_row_stage_2;   /* Lokesh */
+    WORD32 check_row_stage_1;
+    WORD32 check_row_stage_2;
 
     __m128i m_rdng_factor;
     WORD32 i4_shift = IT_SHIFT_STAGE_1;
@@ -877,7 +871,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
             /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
             /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
             {
-                //Interleaving 0,4 row in 0 , 1 Rishab
+                //Interleaving 0,4 row in 0 , 1
                 /*coef2 for m_temp_reg_12 and m_temp_reg_13 , coef1 for m_temp_reg_10 and m_temp_reg_11*/
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[3][0]);
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[0][0]);
@@ -886,25 +880,21 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_temp_reg_10 = _mm_madd_epi16(m_temp_reg_0, m_coeff1);
                 m_temp_reg_12 = _mm_madd_epi16(m_temp_reg_0, m_coeff2);
-
             }
-
 
             /* eo0 is present in the registers m_temp_reg_14 and m_temp_reg_15 */
             /* eo1 is present in the registers m_temp_reg_16 and m_temp_reg_17 */
             /* as upper 8 bytes are zeros so m_temp_reg_15 and m_temp_reg_17 are not used*/
             {
-
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]); //sub 2B*36-6B*83 ,2T*36-6T*83
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]); //add 2B*83+6B*36 ,2T*83+6T*36
 
-                /* Combining instructions to eliminate them based on zero_rows : Lokesh */
-                //Interleaving 2,6 row in 4, 5 Rishab
+                /* Combining instructions to eliminate them based on zero_rows */
+                //Interleaving 2,6 row in 4, 5
                 m_temp_reg_4 = _mm_unpacklo_epi16(m_temp_reg_72, m_temp_reg_76);
 
                 m_temp_reg_16 = _mm_madd_epi16(m_temp_reg_4, m_coeff1);
                 m_temp_reg_14 = _mm_madd_epi16(m_temp_reg_4, m_coeff2);
-
 
                 /* Loading coeff for computing o0, o1, o2 and o3 in the next block */
 
@@ -914,10 +904,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[0][0]);
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[1][0]);
 
-
-
                 /* e */
-
                 /* e0 stored in m_temp_reg_40 and m_temp_reg_41 */
                 /* e1 stored in m_temp_reg_42 and m_temp_reg_43 */
                 /* e3 stored in m_temp_reg_46 and m_temp_reg_47 */
@@ -927,15 +914,12 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_temp_reg_40 = _mm_add_epi32(m_temp_reg_10, m_temp_reg_14);
                 m_temp_reg_46 = _mm_sub_epi32(m_temp_reg_10, m_temp_reg_14);
-
             }
 
             /* o */
             {
-
                 /* o0 stored in m_temp_reg_30 and m_temp_reg_31 */
                 {
-
                     m_temp_reg_60 = _mm_unpacklo_epi16(m_temp_reg_71, m_temp_reg_73);
                     //o0:1B*89+3B*75,5B*50+7B*18
                     m_temp_reg_30 = _mm_madd_epi16(m_temp_reg_60, m_coeff1);
@@ -943,15 +927,11 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_rdng_factor = _mm_cvtsi32_si128((1 << (i4_shift - 1)));
                     m_rdng_factor = _mm_shuffle_epi32(m_rdng_factor, 0x0000);
 
-
-
                     /* Column 0 of destination computed here */
                     /* It is stored in m_temp_reg_50 */
                     /* Column 7 of destination computed here */
                     /* It is stored in m_temp_reg_57 */
                     /* Upper 8 bytes of both registers are zero due to zero_cols*/
-
-
 
                     m_temp_reg_62 = _mm_add_epi32(m_temp_reg_40, m_temp_reg_30);
                     m_temp_reg_66 = _mm_sub_epi32(m_temp_reg_40, m_temp_reg_30);
@@ -976,8 +956,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                     /* o1 stored in m_temp_reg_32 and m_temp_reg_33 */
 
-
-
                     /* Column 1 of destination computed here */
                     /* It is stored in m_temp_reg_51 */
                     /* Column 6 of destination computed here */
@@ -998,15 +976,12 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_51 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_56 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_63);
 
-
                     /* o2 stored in m_temp_reg_34 and m_temp_reg_35 */
 
                     /* Loading coeff for computing o3  in the next block */
 
                     m_coeff3 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[6][0]);
                     m_coeff4 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[7][0]);
-
-
 
                     /* Column 2 of destination computed here */
                     /* It is stored in m_temp_reg_52 */
@@ -1028,11 +1003,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_52 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_55 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_63);
 
-
-
                     /* o3 stored in m_temp_reg_36 and m_temp_reg_37 */
-
-
 
                     /* Column 3 of destination computed here */
                     /* It is stored in m_temp_reg_53 */
@@ -1047,7 +1018,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                     m_temp_reg_62 = _mm_srai_epi32(m_temp_reg_62, i4_shift);
                     m_temp_reg_66 = _mm_srai_epi32(m_temp_reg_66, i4_shift);
-
 
                     m_temp_reg_53 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_54 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_63);
@@ -1085,7 +1055,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
             /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
             /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
             {
-                //Interleaving 0,4 row in 0 , 1 Rishab
+                //Interleaving 0,4 row in 0 , 1
                 /*coef2 for m_temp_reg_12 and m_temp_reg_13 , coef1 for m_temp_reg_10 and m_temp_reg_11*/
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[3][0]);
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[0][0]);
@@ -1094,25 +1064,21 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_temp_reg_10 = _mm_madd_epi16(m_temp_reg_0, m_coeff1);
                 m_temp_reg_12 = _mm_madd_epi16(m_temp_reg_0, m_coeff2);
-
             }
-
 
             /* eo0 is present in the registers m_temp_reg_14 and m_temp_reg_15 */
             /* eo1 is present in the registers m_temp_reg_16 and m_temp_reg_17 */
             /* as upper 8 bytes are zeros so m_temp_reg_15 and m_temp_reg_17 are not used*/
             {
-
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]); //sub 2B*36-6B*83 ,2T*36-6T*83
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]); //add 2B*83+6B*36 ,2T*83+6T*36
 
-                /* Combining instructions to eliminate them based on zero_rows : Lokesh */
-                //Interleaving 2,6 row in 4, 5 Rishab
+                /* Combining instructions to eliminate them based on zero_rows */
+                //Interleaving 2,6 row in 4, 5
                 m_temp_reg_4 = _mm_unpacklo_epi16(m_temp_reg_72, m_temp_reg_76);
 
                 m_temp_reg_16 = _mm_madd_epi16(m_temp_reg_4, m_coeff1);
                 m_temp_reg_14 = _mm_madd_epi16(m_temp_reg_4, m_coeff2);
-
 
                 /* Loading coeff for computing o0, o1, o2 and o3 in the next block */
 
@@ -1121,8 +1087,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[0][0]);
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[1][0]);
-
-
 
                 /* e */
 
@@ -1135,15 +1099,12 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_temp_reg_40 = _mm_add_epi32(m_temp_reg_10, m_temp_reg_14);
                 m_temp_reg_46 = _mm_sub_epi32(m_temp_reg_10, m_temp_reg_14);
-
             }
 
             /* o */
             {
-
                 /* o0 stored in m_temp_reg_30 and m_temp_reg_31 */
                 {
-
                     m_temp_reg_60 = _mm_unpacklo_epi16(m_temp_reg_71, m_temp_reg_73);
                     m_temp_reg_64 = _mm_unpacklo_epi16(m_temp_reg_75, m_temp_reg_77);
                     //o0:1B*89+3B*75,5B*50+7B*18
@@ -1155,15 +1116,11 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                     m_temp_reg_30 = _mm_add_epi32(m_temp_reg_20, m_temp_reg_24);
 
-
-
                     /* Column 0 of destination computed here */
                     /* It is stored in m_temp_reg_50 */
                     /* Column 7 of destination computed here */
                     /* It is stored in m_temp_reg_57 */
                     /* Upper 8 bytes of both registers are zero due to zero_cols*/
-
-
 
                     m_temp_reg_62 = _mm_add_epi32(m_temp_reg_40, m_temp_reg_30);
                     m_temp_reg_66 = _mm_sub_epi32(m_temp_reg_40, m_temp_reg_30);
@@ -1190,8 +1147,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     /* o1 stored in m_temp_reg_32 and m_temp_reg_33 */
                     m_temp_reg_32 = _mm_sub_epi32(m_temp_reg_22, m_temp_reg_26);
 
-
-
                     /* Column 1 of destination computed here */
                     /* It is stored in m_temp_reg_51 */
                     /* Column 6 of destination computed here */
@@ -1213,7 +1168,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_51 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_56 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_63);
 
-
                     /* o2 stored in m_temp_reg_34 and m_temp_reg_35 */
 
                     /* Loading coeff for computing o3  in the next block */
@@ -1222,7 +1176,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_coeff4 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[7][0]);
 
                     m_temp_reg_34 = _mm_add_epi32(m_temp_reg_20, m_temp_reg_24);
-
 
                     /* Column 2 of destination computed here */
                     /* It is stored in m_temp_reg_52 */
@@ -1245,12 +1198,9 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_52 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_55 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_63);
 
-
-
                     /* o3 stored in m_temp_reg_36 and m_temp_reg_37 */
 
                     m_temp_reg_36 = _mm_add_epi32(m_temp_reg_22, m_temp_reg_26);
-
 
                     /* Column 3 of destination computed here */
                     /* It is stored in m_temp_reg_53 */
@@ -1265,7 +1215,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                     m_temp_reg_62 = _mm_srai_epi32(m_temp_reg_62, i4_shift);
                     m_temp_reg_66 = _mm_srai_epi32(m_temp_reg_66, i4_shift);
-
 
                     m_temp_reg_53 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_54 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_63);
@@ -1315,19 +1264,15 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 m_temp_reg_11 = _mm_madd_epi16(m_temp_reg_1, m_coeff1);
                 m_temp_reg_13 = _mm_madd_epi16(m_temp_reg_1, m_coeff2);
 
-
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]);
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]);
             }
 
-
             /* eo0 is present in the registers m_temp_reg_14 and m_temp_reg_15 */
             /* eo1 is present in the registers m_temp_reg_16 and m_temp_reg_17 */
             {
-
                 m_temp_reg_0 = _mm_unpacklo_epi16(m_temp_reg_52, m_temp_reg_56);
                 m_temp_reg_1 = _mm_unpackhi_epi16(m_temp_reg_52, m_temp_reg_56);
-
 
                 m_temp_reg_16 = _mm_madd_epi16(m_temp_reg_0, m_coeff1);
                 m_temp_reg_14 = _mm_madd_epi16(m_temp_reg_0, m_coeff2);
@@ -1337,11 +1282,8 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 /* Loading coeff for computing o0 in the next block */
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[0][0]);
 
-
                 m_temp_reg_0 = _mm_unpacklo_epi16(m_temp_reg_51, m_temp_reg_53);
                 m_temp_reg_1 = _mm_unpackhi_epi16(m_temp_reg_51, m_temp_reg_53);
-
-
 
                 /* e */
 
@@ -1360,12 +1302,10 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_temp_reg_41 = _mm_add_epi32(m_temp_reg_11, m_temp_reg_15);
                 m_temp_reg_47 = _mm_sub_epi32(m_temp_reg_11, m_temp_reg_15);
-
             }
 
             /* o */
             {
-
                 /* o0 stored in m_temp_reg_30 and m_temp_reg_31 */
                 {
                     //o0:1B*89+3B*75,1T*89+3T*75
@@ -1376,8 +1316,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_rdng_factor = _mm_shuffle_epi32(m_rdng_factor, 0x0000);
                     /* Loading coeff for computing o1 in the next block */
                     m_coeff3 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[2][0]);
-
-
 
                     /* Column 0 of destination computed here */
                     /* It is stored in m_temp_reg_50 */
@@ -1407,14 +1345,10 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_50 = _mm_packs_epi32(m_temp_reg_2, m_temp_reg_3);
                     m_temp_reg_57 = _mm_packs_epi32(m_temp_reg_6, m_temp_reg_7);
 
-
                     /* o1 stored in m_temp_reg_32 and m_temp_reg_33 */
-
 
                     /* Loading coeff for computing o2  in the next block */
                     m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[4][0]);
-
-
 
                     /* Column 1 of destination computed here */
                     /* It is stored in m_temp_reg_51 */
@@ -1444,13 +1378,11 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_51 = _mm_packs_epi32(m_temp_reg_2, m_temp_reg_3);
                     m_temp_reg_56 = _mm_packs_epi32(m_temp_reg_6, m_temp_reg_7);
 
-
                     /* o2 stored in m_temp_reg_34 and m_temp_reg_35 */
 
                     /* Loading coeff for computing o3  in the next block */
 
                     m_coeff3 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[6][0]);
-
 
                     /* Column 2 of destination computed here */
                     /* It is stored in m_temp_reg_52 */
@@ -1477,14 +1409,10 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_6 = _mm_srai_epi32(m_temp_reg_6, i4_shift);
                     m_temp_reg_7 = _mm_srai_epi32(m_temp_reg_7, i4_shift);
 
-
                     m_temp_reg_52 = _mm_packs_epi32(m_temp_reg_2, m_temp_reg_3);
                     m_temp_reg_55 = _mm_packs_epi32(m_temp_reg_6, m_temp_reg_7);
 
-
-
                     /* o3 stored in m_temp_reg_36 and m_temp_reg_37 */
-
 
                     /* Column 3 of destination computed here */
                     /* It is stored in m_temp_reg_53 */
@@ -1610,18 +1538,15 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
         }
     }
     else
-
     {
-
         /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
         /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
-#if 1
         if(!check_row_stage_1)
         {
             /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
             /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
             {
-                //Interleaving 0,4 row in 0 , 1 Rishab
+                //Interleaving 0,4 row in 0 , 1
                 /*coef2 for m_temp_reg_12 and m_temp_reg_13 , coef1 for m_temp_reg_10 and m_temp_reg_11*/
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[3][0]);
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[0][0]);
@@ -1632,21 +1557,18 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 m_temp_reg_10 = _mm_madd_epi16(m_temp_reg_0, m_coeff1);
                 m_temp_reg_12 = _mm_madd_epi16(m_temp_reg_0, m_coeff2);
 
-
                 m_temp_reg_11 = _mm_madd_epi16(m_temp_reg_1, m_coeff1);
                 m_temp_reg_13 = _mm_madd_epi16(m_temp_reg_1, m_coeff2);
             }
 
-
             /* eo0 is present in the registers m_temp_reg_14 and m_temp_reg_15 */
             /* eo1 is present in the registers m_temp_reg_16 and m_temp_reg_17 */
             {
-
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]); //sub 2B*36-6B*83 ,2T*36-6T*83
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]); //add 2B*83+6B*36 ,2T*83+6T*36
 
-                /* Combining instructions to eliminate them based on zero_rows : Lokesh */
-                //Interleaving 2,6 row in 4, 5 Rishab
+                /* Combining instructions to eliminate them based on zero_rows */
+                //Interleaving 2,6 row in 4, 5
                 m_temp_reg_4 = _mm_unpacklo_epi16(m_temp_reg_72, m_temp_reg_76);
                 m_temp_reg_5 = _mm_unpackhi_epi16(m_temp_reg_72, m_temp_reg_76);
 
@@ -1656,8 +1578,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 m_temp_reg_17 = _mm_madd_epi16(m_temp_reg_5, m_coeff1);
                 m_temp_reg_15 = _mm_madd_epi16(m_temp_reg_5, m_coeff2);
 
-
-
                 /* Loading coeff for computing o0, o1, o2 and o3 in the next block */
 
                 m_coeff3 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[2][0]);
@@ -1665,7 +1585,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[0][0]);
                 //m_coeff2 = _mm_loadu_si128((__m128i *) &g_ai2_ihevc_trans_intr_odd_8[1][0]);
-
             }
 
             /* e */
@@ -1685,15 +1604,12 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_temp_reg_41 = _mm_add_epi32(m_temp_reg_11, m_temp_reg_15);
                 m_temp_reg_47 = _mm_sub_epi32(m_temp_reg_11, m_temp_reg_15);
-
             }
 
             /* o */
             {
-
                 /* o0 stored in m_temp_reg_30 and m_temp_reg_31 */
                 {
-
                     m_temp_reg_60 = _mm_unpacklo_epi16(m_temp_reg_71, m_temp_reg_73);
                     m_temp_reg_61 = _mm_unpackhi_epi16(m_temp_reg_71, m_temp_reg_73);
                     //o0:1B*89+3B*75,1T*89+3T*75
@@ -1702,7 +1618,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                     m_rdng_factor = _mm_cvtsi32_si128((1 << (i4_shift - 1)));
                     m_rdng_factor = _mm_shuffle_epi32(m_rdng_factor, 0x0000);
-
                 }
 
                 /* Column 0 of destination computed here */
@@ -1710,8 +1625,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 /* Column 7 of destination computed here */
                 /* It is stored in m_temp_reg_57 */
                 {
-
-
                     m_temp_reg_62 = _mm_add_epi32(m_temp_reg_40, m_temp_reg_30);
                     m_temp_reg_66 = _mm_sub_epi32(m_temp_reg_40, m_temp_reg_30);
 
@@ -1738,7 +1651,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     /* Loading coeff for computing o2  in the next block */
 
                     m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[4][0]);
-
                 }
 
                 /* Column 1 of destination computed here */
@@ -1769,14 +1681,11 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_51 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_56 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_67);
 
-
                     /* o2 stored in m_temp_reg_34 and m_temp_reg_35 */
-
 
                     /* Loading coeff for computing o3  in the next block */
 
                     m_coeff3 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[6][0]);
-
                 }
 
                 /* Column 2 of destination computed here */
@@ -1807,11 +1716,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_52 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_55 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_67);
 
-
-
                     /* o3 stored in m_temp_reg_36 and m_temp_reg_37 */
-
-
                 }
 
                 /* Column 3 of destination computed here */
@@ -1844,8 +1749,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
             /* and ultimately stored in registers m_temp_reg_50 to m_temp_reg_57 */
             /* respectively */
             {
-
-
                 m_temp_reg_10 = _mm_unpacklo_epi16(m_temp_reg_50, m_temp_reg_51);
                 m_temp_reg_11 = _mm_unpacklo_epi16(m_temp_reg_52, m_temp_reg_53);
                 m_temp_reg_14 = _mm_unpackhi_epi16(m_temp_reg_50, m_temp_reg_51);
@@ -1877,12 +1780,10 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
         }
         else
         {
-#endif
-
             /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
             /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
             {
-                //Interleaving 0,4 row in 0 , 1 Rishab
+                //Interleaving 0,4 row in 0 , 1
                 /*coef2 for m_temp_reg_12 and m_temp_reg_13 , coef1 for m_temp_reg_10 and m_temp_reg_11*/
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[3][0]);
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[0][0]);
@@ -1893,21 +1794,18 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 m_temp_reg_10 = _mm_madd_epi16(m_temp_reg_0, m_coeff1);
                 m_temp_reg_12 = _mm_madd_epi16(m_temp_reg_0, m_coeff2);
 
-
                 m_temp_reg_11 = _mm_madd_epi16(m_temp_reg_1, m_coeff1);
                 m_temp_reg_13 = _mm_madd_epi16(m_temp_reg_1, m_coeff2);
             }
 
-
             /* eo0 is present in the registers m_temp_reg_14 and m_temp_reg_15 */
             /* eo1 is present in the registers m_temp_reg_16 and m_temp_reg_17 */
             {
-
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]); //sub 2B*36-6B*83 ,2T*36-6T*83
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]); //add 2B*83+6B*36 ,2T*83+6T*36
 
-                /* Combining instructions to eliminate them based on zero_rows : Lokesh */
-                //Interleaving 2,6 row in 4, 5 Rishab
+                /* Combining instructions to eliminate them based on zero_rows */
+                //Interleaving 2,6 row in 4, 5
                 m_temp_reg_4 = _mm_unpacklo_epi16(m_temp_reg_72, m_temp_reg_76);
                 m_temp_reg_5 = _mm_unpackhi_epi16(m_temp_reg_72, m_temp_reg_76);
 
@@ -1917,8 +1815,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 m_temp_reg_17 = _mm_madd_epi16(m_temp_reg_5, m_coeff1);
                 m_temp_reg_15 = _mm_madd_epi16(m_temp_reg_5, m_coeff2);
 
-
-
                 /* Loading coeff for computing o0, o1, o2 and o3 in the next block */
 
                 m_coeff3 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[2][0]);
@@ -1926,7 +1822,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[0][0]);
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[1][0]);
-
             }
 
             /* e */
@@ -1946,15 +1841,12 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_temp_reg_41 = _mm_add_epi32(m_temp_reg_11, m_temp_reg_15);
                 m_temp_reg_47 = _mm_sub_epi32(m_temp_reg_11, m_temp_reg_15);
-
             }
 
             /* o */
             {
-
                 /* o0 stored in m_temp_reg_30 and m_temp_reg_31 */
                 {
-
                     m_temp_reg_60 = _mm_unpacklo_epi16(m_temp_reg_71, m_temp_reg_73);
                     m_temp_reg_61 = _mm_unpackhi_epi16(m_temp_reg_71, m_temp_reg_73);
                     m_temp_reg_64 = _mm_unpacklo_epi16(m_temp_reg_75, m_temp_reg_77);
@@ -1964,7 +1856,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_21 = _mm_madd_epi16(m_temp_reg_61, m_coeff1);
                     m_temp_reg_24 = _mm_madd_epi16(m_temp_reg_64, m_coeff2);
                     m_temp_reg_25 = _mm_madd_epi16(m_temp_reg_65, m_coeff2);
-
 
                     m_rdng_factor = _mm_cvtsi32_si128((1 << (i4_shift - 1)));
                     m_rdng_factor = _mm_shuffle_epi32(m_rdng_factor, 0x0000);
@@ -1978,8 +1869,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 /* Column 7 of destination computed here */
                 /* It is stored in m_temp_reg_57 */
                 {
-
-
                     m_temp_reg_62 = _mm_add_epi32(m_temp_reg_40, m_temp_reg_30);
                     m_temp_reg_66 = _mm_sub_epi32(m_temp_reg_40, m_temp_reg_30);
 
@@ -2045,9 +1934,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_51 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_56 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_67);
 
-
                     /* o2 stored in m_temp_reg_34 and m_temp_reg_35 */
-
 
                     /* Loading coeff for computing o3  in the next block */
 
@@ -2088,10 +1975,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_52 = _mm_packs_epi32(m_temp_reg_62, m_temp_reg_63);
                     m_temp_reg_55 = _mm_packs_epi32(m_temp_reg_66, m_temp_reg_67);
 
-
-
                     /* o3 stored in m_temp_reg_36 and m_temp_reg_37 */
-
 
                     m_temp_reg_36 = _mm_add_epi32(m_temp_reg_22, m_temp_reg_26);
                     m_temp_reg_37 = _mm_add_epi32(m_temp_reg_23, m_temp_reg_27);
@@ -2127,8 +2011,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
             /* and ultimately stored in registers m_temp_reg_50 to m_temp_reg_57 */
             /* respectively */
             {
-
-
                 m_temp_reg_10 = _mm_unpacklo_epi16(m_temp_reg_50, m_temp_reg_51);
                 m_temp_reg_11 = _mm_unpacklo_epi16(m_temp_reg_52, m_temp_reg_53);
                 m_temp_reg_14 = _mm_unpackhi_epi16(m_temp_reg_50, m_temp_reg_51);
@@ -2163,7 +2045,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
         i4_shift = IT_SHIFT_STAGE_2;
 
         {
-
             /* ee0 is present in the registers m_temp_reg_10 and m_temp_reg_11 */
             /* ee1 is present in the registers m_temp_reg_12 and m_temp_reg_13 */
             {
@@ -2178,18 +2059,15 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 m_temp_reg_11 = _mm_madd_epi16(m_temp_reg_1, m_coeff1);
                 m_temp_reg_13 = _mm_madd_epi16(m_temp_reg_1, m_coeff2);
 
-
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[1][0]);
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_even_8[2][0]);
             }
-
 
             /* eo0 is present in the registers m_temp_reg_14 and m_temp_reg_15 */
             /* eo1 is present in the registers m_temp_reg_16 and m_temp_reg_17 */
             {
                 m_temp_reg_0 = _mm_unpacklo_epi16(m_temp_reg_52, m_temp_reg_56);
                 m_temp_reg_1 = _mm_unpackhi_epi16(m_temp_reg_52, m_temp_reg_56);
-
 
                 m_temp_reg_16 = _mm_madd_epi16(m_temp_reg_0, m_coeff1);
                 m_temp_reg_14 = _mm_madd_epi16(m_temp_reg_0, m_coeff2);
@@ -2199,7 +2077,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 /* Loading coeff for computing o0 in the next block */
                 m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[0][0]);
                 m_coeff2 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[1][0]);
-
 
                 m_temp_reg_0 = _mm_unpacklo_epi16(m_temp_reg_51, m_temp_reg_53);
                 m_temp_reg_1 = _mm_unpackhi_epi16(m_temp_reg_51, m_temp_reg_53);
@@ -2222,7 +2099,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                 m_temp_reg_41 = _mm_add_epi32(m_temp_reg_11, m_temp_reg_15);
                 m_temp_reg_47 = _mm_sub_epi32(m_temp_reg_11, m_temp_reg_15);
-
             }
 
             /* o */
@@ -2278,9 +2154,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_50 = _mm_packs_epi32(m_temp_reg_2, m_temp_reg_3);
                     m_temp_reg_57 = _mm_packs_epi32(m_temp_reg_6, m_temp_reg_7);
 
-
                     /* o1 stored in m_temp_reg_32 and m_temp_reg_33 */
-
 
                     /* Loading coeff for computing o2  in the next block */
                     m_coeff1 = _mm_loadu_si128((__m128i *)&g_ai2_ihevc_trans_intr_odd_8[4][0]);
@@ -2319,7 +2193,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
 
                     m_temp_reg_51 = _mm_packs_epi32(m_temp_reg_2, m_temp_reg_3);
                     m_temp_reg_56 = _mm_packs_epi32(m_temp_reg_6, m_temp_reg_7);
-
 
                     /* o2 stored in m_temp_reg_34 and m_temp_reg_35 */
 
@@ -2362,10 +2235,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                     m_temp_reg_52 = _mm_packs_epi32(m_temp_reg_2, m_temp_reg_3);
                     m_temp_reg_55 = _mm_packs_epi32(m_temp_reg_6, m_temp_reg_7);
 
-
-
                     /* o3 stored in m_temp_reg_36 and m_temp_reg_37 */
-
 
                     m_temp_reg_36 = _mm_add_epi32(m_temp_reg_22, m_temp_reg_26);
                     m_temp_reg_37 = _mm_add_epi32(m_temp_reg_23, m_temp_reg_27);
@@ -2447,7 +2317,6 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 pu1_pred += pred_strd;
                 m_temp_reg_7 = _mm_loadl_epi64((__m128i *)pu1_pred);
 
-
                 m_temp_reg_50 = _mm_setzero_si128();
                 m_temp_reg_0 = _mm_unpacklo_epi8(m_temp_reg_0, m_temp_reg_50);
                 m_temp_reg_1 = _mm_unpacklo_epi8(m_temp_reg_1, m_temp_reg_50);
@@ -2492,12 +2361,7 @@ void ihevc_itrans_recon_8x8_sse42(WORD16 *pi2_src,
                 pu1_dst += dst_strd;
                 _mm_storel_epi64((__m128i *)pu1_dst, m_temp_reg_57);
                 pu1_dst += dst_strd;
-
             }
-
-
         }
-
-
     }
 }

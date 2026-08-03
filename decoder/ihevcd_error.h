@@ -45,9 +45,47 @@
 typedef enum
 {
     /**
+     *  No error
+     */
+    IHEVCD_SUCCESS = 0,
+    /**
+     *  Codec calls done without successful init
+     */
+    IHEVCD_INIT_NOT_DONE                        = 0x100,
+    /**
+     *  Unsupported level passed as an argument
+     */
+    IHEVCD_LEVEL_UNSUPPORTED,
+    /**
+     *  Unsupported number of reference pictures passed as an argument
+     */
+    IHEVCD_NUM_REF_UNSUPPORTED,
+    /**
+     *  Unsupported number of reorder pictures passed as an argument
+     */
+    IHEVCD_NUM_REORDER_UNSUPPORTED,
+    /**
+     *  Unsupported number of extra display pictures passed as an argument
+     */
+    IHEVCD_NUM_EXTRA_DISP_UNSUPPORTED,
+    /**
+     *  Invalid display stride requested.
+     */
+    IHEVCD_INVALID_DISP_STRD,
+    /**
+     *  Buffer size to hold version string is not sufficient
+     *  Allocate more to hold version string
+     */
+    IHEVCD_CXA_VERS_BUF_INSUFFICIENT            = 0x200,
+    /**
+     * Stream chroma format other than YUV420
+     */
+    IHEVCD_UNSUPPORTED_CHROMA_FMT_IDC           = 0x300,
+
+    /**
      * VPS id more than MAX_VPS_CNT
      */
-    IHEVCD_UNSUPPORTED_VPS_ID  = IVD_DUMMY_ELEMENT_FOR_CODEC_EXTENSIONS + 0x300,
+    IHEVCD_UNSUPPORTED_VPS_ID,
     /**
      * SPS id more than MAX_SPS_CNT
      */
@@ -109,6 +147,16 @@ typedef enum
     IHEVCD_REF_PIC_NOT_FOUND,
 
     /**
+     * Reached end of sequence
+     */
+    IHEVCD_END_OF_SEQUENCE,
+
+    /**
+     * Width/height greater than max width and max height
+     */
+    IHEVCD_UNSUPPORTED_DIMENSIONS,
+
+    /**
      * Bit depth is greater than 8
      */
     IHEVCD_UNSUPPORTED_BIT_DEPTH,
@@ -123,5 +171,29 @@ typedef enum
      */
     IHEVCD_VUI_PARAMS_NOT_FOUND,
 
+    /**
+     * Profile higher than init profile
+     */
+     IHEVCD_GEN_PROFILE_HIGHER_THAN_INIT_PROFILE,
+
+     /**
+      * Unsupported profile
+      */
+      IHEVCD_GEN_PROFILE_UNSUPPORTED,
+
+      /**
+       * Invalid output chroma format
+       */
+       IHEVCD_INVALID_OUT_CHROMA_FMT,
+
+    /**
+     * Unsupported parameter while decoding
+     */
+    IHEVCD_UNSUPPORTED_PARAMETER,
+
+    /**
+     * Generic failure
+     */
+    IHEVCD_FAIL                             = 0x7FFFFFFF
 }IHEVCD_ERROR_T;
 #endif /* _IHEVCD_ERROR_H_ */

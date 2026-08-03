@@ -49,6 +49,8 @@ enum
 
 static const WORD32 gi4_ihevc_hbd_table_edge_idx[5] = { 1, 2, 0, 3, 4 };
 
+static const WORD8 gi4_ihevc_hbd_table_edge_idx_neon[8] = { 1, 2, 0, 3, 4, 0, 0, 0};
+
 typedef void ihevc_sao_band_offset_luma_ft(UWORD8 *pu1_src,
                                            WORD32 src_strd,
                                            UWORD8 *pu1_src_left,
@@ -363,16 +365,41 @@ ihevc_sao_edge_offset_class3_chroma_ft ihevc_sao_edge_offset_class3_chroma_ssse3
 
 /* SSE4 function declarations */
 
+/* AVX function declarations */
+ihevc_sao_edge_offset_class0_ft ihevc_sao_edge_offset_class0_avx;
+ihevc_sao_edge_offset_class0_chroma_ft ihevc_sao_edge_offset_class0_chroma_avx;
+ihevc_sao_edge_offset_class1_ft ihevc_sao_edge_offset_class1_avx;
+ihevc_sao_edge_offset_class1_chroma_ft ihevc_sao_edge_offset_class1_chroma_avx;
+ihevc_sao_edge_offset_class2_ft ihevc_sao_edge_offset_class2_avx;
+ihevc_sao_edge_offset_class2_chroma_ft ihevc_sao_edge_offset_class2_chroma_avx;
+ihevc_sao_edge_offset_class3_ft ihevc_sao_edge_offset_class3_avx;
+ihevc_sao_edge_offset_class3_chroma_ft ihevc_sao_edge_offset_class3_chroma_avx;
+
 /* C high bit depth function declarations */
 ihevc_hbd_sao_band_offset_luma_ft ihevc_hbd_sao_band_offset_luma;
 ihevc_hbd_sao_band_offset_chroma_ft ihevc_hbd_sao_band_offset_chroma;
 ihevc_hbd_sao_edge_offset_class0_ft ihevc_hbd_sao_edge_offset_class0;
+ihevc_hbd_sao_edge_offset_class0_ft ihevc_hbd_sao_edge_offset_class0_av8;
+ihevc_hbd_sao_edge_offset_class0_ft ihevc_hbd_sao_edge_offset_class0_a9q;
+ihevc_hbd_sao_edge_offset_class0_ft ihevc_hbd_sao_edge_offset_class0_neonintr;
 ihevc_hbd_sao_edge_offset_class0_chroma_ft ihevc_hbd_sao_edge_offset_class0_chroma;
+ihevc_hbd_sao_edge_offset_class0_chroma_ft ihevc_hbd_sao_edge_offset_class0_chroma_av8;
+ihevc_hbd_sao_edge_offset_class0_chroma_ft ihevc_hbd_sao_edge_offset_class0_chroma_a9q;
+ihevc_hbd_sao_edge_offset_class0_chroma_ft ihevc_hbd_sao_edge_offset_class0_chroma_neonintr;
 ihevc_hbd_sao_edge_offset_class1_ft ihevc_hbd_sao_edge_offset_class1;
+ihevc_hbd_sao_edge_offset_class1_ft ihevc_hbd_sao_edge_offset_class1_av8;
+ihevc_hbd_sao_edge_offset_class1_ft ihevc_hbd_sao_edge_offset_class1_a9q;
+ihevc_hbd_sao_edge_offset_class1_ft ihevc_hbd_sao_edge_offset_class1_neonintr;
 ihevc_hbd_sao_edge_offset_class1_chroma_ft ihevc_hbd_sao_edge_offset_class1_chroma;
 ihevc_hbd_sao_edge_offset_class2_ft ihevc_hbd_sao_edge_offset_class2;
+ihevc_hbd_sao_edge_offset_class2_ft ihevc_hbd_sao_edge_offset_class2_av8;
+ihevc_hbd_sao_edge_offset_class2_ft ihevc_hbd_sao_edge_offset_class2_a9q;
+ihevc_hbd_sao_edge_offset_class2_ft ihevc_hbd_sao_edge_offset_class2_neonintr;
 ihevc_hbd_sao_edge_offset_class2_chroma_ft ihevc_hbd_sao_edge_offset_class2_chroma;
 ihevc_hbd_sao_edge_offset_class3_ft ihevc_hbd_sao_edge_offset_class3;
+ihevc_hbd_sao_edge_offset_class3_ft ihevc_hbd_sao_edge_offset_class3_av8;
+ihevc_hbd_sao_edge_offset_class3_ft ihevc_hbd_sao_edge_offset_class3_a9q;
+ihevc_hbd_sao_edge_offset_class3_ft ihevc_hbd_sao_edge_offset_class3_neonintr;
 ihevc_hbd_sao_edge_offset_class3_chroma_ft ihevc_hbd_sao_edge_offset_class3_chroma;
 
 /* SSE4.2 HBD function Declarations*/
@@ -386,6 +413,18 @@ ihevc_hbd_sao_edge_offset_class2_ft ihevc_hbd_sao_edge_offset_class2_sse42;
 ihevc_hbd_sao_edge_offset_class2_chroma_ft ihevc_hbd_sao_edge_offset_class2_chroma_sse42;
 ihevc_hbd_sao_edge_offset_class3_ft ihevc_hbd_sao_edge_offset_class3_sse42;
 ihevc_hbd_sao_edge_offset_class3_chroma_ft ihevc_hbd_sao_edge_offset_class3_chroma_sse42;
+
+
+ihevc_hbd_sao_band_offset_luma_ft ihevc_hbd_sao_band_offset_luma_avx;
+ihevc_hbd_sao_band_offset_chroma_ft ihevc_hbd_sao_band_offset_chroma_avx;
+ihevc_hbd_sao_edge_offset_class0_ft ihevc_hbd_sao_edge_offset_class0_avx;
+ihevc_hbd_sao_edge_offset_class0_chroma_ft ihevc_hbd_sao_edge_offset_class0_chroma_avx;
+ihevc_hbd_sao_edge_offset_class1_ft ihevc_hbd_sao_edge_offset_class1_avx;
+ihevc_hbd_sao_edge_offset_class1_chroma_ft ihevc_hbd_sao_edge_offset_class1_chroma_avx;
+ihevc_hbd_sao_edge_offset_class2_ft ihevc_hbd_sao_edge_offset_class2_avx;
+ihevc_hbd_sao_edge_offset_class2_chroma_ft ihevc_hbd_sao_edge_offset_class2_chroma_avx;
+ihevc_hbd_sao_edge_offset_class3_ft ihevc_hbd_sao_edge_offset_class3_avx;
+ihevc_hbd_sao_edge_offset_class3_chroma_ft ihevc_hbd_sao_edge_offset_class3_chroma_avx;
 
 /* armv8 function declarations */
 ihevc_sao_band_offset_luma_ft ihevc_sao_band_offset_luma_av8;

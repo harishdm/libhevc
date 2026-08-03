@@ -101,7 +101,7 @@
 ihevc_intra_pred_luma_ver_av8:
 
     // stmfd sp!, {x4-x12, x14}            //stack stores the values of the arguments
-    push_v_regs
+
     stp         x19, x20,[sp,#-16]!
 
     lsl         x5, x4, #1                  //2nt
@@ -122,7 +122,7 @@ copy_32:
     ld1         {v22.8b, v23.8b}, [x6]      //16 loads (col 16:31)
     lsl         x11, x3, #2
 
-    add         x11, x11, #-16
+    sub         x11, x11, #16
     st1         {v20.8b, v21.8b}, [x2],#16
     st1         {v20.8b, v21.8b}, [x5],#16
     st1         {v20.8b, v21.8b}, [x8],#16
@@ -183,7 +183,7 @@ blk_16:
     sxtw        x12,w12
 
     ld1         {v16.8b, v17.8b}, [x6]      //ld for repl to cols src[2nt+1+col(0:15)] (0 ignored for stores)
-    add         x6, x6, #-17                //subtract -9 to take it to src[2nt-1-row(15)]
+    sub         x6, x6, #17                 //subtract -9 to take it to src[2nt-1-row(15)]
 
     dup         v24.16b,w12                 //src[2nt+1]
     dup         v30.8h,w12
@@ -207,7 +207,7 @@ blk_16:
     sqadd       v0.8h,  v0.8h ,  v30.8h
     sqadd       v28.8h,  v28.8h ,  v30.8h
 
-    movi        d10, #0x00000000000000ff
+    movi        d3, #0x00000000000000ff
     //vaddl.s8    q1, d25, d27
 
     sqxtun      v24.8b, v28.8h
@@ -218,13 +218,13 @@ blk_16:
     rev64       v24.16b,  v24.16b
     mov         v25.d[0], v24.d[1]
 
-    mov         v11.d[0],v17.d[0]
+    mov         v4.d[0],v17.d[0]
 
     bsl         v18.8b,  v24.8b ,  v16.8b   //only select row values from q12(predpixel)
-    bsl         v10.8b,  v25.8b ,  v16.8b
+    bsl         v3.8b,  v25.8b ,  v16.8b
 
-    movi        d8, #0x00000000000000ff
-    mov         v9.d[0],v17.d[0]
+    movi        d1, #0x00000000000000ff
+    mov         v2.d[0],v17.d[0]
 
     movi        d6, #0x00000000000000ff
     mov         v7.d[0],v17.d[0]
@@ -232,14 +232,14 @@ blk_16:
     st1         {v18.8b, v19.8b}, [x2], x3
     sshr        d24, d24,#8
 
-    st1         {v10.8b, v11.8b}, [x5], x3
+    st1         {v3.8b, v4.8b}, [x5], x3
     sshr        d25, d25,#8
 
 
-    bsl         v8.8b,  v24.8b ,  v16.8b
+    bsl         v1.8b,  v24.8b ,  v16.8b
     bsl         v6.8b,  v25.8b ,  v16.8b
 
-    st1         {v8.8b, v9.8b}, [x2], x3
+    st1         {v1.8b, v2.8b}, [x2], x3
     sshr        d24, d24,#8
 
     st1         {v6.8b, v7.8b}, [x5], x3
@@ -250,34 +250,34 @@ blk_16:
     movi        d18, #0x00000000000000ff
     //vmov.i64    d19, d17
 
-    movi        d10, #0x00000000000000ff
+    movi        d3, #0x00000000000000ff
     //vmov.i64    d11, d17
 
 
 loop_16:
 
 
-    movi        d8, #0x00000000000000ff
+    movi        d1, #0x00000000000000ff
 
     movi        d6, #0x00000000000000ff
 
     bsl         v18.8b,  v24.8b ,  v16.8b   //only select row values from q12(predpixel)
-    bsl         v10.8b,  v25.8b ,  v16.8b
+    bsl         v3.8b,  v25.8b ,  v16.8b
 
     st1         {v18.8b, v19.8b}, [x2], x3
     sshr        d24, d24,#8
 
-    st1         {v10.8b, v11.8b}, [x5], x3
+    st1         {v3.8b, v4.8b}, [x5], x3
     sshr        d25, d25,#8
 
     movi        d18, #0x00000000000000ff
 
-    movi        d10, #0x00000000000000ff
+    movi        d3, #0x00000000000000ff
 
-    bsl         v8.8b,  v24.8b ,  v16.8b
+    bsl         v1.8b,  v24.8b ,  v16.8b
     bsl         v6.8b,  v25.8b ,  v16.8b
 
-    st1         {v8.8b, v9.8b}, [x2], x3
+    st1         {v1.8b, v2.8b}, [x2], x3
     sshr        d24, d24,#8
 
     st1         {v6.8b, v7.8b}, [x5], x3
@@ -287,23 +287,23 @@ loop_16:
 
     bne         loop_16
 
-    movi        d8, #0x00000000000000ff
+    movi        d1, #0x00000000000000ff
 
     movi        d6, #0x00000000000000ff
 
     bsl         v18.8b,  v24.8b ,  v16.8b   //only select row values from q12(predpixel)
-    bsl         v10.8b,  v25.8b ,  v16.8b
+    bsl         v3.8b,  v25.8b ,  v16.8b
 
     st1         {v18.8b, v19.8b}, [x2], x3
     sshr        d24, d24,#8
 
-    st1         {v10.8b, v11.8b}, [x5], x3
+    st1         {v3.8b, v4.8b}, [x5], x3
     sshr        d25, d25,#8
 
-    bsl         v8.8b,  v24.8b ,  v16.8b
+    bsl         v1.8b,  v24.8b ,  v16.8b
     bsl         v6.8b,  v25.8b ,  v16.8b
 
-    st1         {v8.8b, v9.8b}, [x2], x3
+    st1         {v1.8b, v2.8b}, [x2], x3
 
     st1         {v6.8b, v7.8b}, [x5], x3
 
@@ -311,10 +311,10 @@ loop_16:
 
 
 blk_4_8:
-    movi        d11, #0x00000000000000ff
+    movi        d4, #0x00000000000000ff
     add         x6, x0, x5                  //&src[2nt]
 
-    movi        d10, #0x00000000000000ff
+    movi        d3, #0x00000000000000ff
     ldrb        w11, [x6], #1               //src[2nt]
     sxtw        x11,w11
 
@@ -323,7 +323,7 @@ blk_4_8:
     sxtw        x12,w12
 
     ld1         {v16.8b},[x6]               //ld for repl to cols src[2nt+1+col(0:3 or 0:7)](0 ignored for st)
-    add         x6, x6, #-9                 //subtract -9 to take it to src[2nt-1-row(15)]
+    sub         x6, x6, #9                  //subtract -9 to take it to src[2nt-1-row(15)]
 
     dup         v24.8b,w12                  //src[2nt+1]
     dup         v30.8h,w12
@@ -363,19 +363,19 @@ blk_4_8:
 
     movi        d19, #0x00000000000000ff
 
-    bsl         v10.8b,  v24.8b ,  v16.8b
+    bsl         v3.8b,  v24.8b ,  v16.8b
 
-    st1         {v10.8b},[x2], x3
+    st1         {v3.8b},[x2], x3
     sshr        d24, d24,#8
 
-    movi        d10, #0x00000000000000ff
+    movi        d3, #0x00000000000000ff
 
-    bsl         v11.8b,  v24.8b ,  v16.8b
+    bsl         v4.8b,  v24.8b ,  v16.8b
 
-    st1         {v11.8b},[x2], x3
+    st1         {v4.8b},[x2], x3
     sshr        d24, d24,#8
 
-    movi        d11, #0x00000000000000ff
+    movi        d4, #0x00000000000000ff
 
     bsl         v18.8b,  v24.8b ,  v16.8b   //only select row values from q12(predpixel)
 
@@ -387,14 +387,14 @@ blk_4_8:
     st1         {v19.8b},[x2], x3
     sshr        d24, d24,#8
 
-    bsl         v10.8b,  v24.8b ,  v16.8b
+    bsl         v3.8b,  v24.8b ,  v16.8b
 
-    st1         {v10.8b},[x2], x3
+    st1         {v3.8b},[x2], x3
     sshr        d24, d24,#8
 
-    bsl         v11.8b,  v24.8b ,  v16.8b
+    bsl         v4.8b,  v24.8b ,  v16.8b
 
-    st1         {v11.8b},[x2], x3
+    st1         {v4.8b},[x2], x3
     sshr        d24, d24,#8
 
     b           end_func
@@ -411,19 +411,19 @@ blk_4:
     st1         {v19.s}[0],[x2], x3
     sshr        d24, d24,#8
 
-    bsl         v10.8b,  v24.8b ,  v16.8b
+    bsl         v3.8b,  v24.8b ,  v16.8b
 
-    st1         {v10.s}[0],[x2], x3
+    st1         {v3.s}[0],[x2], x3
     sshr        d24, d24,#8
 
-    bsl         v11.8b,  v24.8b ,  v16.8b
-    st1         {v11.s}[0],[x2], x3
+    bsl         v4.8b,  v24.8b ,  v16.8b
+    st1         {v4.s}[0],[x2], x3
 
 
 end_func:
     // ldmfd sp!,{x4-x12,x15}                  //reload the registers from sp
     ldp         x19, x20,[sp],#16
-    pop_v_regs
+
     ret
 
 

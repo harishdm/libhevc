@@ -151,12 +151,13 @@ ihevc_itrans_recon_8x8_a9q:
     @// copy the input pointer to another register
     @// step 1 : load all constants
     stmfd       sp!,{r4-r12,lr}
-    add         sp,sp,#40
-    ldr         r8,[sp,#4]                  @ prediction stride
-    ldr         r7,[sp,#8]                  @ destination stride
-    ldr         r6,[sp]                     @ src stride
-    ldr         r12,[sp,#12]
-    ldr         r11,[sp,#16]
+    vpush       {d8  -  d15}
+
+    ldr         r8,[sp,#108]                  @ prediction stride
+    ldr         r7,[sp,#112]                  @ destination stride
+    ldr         r6,[sp, #104]                     @ src stride
+    ldr         r12,[sp,#116]
+    ldr         r11,[sp,#120]
     mov         r6,r6,lsl #1                @ x sizeof(word16)
     add         r9,r0,r6, lsl #1            @ 2 rows
 
@@ -925,7 +926,7 @@ pred_buff_addition:
 
 
 
-    sub         sp,sp,#40
+    vpop        {d8  -  d15}
     ldmfd       sp!,{r4-r12,pc}
 
 

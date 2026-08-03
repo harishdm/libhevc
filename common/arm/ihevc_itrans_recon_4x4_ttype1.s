@@ -119,10 +119,12 @@
 ihevc_itrans_recon_4x4_ttype1_a9q:
 
     stmfd       sp!, {r4-r12, r14}          @stack stores the values of the arguments
-    ldr         r4,[sp,#40]                 @loading src_strd
-    ldr         r5,[sp,#44]                 @loading pred_strd
-    ldr         r6,[sp,#48]                 @loading dst_strd
-    ldr         r7,[sp,#52]                 @loading zero_cols
+    vpush       {d8  -  d15}
+
+    ldr         r4,[sp,#104]                 @loading src_strd
+    ldr         r5,[sp,#108]                 @loading pred_strd
+    ldr         r6,[sp,#112]                 @loading dst_strd
+    ldr         r7,[sp,#116]                 @loading zero_cols
 
     add         r4,r4,r4                    @ src_strd in terms of word16
 
@@ -224,6 +226,7 @@ ihevc_itrans_recon_4x4_ttype1_a9q:
     vst1.32     {d1[0]},[r3],r6
     vst1.32     {d1[1]},[r3],r6
 
+    vpop        {d8  -  d15}
     ldmfd       sp!,{r4-r12,r15}            @reload the registers from sp
 
 

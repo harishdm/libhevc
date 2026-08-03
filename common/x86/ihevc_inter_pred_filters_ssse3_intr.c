@@ -27,7 +27,7 @@
 *
 *
 * @author
-*
+*  Ittiam
 *
 * @par List of Functions:
 *  - ihevc_inter_pred_luma_copy_ssse3()
@@ -310,19 +310,14 @@ void ihevc_inter_pred_luma_horz_ssse3(UWORD8 *pu1_src,
 
     if(0 == (ht & 1)) /* ht multiple of 2 case */
     {
-
         if(0 == (wd & 7)) /* wd = multiple of 8 case */
         {
             for(row = 0; row < ht; row += 2)
             {
-
                 int offset = 0;
 
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 for(col = 0; col < wd; col += 8)
                 {
@@ -411,11 +406,8 @@ void ihevc_inter_pred_luma_horz_ssse3(UWORD8 *pu1_src,
             {
                 int offset = 0;
 
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 for(col = 0; col < wd; col += 4)
                 {
@@ -515,12 +507,8 @@ void ihevc_inter_pred_luma_horz_ssse3(UWORD8 *pu1_src,
             {
                 int offset = 0;
 
-
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 for(col = 0; col < wd; col += 8)
                 {
@@ -573,11 +561,8 @@ void ihevc_inter_pred_luma_horz_ssse3(UWORD8 *pu1_src,
             {
                 int offset = 0;
 
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 for(col = 0; col < wd; col += 4)
                 {
@@ -667,7 +652,8 @@ void ihevc_inter_pred_luma_horz_ssse3(UWORD8 *pu1_src,
                 pu1_src += 2 * src_strd;  /* Pointer update */
                 pu1_dst += 2 * dst_strd;  /* Pointer update */
             }
-            { /* last repeat at outside the loop */
+            {
+                /* last repeat at outside the loop */
                 int offset = 0;
                 for(col = 0; col < wd; col += 4)
                 {
@@ -792,7 +778,7 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
     PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
     PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
 
-/* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
+    /* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
     s4_8x16b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     control_mask_1_8x16b = _mm_set1_epi32(0x01000100); /* Control Mask register */
@@ -806,22 +792,21 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
     coeff4_5_8x16b = _mm_shuffle_epi8(s4_8x16b, control_mask_3_8x16b);  /* pi1_coeff[4] */
     coeff6_7_8x16b = _mm_shuffle_epi8(s4_8x16b, control_mask_4_8x16b);  /* pi1_coeff[4] */
 
-/*  seting  values in register */
+    /*  seting  values in register */
     zero_8x16b = _mm_setzero_si128(); /* for saturated clipping */
     offset_8x16b = _mm_set1_epi16(OFFSET_14_MINUS_BIT_DEPTH); /* for offset addition */
     mask_low_32b = _mm_set_epi32(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000);
     mask_high_96b = _mm_set_epi32(0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF);
 
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if(wd % 8 == 0)
-    { /* wd = multiple of 8 case */
-
+    {
+        /* wd = multiple of 8 case */
         pu1_src_copy = pu1_src;
         pu1_dst_copy = pu1_dst;
 
         for(col = 0; col < wd; col += 8)
         {
-
             pu1_src = pu1_src_copy + col;
             pu1_dst = pu1_dst_copy + col;
 
@@ -917,7 +902,6 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
             /* Store the output pixels of row 2*/
             _mm_storel_epi64((__m128i *)(pu1_dst + (2 * dst_strd)), s29_8x16b);
 
-
             /*ROW 1*/
             s4_0_16x8b = _mm_unpacklo_epi8(s2_1_16x8b, s2_2_16x8b);
 
@@ -950,7 +934,6 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
             /* store 8 8-bit output values  */
             /* Store the output pixels of row 1*/
             _mm_storel_epi64((__m128i *)(pu1_dst + (dst_strd)), s19_8x16b);
-
 
             /* ROW 3*/
             s30_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff0_1_8x16b);
@@ -985,13 +968,10 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
 
             for(row = 4; row < ht; row += 4)
             {
-#if 1
                 PREFETCH((char const *)(pu1_src + (8 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (9 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (10 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (11 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 s3_0_16x8b = s3_2_16x8b;
                 s3_1_16x8b = s3_3_16x8b;
@@ -1059,7 +1039,6 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
                 /* Store the output pixels of (cur_row+2)*/
                 _mm_storel_epi64((__m128i *)(pu1_dst + (2 * dst_strd)), s29_8x16b);
 
-
                 /*row + 1*/
                 s10_8x16b = _mm_maddubs_epi16(s4_0_16x8b, coeff0_1_8x16b);
                 s11_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff2_3_8x16b);
@@ -1084,7 +1063,6 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
                 /* store 8 8-bit output values  */
                 /* Store the output pixels of (cur_row + 1)*/
                 _mm_storel_epi64((__m128i *)(pu1_dst + dst_strd), s19_8x16b);
-
 
                 /* row + 3*/
                 s30_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff0_1_8x16b);
@@ -1124,23 +1102,18 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
     }
     else /* wd = multiple of 8 case */
     {
-
         pu1_src_copy = pu1_src;
         pu1_dst_copy = pu1_dst;
 
         for(col = 0; col < wd; col += 4)
         {
-
             pu1_src = pu1_src_copy + col;
             pu1_dst = pu1_dst_copy + col;
 
-#if 1
             PREFETCH((char const *)(pu1_src + (8 * src_strd)), _MM_HINT_T0)
             PREFETCH((char const *)(pu1_src + (9 * src_strd)), _MM_HINT_T0)
             PREFETCH((char const *)(pu1_src + (10 * src_strd)), _MM_HINT_T0)
             PREFETCH((char const *)(pu1_src + (11 * src_strd)), _MM_HINT_T0)
-
-#endif
 
             /*load 8 pixel values */
             s2_0_16x8b  = _mm_loadl_epi64((__m128i *)(pu1_src + (-3 * src_strd)));
@@ -1193,12 +1166,10 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
 
             /* i2_tmp = CLIP_U8(i2_tmp);*/
             s9_8x16b = _mm_packus_epi16(s8_8x16b, zero_8x16b);
-#if 1
             s5_8x16b = _mm_loadl_epi64((__m128i *)(pu1_dst));
             s6_8x16b =  _mm_and_si128(s5_8x16b, mask_low_32b);
             s7_8x16b =  _mm_and_si128(s9_8x16b, mask_high_96b);
             s8_8x16b = _mm_or_si128(s6_8x16b, s7_8x16b);
-#endif
             /* store 8 8-bit output values  */
             /* Store the output pixels of row 0*/
             _mm_storel_epi64((__m128i *)(pu1_dst), s8_8x16b);
@@ -1229,16 +1200,13 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
 
             /* i2_tmp = CLIP_U8(i2_tmp);*/
             s29_8x16b = _mm_packus_epi16(s28_8x16b, zero_8x16b);
-#if 1
             s25_8x16b = _mm_loadl_epi64((__m128i *)(pu1_dst + (2 * dst_strd)));
             s26_8x16b =  _mm_and_si128(s25_8x16b, mask_low_32b);
             s27_8x16b =  _mm_and_si128(s29_8x16b, mask_high_96b);
             s28_8x16b = _mm_or_si128(s26_8x16b, s27_8x16b);
-#endif
             /* store 8 8-bit output values  */
             /* Store the output pixels of row 2*/
             _mm_storel_epi64((__m128i *)(pu1_dst + (2 * dst_strd)), s28_8x16b);
-
 
             /*ROW 1*/
             s4_0_16x8b = _mm_unpacklo_epi8(s2_1_16x8b, s2_2_16x8b);
@@ -1268,16 +1236,13 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
 
             /* i2_tmp = CLIP_U8(i2_tmp);*/
             s19_8x16b = _mm_packus_epi16(s18_8x16b, zero_8x16b);
-#if 1
             s15_8x16b = _mm_loadl_epi64((__m128i *)(pu1_dst + dst_strd));
             s16_8x16b =  _mm_and_si128(s15_8x16b, mask_low_32b);
             s17_8x16b =  _mm_and_si128(s19_8x16b, mask_high_96b);
             s18_8x16b = _mm_or_si128(s16_8x16b, s17_8x16b);
-#endif
             /* store 8 8-bit output values  */
             /* Store the output pixels of row 1*/
             _mm_storel_epi64((__m128i *)(pu1_dst + (dst_strd)), s18_8x16b);
-
 
             /* ROW 3*/
             s30_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff0_1_8x16b);
@@ -1303,12 +1268,10 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
             /* i2_tmp = CLIP_U8(i2_tmp);*/
             s39_8x16b = _mm_packus_epi16(s38_8x16b, zero_8x16b);
 
-#if 1
             s35_8x16b = _mm_loadl_epi64((__m128i *)(pu1_dst + (3 * dst_strd)));
             s36_8x16b =  _mm_and_si128(s35_8x16b, mask_low_32b);
             s37_8x16b =  _mm_and_si128(s39_8x16b, mask_high_96b);
             s38_8x16b = _mm_or_si128(s36_8x16b, s37_8x16b);
-#endif
 
             /* store 8 8-bit output values  */
             /* Store the output pixels of row 2*/
@@ -1319,14 +1282,10 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
 
             for(row = 4; row < ht; row += 4)
             {
-
-#if 1
                 PREFETCH((char const *)(pu1_src + (8 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (9 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (10 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (11 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 s3_0_16x8b = s3_2_16x8b;
                 s3_1_16x8b = s3_3_16x8b;
@@ -1404,7 +1363,6 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
                 /* Store the output pixels of (cur_row+2)*/
                 _mm_storel_epi64((__m128i *)(pu1_dst + (2 * dst_strd)), s28_8x16b);
 
-
                 /*row + 1*/
                 s10_8x16b = _mm_maddubs_epi16(s4_0_16x8b, coeff0_1_8x16b);
                 s11_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff2_3_8x16b);
@@ -1434,7 +1392,6 @@ void ihevc_inter_pred_luma_vert_ssse3(UWORD8 *pu1_src,
                 /* store 8 8-bit output values  */
                 /* Store the output pixels of (cur_row + 1)*/
                 _mm_storel_epi64((__m128i *)(pu1_dst + dst_strd), s18_8x16b);
-
 
                 /* row + 3*/
                 s30_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff0_1_8x16b);
@@ -1535,7 +1492,7 @@ void ihevc_inter_pred_luma_copy_w16out_ssse3(UWORD8 *pu1_src,
     ASSERT(ht % 2 == 0); /* checking assumption*/
     UNUSED(pi1_coeff);
     zero_8x16b = _mm_setzero_si128();
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if(wd % 8 == 0) /* wd = multiple of 8 case */
     {
         for(row = 0; row < ht; row += 2)
@@ -1543,7 +1500,7 @@ void ihevc_inter_pred_luma_copy_w16out_ssse3(UWORD8 *pu1_src,
             int offset = 0;
             for(col = 0; col < wd; col += 8)
             {
-/* row =0 */
+                /* row =0 */
                 /*load 16 pixel values from 15:0 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + offset)); /* pu1_src[col] */
                 s3 = _mm_unpacklo_epi8(s3, zero_8x16b);
@@ -1553,7 +1510,7 @@ void ihevc_inter_pred_luma_copy_w16out_ssse3(UWORD8 *pu1_src,
                 /* pi2_dst[col] = (pu1_src[col] << SHIFT_14_MINUS_BIT_DEPTH); */
                 _mm_store_si128((__m128i *)(pi2_dst + offset), s3);
 
-/* row =1 */
+                /* row =1 */
                 /*load 16 pixel values from 271:256 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + src_strd + offset)); /* pu1_src[col] */
                 s3 = _mm_unpacklo_epi8(s3, zero_8x16b);
@@ -1577,7 +1534,7 @@ void ihevc_inter_pred_luma_copy_w16out_ssse3(UWORD8 *pu1_src,
             int offset = 0;
             for(col = 0; col < wd; col += 4)
             {
-/* row =0 */
+                /* row =0 */
                 /*load 16 pixel values from 15:0 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + offset)); /* pu1_src[col] */
                 s3 = _mm_unpacklo_epi8(s3, zero_8x16b);
@@ -1587,7 +1544,7 @@ void ihevc_inter_pred_luma_copy_w16out_ssse3(UWORD8 *pu1_src,
                 /* pi2_dst[col] = (pu1_src[col] << SHIFT_14_MINUS_BIT_DEPTH); */
                 _mm_storel_epi64((__m128i *)(pi2_dst + offset), s3);
 
-/* row =1 */
+                /* row =1 */
                 /*load 16 pixel values from 271:256 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + src_strd + offset)); /* pu1_src[col] */
                 s3 = _mm_unpacklo_epi8(s3, zero_8x16b);
@@ -1603,7 +1560,6 @@ void ihevc_inter_pred_luma_copy_w16out_ssse3(UWORD8 *pu1_src,
             pi2_dst += 2 * dst_strd; /* pointer update */
         }
     }
-
 }
 
 /**
@@ -1678,7 +1634,6 @@ void ihevc_inter_pred_luma_horz_w16out_ssse3(UWORD8 *pu1_src,
     /* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
     src_temp1_16x8b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
-
     control_mask_1_8x16b = _mm_set1_epi32(0x01000100); /* Control Mask register */
     control_mask_2_8x16b = _mm_set1_epi32(0x03020302); /* Control Mask register */
     control_mask_3_8x16b = _mm_set1_epi32(0x05040504); /* Control Mask register */
@@ -1692,20 +1647,14 @@ void ihevc_inter_pred_luma_horz_w16out_ssse3(UWORD8 *pu1_src,
 
     if(0 == (ht & 1)) /* ht multiple of 2 case */
     {
-
         if(0 == (wd & 7)) /* wd = multiple of 8 case */
         {
             for(row = 0; row < ht; row += 2)
             {
-
                 int offset = 0;
 
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-
-#endif
 
                 for(col = 0; col < wd; col += 8)
                 {
@@ -1783,11 +1732,8 @@ void ihevc_inter_pred_luma_horz_w16out_ssse3(UWORD8 *pu1_src,
             {
                 int offset = 0;
 
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 for(col = 0; col < wd; col += 4)
                 {
@@ -1868,10 +1814,7 @@ void ihevc_inter_pred_luma_horz_w16out_ssse3(UWORD8 *pu1_src,
             {
                 int offset = 0;
 
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 for(col = 0; col < wd; col += 8)
                 {
@@ -1920,12 +1863,8 @@ void ihevc_inter_pred_luma_horz_w16out_ssse3(UWORD8 *pu1_src,
             {
                 int offset = 0;
 
-
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 for(col = 0; col < wd; col += 4)
                 {
@@ -2099,11 +2038,9 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
     __m128i s10_8x16b, s11_8x16b, s12_8x16b, s13_8x16b, s14_8x16b, s15_8x16b, s16_8x16b;
     __m128i s20_8x16b, s21_8x16b, s22_8x16b, s23_8x16b, s24_8x16b, s25_8x16b, s26_8x16b;
     __m128i s30_8x16b, s31_8x16b, s32_8x16b, s33_8x16b, s34_8x16b, s35_8x16b, s36_8x16b;
-
-
     __m128i control_mask_1_8x16b, control_mask_2_8x16b, control_mask_3_8x16b, control_mask_4_8x16b;
 
-/* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
+    /* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
     s4_8x16b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     control_mask_1_8x16b = _mm_set1_epi32(0x01000100); /* Control Mask register */
@@ -2118,16 +2055,15 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
     coeff6_7_8x16b = _mm_shuffle_epi8(s4_8x16b, control_mask_4_8x16b);  /* pi1_coeff[4] */
 
 
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if((wd % 8) == 0)
-    { /* wd = multiple of 8 case */
-
+    {
+        /* wd = multiple of 8 case */
         pu1_src_copy = pu1_src;
         pi2_dst_copy = pi2_dst;
 
         for(col = 0; col < wd; col += 8)
         {
-
             pu1_src = pu1_src_copy + col;
             pi2_dst = pi2_dst_copy + col;
 
@@ -2207,7 +2143,6 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
             /* Store the output pixels of row 2*/
             _mm_store_si128((__m128i *)(pi2_dst + (2 * dst_strd)), s26_8x16b);
 
-
             /*ROW 1*/
             s4_0_16x8b = _mm_unpacklo_epi8(s2_1_16x8b, s2_2_16x8b);
 
@@ -2229,11 +2164,9 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
             s15_8x16b = _mm_add_epi16(s12_8x16b, s13_8x16b);
             s16_8x16b = _mm_add_epi16(s14_8x16b, s15_8x16b);
 
-
             /* store 8 8-bit output values  */
             /* Store the output pixels of row 1*/
             _mm_store_si128((__m128i *)(pi2_dst + (dst_strd)), s16_8x16b);
-
 
             /* ROW 3*/
             s30_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff0_1_8x16b);
@@ -2251,7 +2184,6 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
             s35_8x16b = _mm_add_epi16(s32_8x16b, s33_8x16b);
             s36_8x16b = _mm_add_epi16(s34_8x16b, s35_8x16b);
 
-
             /* store 8 8-bit output values  */
             /* Store the output pixels of row 2*/
             _mm_store_si128((__m128i *)(pi2_dst + (3 * dst_strd)), s36_8x16b);
@@ -2261,7 +2193,6 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
 
             for(row = 4; row < ht; row += 4)
             {
-
                 PREFETCH((char const *)(pu1_src + (4 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (5 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
@@ -2317,7 +2248,6 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
                 /* Store the output pixels of (cur_row+2)*/
                 _mm_store_si128((__m128i *)(pi2_dst + (2 * dst_strd)), s26_8x16b);
 
-
                 /*row + 1*/
                 s10_8x16b = _mm_maddubs_epi16(s4_0_16x8b, coeff0_1_8x16b);
                 s11_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff2_3_8x16b);
@@ -2331,11 +2261,9 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
                 s15_8x16b = _mm_add_epi16(s12_8x16b, s13_8x16b);
                 s16_8x16b = _mm_add_epi16(s14_8x16b, s15_8x16b);
 
-
                 /* store 8 8-bit output values  */
                 /* Store the output pixels of (cur_row + 1)*/
                 _mm_store_si128((__m128i *)(pi2_dst + dst_strd), s16_8x16b);
-
 
                 /* row + 3*/
                 s30_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff0_1_8x16b);
@@ -2360,7 +2288,6 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
 
                 s2_10_16x8b = s2_3_16x8b;
 
-
                 pu1_src += 4 * src_strd; /* pointer update */
                 pi2_dst += 4 * dst_strd; /* pointer update */
             }
@@ -2368,13 +2295,11 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
     }
     else /* wd = multiple of 8 case */
     {
-
         pu1_src_copy = pu1_src;
         pi2_dst_copy = pi2_dst;
 
         for(col = 0; col < wd; col += 4)
         {
-
             pu1_src = pu1_src_copy + col;
             pi2_dst = pi2_dst_copy + col;
 
@@ -2454,7 +2379,6 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
             /* Store the output pixels of row 2*/
             _mm_storel_epi64((__m128i *)(pi2_dst + (2 * dst_strd)), s26_8x16b);
 
-
             /*ROW 1*/
             s4_0_16x8b = _mm_unpacklo_epi8(s2_1_16x8b, s2_2_16x8b);
 
@@ -2476,11 +2400,9 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
             s15_8x16b = _mm_add_epi16(s12_8x16b, s13_8x16b);
             s16_8x16b = _mm_add_epi16(s14_8x16b, s15_8x16b);
 
-
             /* store 8 8-bit output values  */
             /* Store the output pixels of row 1*/
             _mm_storel_epi64((__m128i *)(pi2_dst + (dst_strd)), s16_8x16b);
-
 
             /* ROW 3*/
             s30_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff0_1_8x16b);
@@ -2507,7 +2429,6 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
 
             for(row = 4; row < ht; row += 4)
             {
-
                 PREFETCH((char const *)(pu1_src + (4 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (5 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
@@ -2563,7 +2484,6 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
                 /* Store the output pixels of (cur_row+2)*/
                 _mm_storel_epi64((__m128i *)(pi2_dst + (2 * dst_strd)), s26_8x16b);
 
-
                 /*row + 1*/
                 s10_8x16b = _mm_maddubs_epi16(s4_0_16x8b, coeff0_1_8x16b);
                 s11_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff2_3_8x16b);
@@ -2580,7 +2500,6 @@ void ihevc_inter_pred_luma_vert_w16out_ssse3(UWORD8 *pu1_src,
                 /* store 8 8-bit output values  */
                 /* Store the output pixels of (cur_row + 1)*/
                 _mm_storel_epi64((__m128i *)(pi2_dst + dst_strd), s16_8x16b);
-
 
                 /* row + 3*/
                 s30_8x16b = _mm_maddubs_epi16(s4_1_16x8b, coeff0_1_8x16b);
@@ -2675,7 +2594,7 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
     __m128i zero_8x16b, offset_8x16b, mask_low_32b, mask_high_96b, sign_reg;
 
-/* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
+    /* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
     s4_8x16b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     zero_8x16b = _mm_setzero_si128();
@@ -2688,20 +2607,17 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
     coeff4_5_8x16b = _mm_shuffle_epi32(s5_8x16b, _MM_SHUFFLE(2, 2, 2, 2));  /* pi1_coeff[4] */
     coeff6_7_8x16b = _mm_shuffle_epi32(s5_8x16b, _MM_SHUFFLE(3, 3, 3, 3));  /* pi1_coeff[4] */
 
-
-/* seting values in register */
+    /* seting values in register */
     offset_8x16b = _mm_set1_epi32(OFFSET_14_MINUS_BIT_DEPTH); /* for offset addition */
     mask_low_32b = _mm_set_epi32(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000);
     mask_high_96b = _mm_set_epi32(0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF);
 
-
     pi2_src_copy = pi2_src;
     pu1_dst_copy = pu1_dst;
 
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     for(col = 0; col < wd; col += 4)
     {
-
         pi2_src = pi2_src_copy + col;
         pu1_dst = pu1_dst_copy + col;
 
@@ -2760,7 +2676,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
         s8_8x16b = _mm_packs_epi32(s8_8x16b, zero_8x16b);
 
-
         /* i2_tmp = CLIP_U8(i2_tmp);*/
         s9_8x16b = _mm_packus_epi16(s8_8x16b, zero_8x16b);
 
@@ -2803,7 +2718,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
         s28_8x16b = _mm_packs_epi32(s28_8x16b, zero_8x16b);
 
-
         /* i2_tmp = CLIP_U8(i2_tmp);*/
         s29_8x16b = _mm_packus_epi16(s28_8x16b, zero_8x16b);
 
@@ -2815,7 +2729,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
         /* store 8 8-bit output values  */
         /* Store the output pixels of row 2*/
         _mm_storel_epi64((__m128i *)(pu1_dst + (2 * dst_strd)), s29_8x16b);
-
 
         /*ROW 1*/
         s4_0_16x8b = _mm_unpacklo_epi16(s2_1_16x8b, s2_2_16x8b);
@@ -2849,7 +2762,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
         s18_8x16b = _mm_packs_epi32(s18_8x16b, zero_8x16b);
 
-
         /* i2_tmp = CLIP_U8(i2_tmp);*/
         s19_8x16b = _mm_packus_epi16(s18_8x16b, zero_8x16b);
 
@@ -2861,7 +2773,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
         /* store 8 8-bit output values  */
         /* Store the output pixels of row 1*/
         _mm_storel_epi64((__m128i *)(pu1_dst + (dst_strd)), s19_8x16b);
-
 
         /* ROW 3*/
         s30_8x16b = _mm_madd_epi16(s4_1_16x8b, coeff0_1_8x16b);
@@ -2882,7 +2793,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
         /*(i2_tmp + OFFSET_14_MINUS_BIT_DEPTH) >> SHIFT_14_MINUS_BIT_DEPTH */
         s38_8x16b = _mm_srai_epi32(s36_8x16b,  SHIFT_14_MINUS_BIT_DEPTH);
 
-
         /* (i4_tmp >> SHIFT_14_MINUS_BIT_DEPTH) + OFFSET_14_MINUS_BIT_DEPTH) */
         s39_8x16b = _mm_add_epi32(s38_8x16b, offset_8x16b);
 
@@ -2890,7 +2800,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
         s38_8x16b = _mm_srai_epi32(s39_8x16b,  SHIFT_14_MINUS_BIT_DEPTH);
 
         s38_8x16b = _mm_packs_epi32(s38_8x16b, zero_8x16b);
-
 
         /* i2_tmp = CLIP_U8(i2_tmp);*/
         s39_8x16b = _mm_packus_epi16(s38_8x16b, zero_8x16b);
@@ -2909,7 +2818,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
         for(row = 4; row < ht; row += 4)
         {
-
             s3_0_16x8b = s3_2_16x8b;
             s3_1_16x8b = s3_3_16x8b;
             s3_2_16x8b = s3_4_16x8b;
@@ -2943,7 +2851,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
             s8_8x16b = _mm_packs_epi32(s8_8x16b, zero_8x16b);
 
-
             /* i2_tmp = CLIP_U8(i2_tmp);*/
             s9_8x16b = _mm_packus_epi16(s8_8x16b, zero_8x16b);
 
@@ -2956,7 +2863,7 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
             /* Store the output pixels of row 4*/
             _mm_storel_epi64((__m128i *)(pu1_dst), s9_8x16b);
 
-/* row + 2*/
+            /* row + 2*/
             s20_8x16b = _mm_madd_epi16(s3_1_16x8b, coeff0_1_8x16b);
             s21_8x16b = _mm_madd_epi16(s3_2_16x8b, coeff2_3_8x16b);
             s22_8x16b = _mm_madd_epi16(s3_3_16x8b, coeff4_5_8x16b);
@@ -2987,7 +2894,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
             s28_8x16b = _mm_packs_epi32(s28_8x16b, zero_8x16b);
 
-
             /* i2_tmp = CLIP_U8(i2_tmp);*/
             s29_8x16b = _mm_packus_epi16(s28_8x16b, zero_8x16b);
 
@@ -3000,8 +2906,7 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
             /* Store the output pixels of (cur_row+2)*/
             _mm_storel_epi64((__m128i *)(pu1_dst + (2 * dst_strd)), s29_8x16b);
 
-
-/*row + 1*/
+            /*row + 1*/
             s10_8x16b = _mm_madd_epi16(s4_0_16x8b, coeff0_1_8x16b);
             s11_8x16b = _mm_madd_epi16(s4_1_16x8b, coeff2_3_8x16b);
             s12_8x16b = _mm_madd_epi16(s4_2_16x8b, coeff4_5_8x16b);
@@ -3037,8 +2942,7 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
             /* Store the output pixels of (cur_row + 1)*/
             _mm_storel_epi64((__m128i *)(pu1_dst + dst_strd), s19_8x16b);
 
-
-/* row + 3*/
+            /* row + 3*/
             s30_8x16b = _mm_madd_epi16(s4_1_16x8b, coeff0_1_8x16b);
             s31_8x16b = _mm_madd_epi16(s4_2_16x8b, coeff2_3_8x16b);
             s32_8x16b = _mm_madd_epi16(s4_3_16x8b, coeff4_5_8x16b);
@@ -3066,7 +2970,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
             s38_8x16b = _mm_packs_epi32(s38_8x16b, zero_8x16b);
 
-
             /* i2_tmp = CLIP_U8(i2_tmp);*/
             s39_8x16b = _mm_packus_epi16(s38_8x16b, zero_8x16b);
 
@@ -3085,7 +2988,6 @@ void ihevc_inter_pred_luma_vert_w16inp_ssse3(WORD16 *pi2_src,
             pu1_dst += 4 * dst_strd; /* pointer update */
         }
     }
-
 }
 
 
@@ -3152,7 +3054,7 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
 
     __m128i zero_8x16b, offset_8x16b, sign_reg;
 
-/* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
+    /* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
     s4_8x16b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     zero_8x16b = _mm_setzero_si128();
@@ -3165,17 +3067,15 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
     coeff4_5_8x16b = _mm_shuffle_epi32(s5_8x16b, _MM_SHUFFLE(2, 2, 2, 2));  /* pi1_coeff[4] */
     coeff6_7_8x16b = _mm_shuffle_epi32(s5_8x16b, _MM_SHUFFLE(3, 3, 3, 3));  /* pi1_coeff[4] */
 
-
-/* seting values in register */
+    /* seting values in register */
     offset_8x16b = _mm_set1_epi32(OFFSET14); /* for offset addition */
 
     pi2_src_copy = pi2_src;
     pi2_dst_copy = pi2_dst;
 
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     for(col = 0; col < wd; col += 4)
     {
-
         pi2_src = pi2_src_copy + col;
         pi2_dst = pi2_dst_copy + col;
 
@@ -3266,7 +3166,6 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
         /* Store the output pixels of row 2*/
         _mm_storel_epi64((__m128i *)(pi2_dst + (2 * dst_strd)), s28_8x16b);
 
-
         /*ROW 1*/
         s4_0_16x8b = _mm_unpacklo_epi16(s2_1_16x8b, s2_2_16x8b);
 
@@ -3300,7 +3199,6 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
         /* Store the output pixels of row 1*/
         _mm_storel_epi64((__m128i *)(pi2_dst + (dst_strd)), s18_8x16b);
 
-
         /* ROW 3*/
         s30_8x16b = _mm_madd_epi16(s4_1_16x8b, coeff0_1_8x16b);
         s31_8x16b = _mm_madd_epi16(s4_2_16x8b, coeff2_3_8x16b);
@@ -3320,7 +3218,6 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
         /*(i2_tmp + OFFSET_14_MINUS_BIT_DEPTH) >> SHIFT_14_MINUS_BIT_DEPTH */
         s38_8x16b = _mm_srai_epi32(s36_8x16b,  SHIFT_14_MINUS_BIT_DEPTH);
 
-
         /* (i4_tmp >> SHIFT_14_MINUS_BIT_DEPTH) + OFFSET_14_MINUS_BIT_DEPTH) */
         s39_8x16b = _mm_sub_epi32(s38_8x16b, offset_8x16b);
 
@@ -3335,7 +3232,6 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
 
         for(row = 4; row < ht; row += 4)
         {
-
             s3_0_16x8b = s3_2_16x8b;
             s3_1_16x8b = s3_3_16x8b;
             s3_2_16x8b = s3_4_16x8b;
@@ -3370,7 +3266,7 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
             /* Store the output pixels of row 4*/
             _mm_storel_epi64((__m128i *)(pi2_dst), s8_8x16b);
 
-/* row + 2*/
+            /* row + 2*/
             s20_8x16b = _mm_madd_epi16(s3_1_16x8b, coeff0_1_8x16b);
             s21_8x16b = _mm_madd_epi16(s3_2_16x8b, coeff2_3_8x16b);
             s22_8x16b = _mm_madd_epi16(s3_3_16x8b, coeff4_5_8x16b);
@@ -3402,8 +3298,7 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
             /* Store the output pixels of (cur_row+2)*/
             _mm_storel_epi64((__m128i *)(pi2_dst + (2 * dst_strd)), s28_8x16b);
 
-
-/*row + 1*/
+            /*row + 1*/
             s10_8x16b = _mm_madd_epi16(s4_0_16x8b, coeff0_1_8x16b);
             s11_8x16b = _mm_madd_epi16(s4_1_16x8b, coeff2_3_8x16b);
             s12_8x16b = _mm_madd_epi16(s4_2_16x8b, coeff4_5_8x16b);
@@ -3428,8 +3323,7 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
             /* Store the output pixels of (cur_row + 1)*/
             _mm_storel_epi64((__m128i *)(pi2_dst + dst_strd), s18_8x16b);
 
-
-/* row + 3*/
+            /* row + 3*/
             s30_8x16b = _mm_madd_epi16(s4_1_16x8b, coeff0_1_8x16b);
             s31_8x16b = _mm_madd_epi16(s4_2_16x8b, coeff2_3_8x16b);
             s32_8x16b = _mm_madd_epi16(s4_3_16x8b, coeff4_5_8x16b);
@@ -3464,7 +3358,6 @@ void ihevc_inter_pred_luma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
             pi2_dst += 4 * dst_strd; /* pointer update */
         }
     }
-
 }
 
 /**
@@ -3522,7 +3415,7 @@ void ihevc_inter_pred_chroma_copy_ssse3(UWORD8 *pu1_src,
 
     mask_4x32b = _mm_set_epi32(0, 0, 0, 0x80808080); /* Mask register */
 
-/*  for loop starts from here */
+    /*  for loop starts from here */
     if(wd % 8 == 0)
     {
         for(row = 0; row < ht; row += 2)
@@ -3530,14 +3423,13 @@ void ihevc_inter_pred_chroma_copy_ssse3(UWORD8 *pu1_src,
             int offset = 0;
             for(col = 0; col < 2 * wd; col += 16)
             {
-/* row =0 */
-
+                /* row =0 */
                 /*load 16 pixel values from 15:0 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + offset)); /* pu1_src[col]; */
                 /* storing 16 8-bit output values */
                 _mm_storeu_si128((__m128i *)(pu1_dst + offset), s3); /* pu1_dst[col] = pu1_src[col]; */
 
-/* row =1 */
+                /* row =1 */
                 /*load 16 pixel values from 271:256 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + src_strd + offset)); /* pu1_src[col]; */
                 /* storing 8 8-bit output values */
@@ -3557,12 +3449,12 @@ void ihevc_inter_pred_chroma_copy_ssse3(UWORD8 *pu1_src,
             int offset = 0;
             for(col = 0; col < 2 * wd; col += 8)
             {
-/* row =0  */
+                /* row =0  */
                 /*load 16 pixel values from 15:0 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + offset)); /* pu1_src[col]; */
                 /* storing 8 8-bit output values */
                 _mm_storel_epi64((__m128i *)(pu1_dst + offset), s3); /* pu1_dst[col] = pu1_src[col]; */
-/* row =1 */
+                /* row =1 */
                 /*load 16 pixel values from 271:256 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + src_strd + offset)); /* pu1_src[col]; */
                 /* storing 8 8-bit output values */
@@ -3582,11 +3474,11 @@ void ihevc_inter_pred_chroma_copy_ssse3(UWORD8 *pu1_src,
             int offset = 0;
             for(col = 0; col < 2 * wd; col += 4)
             {
-/* row =0 */
+                /* row =0 */
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + offset)); /* pu1_src[col] */
                 /* storing four 8-bit output values */
                 _mm_maskmoveu_si128(s3, mask_4x32b, (char *)(pu1_dst + offset)); /* pu1_dst[col] = pu1_src[col]; */
-/* row =1 */
+                /* row =1 */
                 /* pu1_src[col] */
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + src_strd + offset));
 
@@ -3666,7 +3558,7 @@ void ihevc_inter_pred_chroma_horz_ssse3(UWORD8 *pu1_src,
 
     ASSERT(wd % 2 == 0); /* checking assumption*/
 
-/* loading four 8-bit coefficients  */
+    /* loading four 8-bit coefficients  */
     src_temp1_16x8b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     offset_8x16b = _mm_set1_epi16(OFFSET_14_MINUS_BIT_DEPTH); /* for offset addition */
@@ -3680,24 +3572,18 @@ void ihevc_inter_pred_chroma_horz_ssse3(UWORD8 *pu1_src,
     coeff0_1_8x16b = _mm_shuffle_epi8(src_temp1_16x8b, control_mask_1_8x16b);  /* pi1_coeff[4] */
     coeff2_3_8x16b = _mm_shuffle_epi8(src_temp1_16x8b, control_mask_2_8x16b);  /* pi1_coeff[4] */
 
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if(wd % 2 == 0 && wd % 4 != 0)
     {
-
         for(row = 0; row < ht; row += 2)
         {
             int offset = 0;
 
-#if 1
             PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
             PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
 
-#endif
-
             for(col = 0; col < 2 * wd; col += 4)
             {
-
-
                 /*load 16 pixel values from row 0*/
                 src_temp1_16x8b = _mm_loadu_si128((__m128i *)(pu1_src - 2 + offset)); /* pu1_src[col + (i-1) * 2]*/
 
@@ -3759,7 +3645,6 @@ void ihevc_inter_pred_chroma_horz_ssse3(UWORD8 *pu1_src,
                 /* store 4 16-bit values */
                 _mm_storel_epi64((__m128i *)(pu1_dst + dst_strd + offset), res_temp17_8x16b); /* pu1_dst[col] = i2_tmp_u  */
 
-
                 offset += 4; /* To pointer update*/
 
             } /* inner loop ends here(8- output values in single iteration)*/
@@ -3770,20 +3655,15 @@ void ihevc_inter_pred_chroma_horz_ssse3(UWORD8 *pu1_src,
     }
     else
     {
-
         for(row = 0; row < ht; row += 2)
         {
             int offset = 0;
 
-#if 1
             PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
             PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
 
-#endif
-
             for(col = 0; col < 2 * wd; col += 8)
             {
-
                 /*load 16 pixel values from row 0*/
                 src_temp1_16x8b = _mm_loadu_si128((__m128i *)(pu1_src - 2 + offset)); /* pu1_src[col + (i-1) * 2]*/
 
@@ -3841,7 +3721,6 @@ void ihevc_inter_pred_chroma_horz_ssse3(UWORD8 *pu1_src,
 
                 /* store 4 16-bit values */
                 _mm_storel_epi64((__m128i *)(pu1_dst + dst_strd + offset), res_temp16_8x16b); /* pu1_dst[col] = i2_tmp_u  */
-
 
                 offset += 8; /* To pointer update*/
 
@@ -3919,7 +3798,7 @@ void ihevc_inter_pred_chroma_vert_ssse3(UWORD8 *pu1_src,
     PREFETCH((char const *)(pu1_src + (4 * src_strd)), _MM_HINT_T0)
     PREFETCH((char const *)(pu1_src + (5 * src_strd)), _MM_HINT_T0)
 
-/* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
+    /* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
     s4_8x16b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     control_mask_1_8x16b = _mm_set1_epi32(0x01000100); /* Control Mask register */
@@ -3929,41 +3808,34 @@ void ihevc_inter_pred_chroma_vert_ssse3(UWORD8 *pu1_src,
     coeff2_3_8x16b = _mm_shuffle_epi8(s4_8x16b, control_mask_2_8x16b);  /* pi1_coeff[4] */
 
 
-/*  seting  values in register */
+    /*  seting  values in register */
     zero_8x16b = _mm_setzero_si128(); /* for saturated clipping */
     offset_8x16b = _mm_set1_epi16(OFFSET_14_MINUS_BIT_DEPTH); /* for offset addition */
     mask_low_32b = _mm_set_epi32(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000);
     mask_high_96b = _mm_set_epi32(0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF);
 
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if(wd % 8 == 0)
-    { /* wd = multiple of 8 case */
-
+    {
+        /* wd = multiple of 8 case */
         pu1_src_copy = pu1_src;
         pu1_dst_copy = pu1_dst;
 
         for(col = 0; col < 2 * wd; col += 16)
         {
-
             pu1_src = pu1_src_copy + col;
             pu1_dst = pu1_dst_copy + col;
 
-
             for(row = 0; row < ht; row += 2)
             {
-
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 /*load 8 pixel values from -751:-768 pos. relative to cur. pos.*/
                 s21_8x16b  = _mm_loadu_si128((__m128i *)(pu1_src + (-1 * src_strd)));
 
                 /*load 8 pixel values from -495:-512 pos. relative to cur. pos.*/
                 s22_8x16b = _mm_loadu_si128((__m128i *)(pu1_src + (0 * src_strd)));
-
 
                 /*load 8 pixel values from -239:-256 pos. relative to cur. pos.*/
                 s23_8x16b = _mm_loadu_si128((__m128i *)(pu1_src + (1 * src_strd)));
@@ -4006,12 +3878,10 @@ void ihevc_inter_pred_chroma_vert_ssse3(UWORD8 *pu1_src,
                 s33_8x16b =  _mm_packus_epi16(s32_8x16b, zero_8x16b);
 
                 s7_8x16b = _mm_unpacklo_epi64(s7_8x16b, s33_8x16b);
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storeu_si128((__m128i *)(pu1_dst), s7_8x16b);
 
-
-#if 1
                 s25_8x16b = _mm_loadu_si128((__m128i *)(pu1_src + (3 * src_strd)));
 
                 s5_8x16b = _mm_unpacklo_epi8(s22_8x16b, s23_8x16b);
@@ -4049,34 +3919,26 @@ void ihevc_inter_pred_chroma_vert_ssse3(UWORD8 *pu1_src,
                 s33_8x16b =  _mm_packus_epi16(s32_8x16b, zero_8x16b);
 
                 s7_8x16b = _mm_unpacklo_epi64(s7_8x16b, s33_8x16b);
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storeu_si128((__m128i *)(pu1_dst + dst_strd), s7_8x16b);
-#endif
 
                 pu1_src += 2 * src_strd;
                 pu1_dst += 2 * dst_strd;
-
-
             } /* inner for loop ends here(8-output values in single iteration) */
-
         }
     }
     else if(wd % 4 == 0)
-    { /* wd = multiple of 8 case */
-
+    {
+        /* wd = multiple of 8 case */
         for(row = 0; row < ht; row += 2)
         {
             pu1_src_copy = pu1_src;
             pu1_dst_copy = pu1_dst;
             for(col = 0; col < 2 * wd; col += 8)
             {
-
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 /*load 8 pixel values from -751:-768 pos. relative to cur. pos.*/
                 s21_8x16b  = _mm_loadl_epi64((__m128i *)(pu1_src + (-1 * src_strd)));
@@ -4108,7 +3970,7 @@ void ihevc_inter_pred_chroma_vert_ssse3(UWORD8 *pu1_src,
                 /* i2_tmp = CLIP_U8(i2_tmp);*/
                 s7_8x16b = _mm_packus_epi16(s6_8x16b, zero_8x16b);
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pu1_dst), s7_8x16b);
 
@@ -4130,35 +3992,29 @@ void ihevc_inter_pred_chroma_vert_ssse3(UWORD8 *pu1_src,
                 /* i2_tmp = CLIP_U8(i2_tmp);*/
                 s7_8x16b = _mm_packus_epi16(s6_8x16b, zero_8x16b);
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pu1_dst + dst_strd), s7_8x16b);
 
                 pu1_src += 8;    /* To pointer update */
                 pu1_dst += 8;
-
             } /* inner for loop ends here(8-output values in single iteration) */
 
             pu1_src = pu1_src_copy + 2 * src_strd; /* pointer update */
             pu1_dst = pu1_dst_copy + 2 * dst_strd; /* pointer update */
         }
     }
-
     else
-    { /* wd = multiple of 4 case */
-
+    {
+        /* wd = multiple of 4 case */
         for(row = 0; row < ht; row += 2)
         {
             pu1_src_copy = pu1_src;
             pu1_dst_copy = pu1_dst;
             for(col = 0; col < 2 * wd; col += 4)
             {
-
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 /*load 8 pixel values from -751:-768 pos. relative to cur. pos.*/
                 s21_8x16b  = _mm_loadl_epi64((__m128i *)(pu1_src + (-1 * src_strd)));
@@ -4195,7 +4051,7 @@ void ihevc_inter_pred_chroma_vert_ssse3(UWORD8 *pu1_src,
                 s6_8x16b =  _mm_and_si128(s7_8x16b, mask_high_96b);
                 s9_8x16b = _mm_or_si128(s5_8x16b, s6_8x16b);
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pu1_dst), s9_8x16b);
 
@@ -4222,7 +4078,7 @@ void ihevc_inter_pred_chroma_vert_ssse3(UWORD8 *pu1_src,
                 s6_8x16b =  _mm_and_si128(s7_8x16b, mask_high_96b);
                 s9_8x16b = _mm_or_si128(s5_8x16b, s6_8x16b);
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pu1_dst + dst_strd), s9_8x16b);
 
@@ -4292,7 +4148,7 @@ void ihevc_inter_pred_chroma_copy_w16out_ssse3(UWORD8 *pu1_src,
 
     UNUSED(pi1_coeff);
     zero_8x16b = _mm_setzero_si128();
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if(wd == 2) /* for wd =2 */
     {
         for(row = 0; row < ht; row += 2)
@@ -4300,7 +4156,7 @@ void ihevc_inter_pred_chroma_copy_w16out_ssse3(UWORD8 *pu1_src,
             int offset = 0;
             for(col = 0; col < 2 * wd; col += 4)
             {
-/* row =0 */
+                /* row =0 */
                 /*load 16 pixel values from 15:0 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + offset)); /* pu1_src[col] */
                 s3 = _mm_unpacklo_epi8(s3, zero_8x16b);
@@ -4310,7 +4166,7 @@ void ihevc_inter_pred_chroma_copy_w16out_ssse3(UWORD8 *pu1_src,
                 /* pi2_dst[col] = (pu1_src[col] << SHIFT_14_MINUS_BIT_DEPTH) */
                 _mm_storel_epi64((__m128i *)(pi2_dst + offset), s3);
 
-/* row =1 */
+                /* row =1 */
                 /*load 16 pixel values from 271:256 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + src_strd + offset));
                 s3 = _mm_unpacklo_epi8(s3, zero_8x16b);
@@ -4333,7 +4189,7 @@ void ihevc_inter_pred_chroma_copy_w16out_ssse3(UWORD8 *pu1_src,
             int count = (2 * wd) / 8;
             for(col = 0; col < count; col++)
             {
-/* row =0 */
+                /* row =0 */
                 /*load 16 pixel values from 15:0 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + offset)); /* pu1_src[col]*/
                 s3 = _mm_unpacklo_epi8(s3, zero_8x16b);
@@ -4354,7 +4210,7 @@ void ihevc_inter_pred_chroma_copy_w16out_ssse3(UWORD8 *pu1_src,
                 offset += 8; /* To pointer update*/
             } /*  inner for loop ends here(8-output values in single iteration) */
 
-/* finding last four values */
+            /* finding last four values */
             s3 = _mm_loadu_si128((__m128i *)(pu1_src + offset)); /* pu1_src[col] */
             s3 = _mm_unpacklo_epi8(s3, zero_8x16b);
 
@@ -4381,7 +4237,7 @@ void ihevc_inter_pred_chroma_copy_w16out_ssse3(UWORD8 *pu1_src,
             int offset = 0;
             for(col = 0; col < 2 * wd / 8; col++)
             {
-/* row =0 */
+                /* row =0 */
                 /*load 16 pixel values from 15:0 pos. relative to cur. pos.*/
                 s3 = _mm_loadu_si128((__m128i *)(pu1_src + offset)); /* pu1_src[col]*/
                 s3 = _mm_unpacklo_epi8(s3, zero_8x16b);
@@ -4473,7 +4329,7 @@ void ihevc_inter_pred_chroma_horz_w16out_ssse3(UWORD8 *pu1_src,
 
     ASSERT(wd % 2 == 0); /* checking assumption*/
 
-/* loading four 8-bit coefficients and convert 8-bit into 16-bit */
+    /* loading four 8-bit coefficients and convert 8-bit into 16-bit */
     src_temp1_16x8b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     all_zero = _mm_setzero_si128();
@@ -4484,22 +4340,18 @@ void ihevc_inter_pred_chroma_horz_w16out_ssse3(UWORD8 *pu1_src,
     coeff0_1_8x16b = _mm_shuffle_epi8(src_temp1_16x8b, control_mask_1_8x16b);  /* pi1_coeff[4] */
     coeff2_3_8x16b = _mm_shuffle_epi8(src_temp1_16x8b, control_mask_2_8x16b);  /* pi1_coeff[4] */
 
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if(wd % 2 == 0 && wd % 4 != 0)
     {
         int offset = 0;
         for(row = ht; row >= 2; row -= 2)
         {
             offset = 0;
-#if 1
             PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
             PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
 
-#endif
-
             for(col = 0; col < 2 * wd; col += 4)
             {
-
                 /*load 16 pixel values of row 0*/
                 src_temp1_16x8b = _mm_loadu_si128((__m128i *)(pu1_src - 2 + offset)); /* pu1_src[col + (i-1) * 2]*/
 
@@ -4545,14 +4397,10 @@ void ihevc_inter_pred_chroma_horz_w16out_ssse3(UWORD8 *pu1_src,
                 /* store 4 16-bit values */
                 _mm_storel_epi64((__m128i *)(pi2_dst + offset), res_temp13_8x16b); /* pi2_dst[col] = i2_tmp_u  */
 
-
-
                 /* store 4 16-bit values */
                 _mm_storel_epi64((__m128i *)(pi2_dst + dst_strd + offset), res_temp3_8x16b); /* pi2_dst[col] = i2_tmp_u  */
 
-
                 offset += 4; /* To pointer update*/
-
             } /* inner loop ends here(8- output values in single iteration)*/
 
             pu1_src += 2 * src_strd; /*pointer update*/
@@ -4565,7 +4413,6 @@ void ihevc_inter_pred_chroma_horz_w16out_ssse3(UWORD8 *pu1_src,
             offset = 0;
             for(col = 0; col < 2 * wd; col += 4)
             {
-
                 /*load 16 pixel values of row 0*/
                 src_temp1_16x8b = _mm_loadu_si128((__m128i *)(pu1_src - 2 + offset)); /* pu1_src[col + (i-1) * 2]*/
 
@@ -4596,10 +4443,8 @@ void ihevc_inter_pred_chroma_horz_w16out_ssse3(UWORD8 *pu1_src,
                 _mm_storel_epi64((__m128i *)(pi2_dst + offset), res_temp13_8x16b); /* pi2_dst[col] = i2_tmp_u  */
 
                 offset += 4; /* To pointer update*/
-
             }
         }
-
     }
     else
     {
@@ -4608,15 +4453,11 @@ void ihevc_inter_pred_chroma_horz_w16out_ssse3(UWORD8 *pu1_src,
         for(row = ht; row >= 2; row -= 2)
         {
             offset = 0;
-#if 1
             PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
             PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
 
-#endif
-
             for(col = 0; col < 2 * wd; col += 8)
             {
-
                 /*load 16 pixel values of row 0*/
                 src_temp1_16x8b = _mm_loadu_si128((__m128i *)(pu1_src - 2 + offset)); /* pu1_src[col + (i-1) * 2]*/
 
@@ -4667,9 +4508,7 @@ void ihevc_inter_pred_chroma_horz_w16out_ssse3(UWORD8 *pu1_src,
                 /* store 8 16-bit values */
                 _mm_storeu_si128((__m128i *)(pi2_dst + dst_strd + offset), res_temp13_8x16b); /* pi2_dst[col] = i2_tmp_u  */
 
-
                 offset += 8; /* To pointer update*/
-
             } /* inner loop ends here(8- output values in single iteration)*/
 
             pu1_src += 2 * src_strd; /*pointer update*/
@@ -4682,7 +4521,6 @@ void ihevc_inter_pred_chroma_horz_w16out_ssse3(UWORD8 *pu1_src,
             offset = 0;
             for(col = 0; col < 2 * wd; col += 8)
             {
-
                 /*load 16 pixel values of row 0*/
                 src_temp1_16x8b = _mm_loadu_si128((__m128i *)(pu1_src - 2 + offset)); /* pu1_src[col + (i-1) * 2]*/
 
@@ -4709,10 +4547,8 @@ void ihevc_inter_pred_chroma_horz_w16out_ssse3(UWORD8 *pu1_src,
                 _mm_storeu_si128((__m128i *)(pi2_dst + offset), res_temp3_8x16b); /* pi2_dst[col] = i2_tmp_u  */
 
                 offset += 8; /* To pointer update*/
-
             }
         }
-
     }
 }
 
@@ -4774,7 +4610,6 @@ void ihevc_inter_pred_chroma_vert_w16out_ssse3(UWORD8 *pu1_src,
     __m128i s21_8x16b, s22_8x16b, s23_8x16b, s24_8x16b, s25_8x16b;
     __m128i s31_8x16b, s32_8x16b, s33_8x16b, s34_8x16b, s35_8x16b;
 
-
     PREFETCH((char const *)(pu1_src + (0 * src_strd)), _MM_HINT_T0)
     PREFETCH((char const *)(pu1_src + (1 * src_strd)), _MM_HINT_T0)
     PREFETCH((char const *)(pu1_src + (2 * src_strd)), _MM_HINT_T0)
@@ -4782,7 +4617,7 @@ void ihevc_inter_pred_chroma_vert_w16out_ssse3(UWORD8 *pu1_src,
     PREFETCH((char const *)(pu1_src + (4 * src_strd)), _MM_HINT_T0)
     PREFETCH((char const *)(pu1_src + (5 * src_strd)), _MM_HINT_T0)
 
-/* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
+    /* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
     s4_8x16b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     control_mask_1_8x16b = _mm_set1_epi32(0x01000100); /* Control Mask register */
@@ -4791,37 +4626,28 @@ void ihevc_inter_pred_chroma_vert_w16out_ssse3(UWORD8 *pu1_src,
     coeff0_1_8x16b = _mm_shuffle_epi8(s4_8x16b, control_mask_1_8x16b);  /* pi1_coeff[4] */
     coeff2_3_8x16b = _mm_shuffle_epi8(s4_8x16b, control_mask_2_8x16b);  /* pi1_coeff[4] */
 
-
-
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if(wd % 8 == 0)
-    { /* wd = multiple of 8 case */
-
+    {
+        /* wd = multiple of 8 case */
         pu1_src_copy = pu1_src;
         pi2_dst_copy = pi2_dst;
 
         for(col = 0; col < 2 * wd; col += 16)
         {
-
             pu1_src = pu1_src_copy + col;
             pi2_dst = pi2_dst_copy + col;
 
-
             for(row = 0; row < ht; row += 2)
             {
-
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 /*load 16 pixel values */
                 s21_8x16b  = _mm_loadu_si128((__m128i *)(pu1_src + (-1 * src_strd)));
 
                 /*load 16 pixel values */
                 s22_8x16b = _mm_loadu_si128((__m128i *)(pu1_src + (0 * src_strd)));
-
 
                 /*load 16 pixel values */
                 s23_8x16b = _mm_loadu_si128((__m128i *)(pu1_src + (1 * src_strd)));
@@ -4849,14 +4675,12 @@ void ihevc_inter_pred_chroma_vert_w16out_ssse3(UWORD8 *pu1_src,
 
                 s35_8x16b = _mm_add_epi16(s32_8x16b, s34_8x16b);
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pi2_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storeu_si128((__m128i *)(pi2_dst), s8_8x16b);
 
                 _mm_storeu_si128((__m128i *)(pi2_dst + 8), s35_8x16b);
 
-
-#if 1
                 s25_8x16b = _mm_loadu_si128((__m128i *)(pu1_src + (3 * src_strd)));
 
                 s5_8x16b = _mm_unpacklo_epi8(s22_8x16b, s23_8x16b);
@@ -4879,40 +4703,29 @@ void ihevc_inter_pred_chroma_vert_w16out_ssse3(UWORD8 *pu1_src,
 
                 s35_8x16b = _mm_add_epi16(s32_8x16b, s34_8x16b); /* (i2_tmp + OFFSET_14_MINUS_BIT_DEPTH) */
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pi2_dst[col] = (UWORD8)i2_tmp; */
                 _mm_store_si128((__m128i *)(pi2_dst + dst_strd), s8_8x16b);
 
                 _mm_store_si128((__m128i *)(pi2_dst + dst_strd + 8), s35_8x16b);
 
-#endif
-
                 pu1_src += 2 * src_strd;
                 pi2_dst += 2 * dst_strd;
-
-
             } /* inner for loop ends here(8-output values in single iteration) */
-
         }
     }
-
     else if(wd % 4 == 0)
-    { /* wd = multiple of 8 case */
-
+    {
+        /* wd = multiple of 8 case */
         for(row = 0; row < ht; row += 2)
         {
-
             pu1_src_copy = pu1_src;
             pi2_dst_copy = pi2_dst;
 
             for(col = 0; col < 2 * wd; col += 8)
             {
-
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 /*load 8 pixel values */
                 s21_8x16b  = _mm_loadl_epi64((__m128i *)(pu1_src + (-1 * src_strd)));
@@ -4952,29 +4765,23 @@ void ihevc_inter_pred_chroma_vert_w16out_ssse3(UWORD8 *pu1_src,
 
                 pu1_src += 8;    /* To pointer update */
                 pi2_dst += 8;
-
             } /* inner for loop ends here(8-output values in single iteration) */
 
             pu1_src = pu1_src_copy + 2 * src_strd; /* pointer update */
             pi2_dst = pi2_dst_copy + 2 * dst_strd; /* pointer update */
         }
     }
-
     else
-    { /* wd = multiple of 4 case */
-
+    {
+        /* wd = multiple of 4 case */
         for(row = 0; row < ht; row += 2)
         {
             pu1_src_copy = pu1_src;
             pi2_dst_copy = pi2_dst;
             for(col = 0; col < 2 * wd; col += 4)
             {
-
-#if 1
                 PREFETCH((char const *)(pu1_src + (6 * src_strd)), _MM_HINT_T0)
                 PREFETCH((char const *)(pu1_src + (7 * src_strd)), _MM_HINT_T0)
-
-#endif
 
                 /*load 8 pixel values */
                 s21_8x16b  = _mm_loadl_epi64((__m128i *)(pu1_src + (-1 * src_strd)));
@@ -4998,8 +4805,7 @@ void ihevc_inter_pred_chroma_vert_w16out_ssse3(UWORD8 *pu1_src,
 
                 s8_8x16b = _mm_add_epi16(s11_8x16b, s12_8x16b); /* (i2_tmp + OFFSET_14_MINUS_BIT_DEPTH) */
 
-
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pi2_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pi2_dst), s8_8x16b);
 
@@ -5013,8 +4819,7 @@ void ihevc_inter_pred_chroma_vert_w16out_ssse3(UWORD8 *pu1_src,
 
                 s8_8x16b = _mm_add_epi16(s15_8x16b, s16_8x16b); /* (i2_tmp + OFFSET_14_MINUS_BIT_DEPTH) */
 
-
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pi2_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pi2_dst + dst_strd), s8_8x16b);
 
@@ -5087,7 +4892,7 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
     __m128i s31_8x16b, s32_8x16b, s33_8x16b, s34_8x16b, s35_8x16b;
 
 
-/* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
+    /* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
     s4_8x16b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     zero_8x16b = _mm_setzero_si128();
@@ -5097,34 +4902,30 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
     coeff0_1_8x16b = _mm_shuffle_epi32(s5_8x16b, _MM_SHUFFLE(0, 0, 0, 0));  /* pi1_coeff[4] */
     coeff2_3_8x16b = _mm_shuffle_epi32(s5_8x16b, _MM_SHUFFLE(1, 1, 1, 1));  /* pi1_coeff[4] */
 
-/*  seting  values in register */
+    /*  seting  values in register */
     offset_8x16b = _mm_set1_epi32(OFFSET_14_MINUS_BIT_DEPTH); /* for offset addition */
     mask_low_32b = _mm_set_epi32(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000);
     mask_high_96b = _mm_set_epi32(0x00000000, 0x00000000, 0x00000000, 0xFFFFFFFF);
 
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if(wd % 4 == 0)
-    { /* wd = multiple of 8 case */
-
+    {
+        /* wd = multiple of 8 case */
         pi2_src_copy = pi2_src;
         pu1_dst_copy = pu1_dst;
 
         for(col = 0; col < 2 * wd; col += 8)
         {
-
             pi2_src = pi2_src_copy + col;
             pu1_dst = pu1_dst_copy + col;
 
-
             for(row = 0; row < ht; row += 2)
             {
-
                 /*load 16 pixel values */
                 s21_8x16b  = _mm_load_si128((__m128i *)(pi2_src + (-1 * src_strd)));
 
                 /*load 16 pixel values */
                 s22_8x16b = _mm_load_si128((__m128i *)(pi2_src + (0 * src_strd)));
-
 
                 /*load 16 pixel values */
                 s23_8x16b = _mm_load_si128((__m128i *)(pi2_src + (1 * src_strd)));
@@ -5157,7 +4958,6 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
                 s32_8x16b = _mm_srai_epi32(s35_8x16b,  SHIFT_14_MINUS_BIT_DEPTH);
 
-
                 /* (i4_tmp >> SHIFT_14_MINUS_BIT_DEPTH) + OFFSET_14_MINUS_BIT_DEPTH) */
                 s7_8x16b = _mm_add_epi32(s6_8x16b, offset_8x16b);
 
@@ -5174,19 +4974,16 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
                 s35_8x16b = _mm_packs_epi32(s34_8x16b, zero_8x16b);
 
-
                 /* i2_tmp = CLIP_U8(i2_tmp);*/
                 s7_8x16b = _mm_packus_epi16(s9_8x16b, zero_8x16b);
 
                 s33_8x16b =  _mm_packus_epi16(s35_8x16b, zero_8x16b);
 
                 s7_8x16b = _mm_unpacklo_epi32(s7_8x16b, s33_8x16b);
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pu1_dst), s7_8x16b);
 
-
-#if 1
                 s25_8x16b = _mm_load_si128((__m128i *)(pi2_src + (3 * src_strd)));
 
                 s5_8x16b = _mm_unpacklo_epi16(s22_8x16b, s23_8x16b);
@@ -5214,7 +5011,6 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
                 s32_8x16b = _mm_srai_epi32(s35_8x16b,  SHIFT_14_MINUS_BIT_DEPTH);
 
-
                 /* (i4_tmp >> SHIFT_14_MINUS_BIT_DEPTH) + OFFSET_14_MINUS_BIT_DEPTH) */
                 s7_8x16b = _mm_add_epi32(s6_8x16b, offset_8x16b);
 
@@ -5231,36 +5027,30 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
                 s35_8x16b = _mm_packs_epi32(s34_8x16b, zero_8x16b);
 
-
                 /* i2_tmp = CLIP_U8(i2_tmp);*/
                 s7_8x16b = _mm_packus_epi16(s9_8x16b, zero_8x16b);
 
                 s33_8x16b =  _mm_packus_epi16(s35_8x16b, zero_8x16b);
 
                 s7_8x16b = _mm_unpacklo_epi32(s7_8x16b, s33_8x16b);
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pu1_dst + dst_strd), s7_8x16b);
-#endif
 
                 pi2_src += 2 * src_strd;
                 pu1_dst += 2 * dst_strd;
-
-
             } /* inner for loop ends here(8-output values in single iteration) */
-
         }
     }
     else
-    { /* wd = multiple of 4 case */
-
+    {
+        /* wd = multiple of 4 case */
         for(row = 0; row < ht; row += 2)
         {
             pi2_src_copy = pi2_src;
             pu1_dst_copy = pu1_dst;
             for(col = 0; col < 2 * wd; col += 4)
             {
-
                 /*load 8 pixel values  */
                 s21_8x16b  = _mm_loadl_epi64((__m128i *)(pi2_src + (-1 * src_strd)));
 
@@ -5283,10 +5073,8 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
                 s8_8x16b = _mm_add_epi32(s11_8x16b, s12_8x16b); /* (i2_tmp + OFFSET_14_MINUS_BIT_DEPTH) */
 
-
                 /*(i2_tmp + OFFSET_14_MINUS_BIT_DEPTH) >> SHIFT_14_MINUS_BIT_DEPTH */
                 s6_8x16b = _mm_srai_epi32(s8_8x16b,  SHIFT_14_MINUS_BIT_DEPTH);
-
 
                 /* (i4_tmp >> SHIFT_14_MINUS_BIT_DEPTH) + OFFSET_14_MINUS_BIT_DEPTH) */
                 s7_8x16b = _mm_add_epi32(s6_8x16b, offset_8x16b);
@@ -5296,7 +5084,6 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
 
                 s9_8x16b = _mm_packs_epi32(s8_8x16b, zero_8x16b);
 
-
                 /* i2_tmp = CLIP_U8(i2_tmp);*/
                 s7_8x16b = _mm_packus_epi16(s9_8x16b, zero_8x16b);
 
@@ -5305,7 +5092,7 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
                 s6_8x16b =  _mm_and_si128(s7_8x16b, mask_high_96b);
                 s9_8x16b = _mm_or_si128(s5_8x16b, s6_8x16b);
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pu1_dst), s9_8x16b);
 
@@ -5338,7 +5125,7 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
                 s6_8x16b =  _mm_and_si128(s7_8x16b, mask_high_96b);
                 s9_8x16b = _mm_or_si128(s5_8x16b, s6_8x16b);
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pu1_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pu1_dst + dst_strd), s9_8x16b);
 
@@ -5350,7 +5137,6 @@ void ihevc_inter_pred_chroma_vert_w16inp_ssse3(WORD16 *pi2_src,
             pu1_dst = pu1_dst_copy + 2 * dst_strd; /* pointer update */
         }
     }
-
 }
 
 /**
@@ -5413,8 +5199,7 @@ void ihevc_inter_pred_chroma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
     __m128i s21_8x16b, s22_8x16b, s23_8x16b, s24_8x16b, s25_8x16b;
     __m128i s31_8x16b, s32_8x16b, s33_8x16b, s34_8x16b, s35_8x16b;
 
-
-/* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
+    /* load 8 8-bit coefficients and convert 8-bit into 16-bit  */
     s4_8x16b = _mm_loadl_epi64((__m128i *)pi1_coeff);
 
     zero_8x16b = _mm_setzero_si128();
@@ -5424,30 +5209,25 @@ void ihevc_inter_pred_chroma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
     coeff0_1_8x16b = _mm_shuffle_epi32(s5_8x16b, _MM_SHUFFLE(0, 0, 0, 0));  /* pi1_coeff[4] */
     coeff2_3_8x16b = _mm_shuffle_epi32(s5_8x16b, _MM_SHUFFLE(1, 1, 1, 1));  /* pi1_coeff[4] */
 
-
-/*  outer for loop starts from here */
+    /*  outer for loop starts from here */
     if(wd % 4 == 0)
-    { /* wd = multiple of 8 case */
-
+    {
+        /* wd = multiple of 8 case */
         pi2_src_copy = pi2_src;
         pi2_dst_copy = pi2_dst;
 
         for(col = 0; col < 2 * wd; col += 8)
         {
-
             pi2_src = pi2_src_copy + col;
             pi2_dst = pi2_dst_copy + col;
 
-
             for(row = 0; row < ht; row += 2)
             {
-
                 /*load 16 pixel values */
                 s21_8x16b  = _mm_load_si128((__m128i *)(pi2_src + (-1 * src_strd)));
 
                 /*load 16 pixel values */
                 s22_8x16b = _mm_load_si128((__m128i *)(pi2_src + (0 * src_strd)));
-
 
                 /*load 16 pixel values */
                 s23_8x16b = _mm_load_si128((__m128i *)(pi2_src + (1 * src_strd)));
@@ -5485,12 +5265,10 @@ void ihevc_inter_pred_chroma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
                 s35_8x16b = _mm_packs_epi32(s32_8x16b, zero_8x16b);
 
                 s7_8x16b = _mm_unpacklo_epi64(s9_8x16b, s35_8x16b);
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pi2_dst[col] = (UWORD8)i2_tmp; */
                 _mm_store_si128((__m128i *)(pi2_dst), s7_8x16b);
 
-
-#if 1
                 s25_8x16b = _mm_loadu_si128((__m128i *)(pi2_src + (3 * src_strd)));
 
                 s5_8x16b = _mm_unpacklo_epi16(s22_8x16b, s23_8x16b);
@@ -5523,29 +5301,24 @@ void ihevc_inter_pred_chroma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
                 s35_8x16b = _mm_packs_epi32(s32_8x16b, zero_8x16b);
 
                 s7_8x16b = _mm_unpacklo_epi64(s9_8x16b, s35_8x16b);
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pi2_dst[col] = (UWORD8)i2_tmp; */
                 _mm_store_si128((__m128i *)(pi2_dst + dst_strd), s7_8x16b);
-#endif
 
                 pi2_src += 2 * src_strd;
                 pi2_dst += 2 * dst_strd;
-
-
             } /* inner for loop ends here(8-output values in single iteration) */
-
         }
     }
     else
-    { /* wd = multiple of 4 case */
-
+    {
+        /* wd = multiple of 4 case */
         for(row = 0; row < ht; row += 2)
         {
             pi2_src_copy = pi2_src;
             pi2_dst_copy = pi2_dst;
             for(col = 0; col < 2 * wd; col += 4)
             {
-
                 /*load 4 pixel values */
                 s21_8x16b  = _mm_loadl_epi64((__m128i *)(pi2_src + (-1 * src_strd)));
 
@@ -5573,7 +5346,7 @@ void ihevc_inter_pred_chroma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
 
                 s9_8x16b = _mm_packs_epi32(s6_8x16b, zero_8x16b);
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pi2_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pi2_dst), s9_8x16b);
 
@@ -5592,7 +5365,7 @@ void ihevc_inter_pred_chroma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
 
                 s9_8x16b = _mm_packs_epi32(s6_8x16b, zero_8x16b);
 
-/* store 8 8-bit output values  */
+                /* store 8 8-bit output values  */
                 /* pi2_dst[col] = (UWORD8)i2_tmp; */
                 _mm_storel_epi64((__m128i *)(pi2_dst + dst_strd), s9_8x16b);
 
@@ -5604,5 +5377,4 @@ void ihevc_inter_pred_chroma_vert_w16inp_w16out_ssse3(WORD16 *pi2_src,
             pi2_dst = pi2_dst_copy + 2 * dst_strd; /* pointer update */
         }
     }
-
 }

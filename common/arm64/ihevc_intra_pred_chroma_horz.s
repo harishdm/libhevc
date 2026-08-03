@@ -96,7 +96,7 @@
 ihevc_intra_pred_chroma_horz_av8:
 
     // stmfd sp!, {x4-x12, x14}                //stack stores the values of the arguments
-    push_v_regs
+
     stp         x19, x20,[sp,#-16]!
 
     lsl         x6,x4,#2                    //four_nt
@@ -117,65 +117,65 @@ ihevc_intra_pred_chroma_horz_av8:
 core_loop_16:
     ld1         { v0.8h},[x12]              //load 16 values. d1[7] will have the 1st value.
     sub         x12,x12,#16
-    ld1         { v10.8h},[x12]             //load 16 values. d1[7] will have the 1st value.
+    ld1         { v18.8h},[x12]             //load 16 values. d1[7] will have the 1st value.
 
-    dup         v2.8h, v0.4h[7]             //duplicate the i value.
+    dup         v2.8h, v0.h[7]              //duplicate the i value.
 
-    dup         v4.8h, v0.4h[6]             //duplicate the ii value.
-    dup         v6.8h, v0.4h[5]             //duplicate the iii value.
+    dup         v4.8h, v0.h[6]              //duplicate the ii value.
+    dup         v6.8h, v0.h[5]              //duplicate the iii value.
     st1         { v2.8h},[x2],x3            //store in 1st row 0-16 columns
     st1         { v2.8h},[x9],x3            //store in 1st row 16-32 columns
 
-    dup         v8.8h, v0.4h[4]
+    dup         v1.8h, v0.h[4]
     st1         { v4.8h},[x2],x3
     st1         { v4.8h},[x9],x3
 
-    dup         v2.8h, v0.4h[3]
+    dup         v2.8h, v0.h[3]
     st1         { v6.8h},[x2],x3
     st1         { v6.8h},[x9],x3
 
-    dup         v4.8h, v0.4h[2]
-    st1         { v8.8h},[x2],x3
-    st1         { v8.8h},[x9],x3
+    dup         v4.8h, v0.h[2]
+    st1         { v1.8h},[x2],x3
+    st1         { v1.8h},[x9],x3
 
-    dup         v6.8h, v0.4h[1]
+    dup         v6.8h, v0.h[1]
     st1         { v2.8h},[x2],x3
     st1         { v2.8h},[x9],x3
 
-    dup         v8.8h, v0.4h[0]
+    dup         v1.8h, v0.h[0]
     st1         { v4.8h},[x2],x3
     st1         { v4.8h},[x9],x3
 
-    dup         v2.8h, v10.4h[7]
+    dup         v2.8h, v18.h[7]
     st1         { v6.8h},[x2],x3
     st1         { v6.8h},[x9],x3
 
-    dup         v4.8h, v10.4h[6]
-    st1         { v8.8h},[x2],x3
-    st1         { v8.8h},[x9],x3
+    dup         v4.8h, v18.h[6]
+    st1         { v1.8h},[x2],x3
+    st1         { v1.8h},[x9],x3
 
-    dup         v6.8h, v10.4h[5]
+    dup         v6.8h, v18.h[5]
     st1         { v2.8h},[x2],x3
     st1         { v2.8h},[x9],x3
 
-    dup         v8.8h, v10.4h[4]
+    dup         v1.8h, v18.h[4]
     st1         { v4.8h},[x2],x3
     st1         { v4.8h},[x9],x3
 
-    dup         v2.8h, v10.4h[3]
+    dup         v2.8h, v18.h[3]
     st1         { v6.8h},[x2],x3
     st1         { v6.8h},[x9],x3
 
-    dup         v4.8h, v10.4h[2]
-    st1         { v8.8h},[x2],x3
-    st1         { v8.8h},[x9],x3
+    dup         v4.8h, v18.h[2]
+    st1         { v1.8h},[x2],x3
+    st1         { v1.8h},[x9],x3
 
-    dup         v6.8h, v10.4h[1]
+    dup         v6.8h, v18.h[1]
     st1         { v2.8h},[x2],x3
     st1         { v2.8h},[x9],x3
     sub         x12,x12,#16                 //move to 16th value pointer
 
-    dup         v8.8h, v10.4h[0]
+    dup         v1.8h, v18.h[0]
     st1         { v4.8h},[x2],x3
     st1         { v4.8h},[x9],x3
 
@@ -183,12 +183,12 @@ core_loop_16:
     st1         { v6.8h},[x2],x3
     st1         { v6.8h},[x9],x3
 
-    st1         { v8.8h},[x2],x3
-    st1         { v8.8h},[x9],x3
+    st1         { v1.8h},[x2],x3
+    st1         { v1.8h},[x9],x3
     bgt         core_loop_16
     // ldmfd sp!,{x4-x12,x15}                  //reload the registers from sp
     ldp         x19, x20,[sp],#16
-    pop_v_regs
+
     ret
     b           endloop
 
@@ -203,33 +203,33 @@ core_loop_8:
 
     sub         x12,x12,#16
 //    ld1 { v30.16b},[x12]
-    dup         v10.8h, v0.4h[7]
+    dup         v18.8h, v0.h[7]
     //vmovl.u8    q13,d26
 
-    dup         v2.8h, v0.4h[6]
+    dup         v2.8h, v0.h[6]
     //vsubl.u8    q12,d30,d28
 
-    dup         v4.8h, v0.4h[5]
+    dup         v4.8h, v0.h[5]
     //vshr.s16    q12,q12,#1
 
-    dup         v6.8h, v0.4h[4]
+    dup         v6.8h, v0.h[4]
     //vqadd.s16    q11,q13,q12
 
-    dup         v8.8h, v0.4h[3]
+    dup         v1.8h, v0.h[3]
     //vqmovun.s16 d22,q11
 
-    st1         { v10.8h},[x2],x3
+    st1         { v18.8h},[x2],x3
 
-    dup         v10.8h, v0.4h[2]
+    dup         v18.8h, v0.h[2]
     //vsubl.u8    q12,d31,d28
 
-    dup         v12.8h, v0.4h[1]
+    dup         v19.8h, v0.h[1]
     //vshr.s16    q12,q12,#1
 
-    dup         v14.8h, v0.4h[0]
+    dup         v20.8h, v0.h[0]
     //vqadd.s16    q11,q13,q12
 
-    dup         v16.8h, v0.4h[3]
+    dup         v16.8h, v0.h[3]
     //vqmovun.s16 d22,q11
 
     st1         { v2.8h},[x2],x3
@@ -238,14 +238,14 @@ core_loop_8:
     st1         { v4.8h},[x2],x3
 
     st1         { v6.8h},[x2],x3
-    st1         { v8.8h},[x2],x3
-    st1         { v10.8h},[x2],x3
+    st1         { v1.8h},[x2],x3
+    st1         { v18.8h},[x2],x3
 
     //vdup.8        q1,d0[2]
-    st1         { v12.8h},[x2],x3
+    st1         { v19.8h},[x2],x3
 
     //vdup.8        q2,d0[1]
-    st1         { v14.8h},[x2],x3
+    st1         { v20.8h},[x2],x3
 
     //vdup.8        q3,d0[0]
     //vst1.8        {q7},[x2],x3
@@ -269,7 +269,7 @@ core_loop_8:
 
     // ldmfd sp!,{x4-x12,x15}                  //reload the registers from sp
     ldp         x19, x20,[sp],#16
-    pop_v_regs
+
     ret
     b           endloop
 
@@ -284,32 +284,32 @@ core_loop_4:
     ld1         {v0.8b},[x12]
     sub         x12,x12,#8
     ld1         {v30.8b},[x12]
-    dup         v26.4h, v0.4h[3]
+    dup         v26.4h, v0.h[3]
     dup         v28.8b,w14
 
-    dup         v3.4h, v0.4h[2]
+    dup         v3.4h, v0.h[2]
     uxtl        v26.8h, v26.8b
 
-    dup         v4.4h, v0.4h[1]
+    dup         v4.4h, v0.h[1]
     usubl       v24.8h, v30.8b, v28.8b
 
-    dup         v5.4h, v0.4h[0]
+    dup         v5.4h, v0.h[0]
     sshr        v24.8h, v24.8h,#1
 
-    dup         v6.4h, v0.4h[3]
+    dup         v6.4h, v0.h[3]
     sqadd       v22.8h,  v26.8h ,  v24.8h
 
-    dup         v7.4h, v0.4h[2]
+    dup         v7.4h, v0.h[2]
     sqxtun      v22.8b, v22.8h
 
     st1         {v6.8b},[x2],x3
     st1         {v3.8b},[x2],x3
 
-    dup         v8.4h, v0.4h[1]
+    dup         v1.4h, v0.h[1]
     st1         {v4.8b},[x2],x3
     st1         {v5.8b},[x2],x3
 
-    dup         v9.4h, v0.4h[0]
+    dup         v17.4h, v0.h[0]
     //vst1.8        {d6},[x2],x3
     //vst1.8        {d7},[x2],x3
 
@@ -317,7 +317,7 @@ core_loop_4:
     //vst1.8        {d9},[x2],x3
     // ldmfd sp!,{x4-x12,x15}                  //reload the registers from sp
     ldp         x19, x20,[sp],#16
-    pop_v_regs
+
     ret
     b           endloop
 
@@ -331,16 +331,16 @@ core_loop_4:
     sub         x12,x12,#5
     ld1         {v0.8b},[x12]
     dup         v28.8b,w14
-    dup         v26.8b, v0.8b[3]
+    dup         v26.8b, v0.b[3]
     uxtl        v26.8h, v26.8b
 
-    dup         v3.8b, v0.8b[2]
+    dup         v3.8b, v0.b[2]
     usubl       v24.8h, v30.8b, v28.8b
 
-    dup         v4.8b, v0.8b[1]
+    dup         v4.8b, v0.b[1]
     sshr        v24.8h, v24.8h,#1
 
-    dup         v5.8b, v0.8b[0]
+    dup         v5.8b, v0.b[0]
     sqadd       v22.8h,  v26.8h ,  v24.8h
 
     sqxtun      v22.8b, v22.8h
@@ -352,7 +352,7 @@ core_loop_4:
 
     // ldmfd sp!,{x4-x12,x15}                  //reload the registers from sp
     ldp         x19, x20,[sp],#16
-    pop_v_regs
+
     ret
 
 endloop:

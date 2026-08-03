@@ -25,7 +25,7 @@
 * Intrinsics, Neon assembly etc
 *
 * @author
-*  Harish
+*  Ittiam
 *
 * @par List of Functions:
 *
@@ -45,7 +45,7 @@
 #define    CXAINTR      10
 
 /* Neon intrinsics */
-#define    NEONINTR     0
+#define    NEONINTR     11
 
 /* X86 intrinsics */
 #define    X86INTR      12

@@ -147,32 +147,33 @@
 ihevc_weighted_pred_bi_a9q:
 
     stmfd       sp!, {r4-r12, r14}          @stack stores the values of the arguments
+    vpush       {d8  -  d15}
 
-    ldr         r6,[sp,#48]                 @load wgt0
-    ldr         r11,[sp,#68]                @load lvl_shift1
-    ldr         r12,[sp,#72]                @load lvl_shift2
+    ldr         r6,[sp,#112]                 @load wgt0
+    ldr         r11,[sp,#132]                @load lvl_shift1
+    ldr         r12,[sp,#136]                @load lvl_shift2
     vmov.s16    d7[0],r6                    @moved for scalar multiplication
     mul         r4,r11,r6                   @lvl_shift1 * wgt0
-    ldr         r8,[sp,#56]                 @load wgt1
-    ldr         r7,[sp,#52]                 @load off0
+    ldr         r8,[sp,#120]                 @load wgt1
+    ldr         r7,[sp,#116]                 @load off0
     vmov.s16    d7[1],r8                    @moved for scalar multiplication
     mla         r4,r12,r8,r4                @(lvl_shift1 * wgt0) + (lvl_shift2 * wgt1)
-    ldr         r9,[sp,#60]                 @load off1
+    ldr         r9,[sp,#124]                 @load off1
     add         r5,r7,r9                    @off0 + off1
-    ldr         r10,[sp,#64]                @load shift
+    ldr         r10,[sp,#128]                @load shift
     add         r5,r5,#1                    @off0 + off1 + 1
     sub         r14,r10,#1                  @shift - 1
-    ldr         r7,[sp,#80]                 @load wd
+    ldr         r7,[sp,#144]                 @load wd
     lsl         r5,r5,r14                   @((off0 + off1 + 1) << (shift - 1))
     vdup.u32    q14,r10                     @vmovq_n_s32(0-shift)
     add         r4,r4,r5                    @tmp_lvl_shift += ((off0 + off1 + 1) << (shift - 1))
     vdup.u32    q15,r4                      @vmovq_n_s32(tmp_lvl_shift)
     vneg.s32    q14,q14
-    ldr         r4,[sp,#40]                 @load src_strd2
+    ldr         r4,[sp,#104]                 @load src_strd2
     lsl         r9,r7,#1
-    ldr         r5,[sp,#44]                 @load dst_strd
+    ldr         r5,[sp,#108]                 @load dst_strd
     lsl         r3,r3,#1
-    ldr         r14,[sp,#76]                @load ht
+    ldr         r14,[sp,#140]                @load ht
     lsl         r4,r4,#1
 
     cmp         r14,#0                      @check ht == 0
@@ -260,6 +261,7 @@ end_core_loop:
     bgt         core_loop                   @if ht is greater than 0 goto outer_loop
 
 end_loops:
+    vpop        {d8  -  d15}
     ldmfd       sp!,{r4-r12,r15}            @reload the registers from sp
 
 

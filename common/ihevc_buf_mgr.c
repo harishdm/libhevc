@@ -24,7 +24,7 @@
 *  Contains function definitions for buffer management
 *
 * @author
-*  Srinivas T
+*  Ittiam
 *
 * @par List of Functions:
 *   - ihevc_buf_mgr_init()
@@ -43,10 +43,12 @@
 *******************************************************************************
 */
 #include <stdlib.h>
+#include <assert.h>
 #include "ihevc_typedefs.h"
 #include "ihevc_macros.h"
 #include "ihevc_func_selector.h"
 #include "ihevc_buf_mgr.h"
+#include "ihevc_debug.h"
 
 
 /**
@@ -113,7 +115,6 @@ WORD32 ihevc_buf_mgr_add(
                 void *pv_ptr,
                 WORD32 buf_id)
 {
-
     /* Check if buffer ID is within allowed range */
     if(buf_id >= (WORD32)ps_buf_mgr->u4_max_buf_cnt)
     {
@@ -165,6 +166,8 @@ void* ihevc_buf_mgr_get_next_free(
     pv_ret_ptr = NULL;
     for(id = 0; id < (WORD32)ps_buf_mgr->u4_max_buf_cnt; id++)
     {
+        ASSERT(ps_buf_mgr->au4_status[id] != 2);
+
         /* Check if the buffer is non-null and status is zero */
         if((ps_buf_mgr->au4_status[id] == 0) && (ps_buf_mgr->apv_ptr[id]))
         {
@@ -206,6 +209,8 @@ WORD32 ihevc_buf_mgr_check_free(
 
     for(id = 0; id < ps_buf_mgr->u4_max_buf_cnt; id++)
     {
+        ASSERT(ps_buf_mgr->au4_status[id] != 2);
+
         if((ps_buf_mgr->au4_status[id] == 0) &&
            (ps_buf_mgr->apv_ptr[id]))
         {
@@ -214,7 +219,6 @@ WORD32 ihevc_buf_mgr_check_free(
     }
 
     return 0;
-
 }
 
 
@@ -256,6 +260,7 @@ WORD32 ihevc_buf_mgr_release(
     }
 
     ps_buf_mgr->au4_status[buf_id] &= ~mask;
+    ASSERT(ps_buf_mgr->au4_status[buf_id] != 2);
 
     /* If both the REF and DISP are zero, DEC is set to zero */
     if(ps_buf_mgr->au4_status[buf_id] == 1)
@@ -305,13 +310,13 @@ WORD32 ihevc_buf_mgr_set_status(
         return (-1);
     }
 
-
     if((ps_buf_mgr->au4_status[buf_id] & mask) != 0)
     {
         return (-1);
     }
 
     ps_buf_mgr->au4_status[buf_id] |= mask;
+    ASSERT(ps_buf_mgr->au4_status[buf_id] != 2);
     return 0;
 }
 

@@ -24,7 +24,7 @@
 *  Contains function definitions for deblocking filters
 *
 * @author
-*  Rishab
+*  Ittiam
 *
 * @par List of Functions:
 *   - ihevc_deblk_luma_vert_ssse3()
@@ -115,12 +115,9 @@ void ihevc_deblk_luma_vert_ssse3(UWORD8 *pu1_src,
     WORD32 de, dep, deq;
     __m128i src_row0_8x16b, src_row1_8x16b, src_row2_8x16b, src_row3_8x16b;
 
-
     {
         __m128i src_tmp_8x16b, coef_8x16b, mask_d_result_4x32b, mask_de_result_8x16b;
         __m128i mask_16x8b, temp_coef0_8x16b, temp_coef1_8x16b;
-
-
 
         ASSERT((bs > 0) && (bs <= 3));
         ASSERT(filter_flag_p || filter_flag_q);
@@ -152,7 +149,6 @@ void ihevc_deblk_luma_vert_ssse3(UWORD8 *pu1_src,
 
         mask_d_result_4x32b = _mm_maddubs_epi16(src_tmp_8x16b, coef_8x16b);
 
-
         //to get all 1's of 8 bit in (1)
         temp_coef0_8x16b = _mm_cmpeq_epi16(src_tmp_8x16b, src_tmp_8x16b);
         temp_coef1_8x16b = _mm_srli_epi16(temp_coef0_8x16b, 15);
@@ -166,7 +162,6 @@ void ihevc_deblk_luma_vert_ssse3(UWORD8 *pu1_src,
         mask_de_result_8x16b = _mm_maddubs_epi16(mask_de_result_8x16b, temp_coef0_8x16b);
         //to get 16 bit 1's
         temp_coef0_8x16b = _mm_srli_epi16(temp_coef1_8x16b, 8);
-
 
         // dq3 dp3 dq0 dp0
         mask_d_result_4x32b = _mm_abs_epi32(mask_d_result_4x32b);
@@ -231,13 +226,10 @@ void ihevc_deblk_luma_vert_ssse3(UWORD8 *pu1_src,
                 deq = 0;
             }
         }
-
     }
 
     if(de != 0)
     {
-
-
         src_row1_8x16b = _mm_loadl_epi64((__m128i *)((pu1_src - 4) + src_strd));
         src_row2_8x16b = _mm_loadl_epi64((__m128i *)((pu1_src - 4) + 2 * src_strd));
 
@@ -303,7 +295,6 @@ void ihevc_deblk_luma_vert_ssse3(UWORD8 *pu1_src,
             //calculating Clipping MAX for all pixel values.
             temp_max0_16x8b = _mm_adds_epu8(src_row0_8x16b, const2tc_8x16b);
             temp_max1_16x8b = _mm_adds_epu8(src_row1_8x16b, const2tc_8x16b);
-
 
             //q'2-q'0-2,p'2-p'0-2
             temp_pq2_str0_16x8b = _mm_unpacklo_epi16(src_row0_8x16b, src_row2_8x16b);
@@ -378,12 +369,9 @@ void ihevc_deblk_luma_vert_ssse3(UWORD8 *pu1_src,
             //separating row 2 and row 3
             src_row2_8x16b = _mm_srli_si128(src_row0_8x16b, 8);
             src_row3_8x16b = _mm_srli_si128(src_row1_8x16b, 8);
-
         }
-
         else
         {
-
             __m128i tmp_delta0_8x16b, tmp_delta1_8x16b, tmp_delta2_8x16b, tmp_delta3_8x16b;
             __m128i tmp0_const_8x16b, tmp1_const_8x16b, tmp2_const_8x16b, tmp3_const_8x16b;
             __m128i coefdelta_0_8x16b, mask_pq_8x16b;
@@ -393,7 +381,6 @@ void ihevc_deblk_luma_vert_ssse3(UWORD8 *pu1_src,
             mask1 = (((LWORD64)(filter_flag_q & deq)) << 63) | (((LWORD64)filter_flag_q) << 47) | (((LWORD64)filter_flag_p) << 31) | (((LWORD64)(filter_flag_p & dep)) << 15);
 
             consttc_8x16b = _mm_set1_epi32(tc);
-
 
             src_row0_8x16b = _mm_unpacklo_epi64(src_row0_8x16b, src_row1_8x16b);
             src_row2_8x16b = _mm_unpacklo_epi64(src_row2_8x16b, src_row3_8x16b);
@@ -451,7 +438,6 @@ void ihevc_deblk_luma_vert_ssse3(UWORD8 *pu1_src,
             tmp0_const_8x16b = _mm_cmpgt_epi16(tmp2_const_8x16b, tmp_delta2_8x16b);
             //Clipping of delta0
             tmp_delta0_8x16b = _mm_max_epi16(tmp_delta0_8x16b, tmp3_const_8x16b);
-
 
             //delta 1 calc starts
 
@@ -554,9 +540,6 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
     __m128i src_q0_8x16b, src_q1_8x16b, src_p0_8x16b, src_p1_8x16b, src_q2_8x16b;
     __m128i tmp_pq_str1_8x16b, src_p2_8x16b, tmp_pq_str0_8x16b;
 
-
-
-
     {
         __m128i src_tmp_p_0_8x16b, src_tmp_p_1_8x16b, src_tmp_q_0_8x16b, src_tmp_q_1_8x16b;
         __m128i coef_8x16b, mask_d_result_4x32b, mask_de_result_8x16b;
@@ -590,7 +573,6 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
         src_p2_8x16b = _mm_loadl_epi64((__m128i *)(pu1_src - 3 * src_strd));
         tmp_pq_str0_8x16b = _mm_loadl_epi64((__m128i *)(pu1_src - 4 * src_strd));
 
-
         src_tmp_p_0_8x16b = _mm_unpacklo_epi8(src_p1_8x16b, src_p0_8x16b);
         src_tmp_p_1_8x16b = _mm_unpacklo_epi8(tmp_pq_str0_8x16b, src_p2_8x16b);
 
@@ -612,7 +594,6 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
 
         mask_d_result_4x32b = _mm_maddubs_epi16(src_tmp_p_0_8x16b, coef_8x16b);
 
-
         //to get all 1's of 8 bit in (1)
         temp_coef0_8x16b = _mm_cmpeq_epi16(src_tmp_p_0_8x16b, src_tmp_p_0_8x16b);
         temp_coef1_8x16b = _mm_srli_epi16(temp_coef0_8x16b, 15);
@@ -626,7 +607,6 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
         mask_de_result_8x16b = _mm_maddubs_epi16(mask_de_result_8x16b, temp_coef0_8x16b);
         //to get 16 bit 1's
         temp_coef0_8x16b = _mm_srli_epi16(temp_coef1_8x16b, 8);
-
 
         // dq3 dp3 dq0 dp0
         mask_d_result_4x32b = _mm_abs_epi32(mask_d_result_4x32b);
@@ -691,15 +671,12 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
                 deq = 0;
             }
         }
-
     }
 
     if(de != 0)
     {
-
         if(2 == de)
         {
-
             __m128i temp_pq0_str0_16x8b;
             __m128i temp_pq1_str0_16x8b, temp_pq1_str1_16x8b;
             __m128i temp_pq2_str0_16x8b;
@@ -755,7 +732,6 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
             src_p0_8x16b = _mm_adds_epu8(src_p1_8x16b, const2tc_8x16b);
             src_p1_8x16b = _mm_subs_epu8(src_p1_8x16b, const2tc_8x16b);
 
-
             //q'2-q'0-2,p'2-p'0-2
             tmp_pq_str0_8x16b = _mm_unpacklo_epi8(src_p2_8x16b, tmp_pq_str0_8x16b);
             temp_pq2_str0_16x8b = _mm_unpacklo_epi8(src_q2_8x16b, tmp_pq_str1_8x16b);
@@ -775,7 +751,6 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
             temp_pq1_str0_16x8b = _mm_add_epi16(temp_pq1_str0_16x8b, temp_pq1_str1_16x8b);
             //to get 2 in 16 bit
             const2_8x16b = _mm_srli_epi16(const2_8x16b, 8);
-
 
             //q'1, p'1 (adding 2)
             temp_pq1_str0_16x8b = _mm_add_epi16(temp_pq1_str0_16x8b, const2_8x16b);
@@ -809,20 +784,16 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
             src_q0_8x16b = _mm_srli_si128(src_p0_8x16b, 8);
             src_q1_8x16b = _mm_srli_si128(src_p1_8x16b, 8);
             src_q2_8x16b = _mm_srli_si128(src_p2_8x16b, 8);
-
-            _mm_storel_epi64((__m128i *)(pu1_src - 3 * src_strd), src_p2_8x16b);
-            _mm_storel_epi64((__m128i *)(pu1_src - 2 * src_strd), src_p1_8x16b);
-            _mm_storel_epi64((__m128i *)(pu1_src - src_strd), src_p0_8x16b);
-            _mm_storel_epi64((__m128i *)(pu1_src), src_q0_8x16b);
-            _mm_storel_epi64((__m128i *)(pu1_src + src_strd), src_q1_8x16b);
-            _mm_storel_epi64((__m128i *)(pu1_src + 2 * src_strd), src_q2_8x16b);
-
+            *(WORD32 *)(pu1_src - 3 * src_strd) =  _mm_cvtsi128_si32(src_p2_8x16b);
+            *(WORD32 *)(pu1_src - 2 * src_strd) = _mm_cvtsi128_si32(src_p1_8x16b);
+            *(WORD32 *)(pu1_src - src_strd) = _mm_cvtsi128_si32(src_p0_8x16b);
+            *(WORD32 *)pu1_src = _mm_cvtsi128_si32(src_q0_8x16b);
+            *(WORD32 *)(pu1_src + src_strd) =  _mm_cvtsi128_si32(src_q1_8x16b);
+            *(WORD32 *)(pu1_src + 2 * src_strd) =  _mm_cvtsi128_si32(src_q2_8x16b);
 
         }
-
         else
         {
-
             __m128i tmp_delta0_8x16b, tmp_delta1_8x16b;
             __m128i tmp0_const_8x16b, tmp1_const_8x16b, tmp2_const_8x16b;
             __m128i coefdelta_0_8x16b;
@@ -946,7 +917,6 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
             // clipping delta1
             tmp_delta1_8x16b = _mm_max_epi16(tmp_delta1_8x16b, tmp1_const_8x16b);
 
-
             //masking of the delta values |delta|<10*tc
             tmp_delta1_8x16b = _mm_and_si128(tmp_delta1_8x16b, tmp_pq_str1_8x16b);
             tmp_delta0_8x16b = _mm_and_si128(tmp_delta0_8x16b, tmp_pq_str0_8x16b);
@@ -971,18 +941,13 @@ void ihevc_deblk_luma_horz_ssse3(UWORD8 *pu1_src,
             src_q1_8x16b = _mm_srli_si128(src_p1_8x16b, 8);
             src_q0_8x16b = _mm_srli_si128(src_p0_8x16b, 8);
 
-            _mm_storel_epi64((__m128i *)(pu1_src - 2 * src_strd), src_p1_8x16b);
-            _mm_storel_epi64((__m128i *)(pu1_src - src_strd), src_p0_8x16b);
-            _mm_storel_epi64((__m128i *)(pu1_src), src_q0_8x16b);
-            _mm_storel_epi64((__m128i *)(pu1_src + src_strd), src_q1_8x16b);
-
+            *(WORD32 *)(pu1_src - 2 * src_strd) =  _mm_cvtsi128_si32(src_p1_8x16b);
+            *(WORD32 *)(pu1_src - src_strd) = _mm_cvtsi128_si32(src_p0_8x16b);
+            *(WORD32 *)pu1_src = _mm_cvtsi128_si32(src_q0_8x16b);
+            *(WORD32 *)(pu1_src + src_strd) =  _mm_cvtsi128_si32(src_q1_8x16b);
 
         }
-
-
-
     }
-
 }
 
 void ihevc_deblk_chroma_vert_ssse3(UWORD8 *pu1_src,
@@ -1121,7 +1086,6 @@ void ihevc_deblk_chroma_vert_ssse3(UWORD8 *pu1_src,
         src_row_0_16x8b = _mm_or_si128(src_row_0_16x8b, delta_vu0_16x8b);
         src_row_2_16x8b = _mm_or_si128(src_row_2_16x8b, delta_vu1_16x8b);
 
-
         //geting values for row1 and row 3
         tmp_pxl_0_16x8b = _mm_srli_si128(src_row_0_16x8b, 8);
         tmp_pxl_1_16x8b = _mm_srli_si128(src_row_2_16x8b, 8);
@@ -1131,9 +1095,6 @@ void ihevc_deblk_chroma_vert_ssse3(UWORD8 *pu1_src,
         _mm_storel_epi64((__m128i *)((pu1_src - 4) + 2 * src_strd), src_row_2_16x8b);
         _mm_storel_epi64((__m128i *)((pu1_src - 4) + 3 * src_strd), tmp_pxl_1_16x8b);
     }
-
-
-
 }
 
 void ihevc_deblk_chroma_horz_ssse3(UWORD8 *pu1_src,
@@ -1150,7 +1111,6 @@ void ihevc_deblk_chroma_horz_ssse3(UWORD8 *pu1_src,
     WORD32 qp_indx_v, qp_chroma_v;
     WORD32 tc_indx_u, tc_u;
     WORD32 tc_indx_v, tc_v;
-
 
     __m128i tmp_p0_16x8b, src_p0_16x8b, src_q0_16x8b, tmp_q0_16x8b;
 
@@ -1199,7 +1159,6 @@ void ihevc_deblk_chroma_horz_ssse3(UWORD8 *pu1_src,
         delta_vu0_16x8b = _mm_maddubs_epi16(tmp_p0_16x8b, delta_vu0_16x8b);
         delta_vu1_16x8b = _mm_maddubs_epi16(tmp_q0_16x8b, delta_vu1_16x8b);
 
-
         // filter flag mask and tc mask
         mask_tc_16x8 = _mm_loadl_epi64((__m128i *)(&mask_tc));
         mask_flag_q_16x8b = _mm_loadl_epi64((__m128i *)(&mask_flag));
@@ -1216,7 +1175,6 @@ void ihevc_deblk_chroma_horz_ssse3(UWORD8 *pu1_src,
 
         //filterp
         mask_flag_p_16x8b = _mm_shuffle_epi32(mask_flag_q_16x8b, 0x00);
-
 
         //converting const 4
         const_16x8b = _mm_slli_epi16(const_16x8b, 2);
@@ -1252,12 +1210,7 @@ void ihevc_deblk_chroma_horz_ssse3(UWORD8 *pu1_src,
         src_q0_16x8b = _mm_packus_epi16(src_q0_16x8b, mask_16x8b);
         src_p0_16x8b = _mm_packus_epi16(src_p0_16x8b, mask_16x8b);
 
-
-
         _mm_storel_epi64((__m128i *)(pu1_src - src_strd), src_p0_16x8b);
         _mm_storel_epi64((__m128i *)(pu1_src), src_q0_16x8b);
-
     }
-
-
 }

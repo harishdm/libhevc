@@ -75,7 +75,7 @@
 #include "ihevcd_opencl_mc_interface.h"
 #endif
 
-mv_buf_t* ihevcd_mv_mgr_get_poc(buf_mgr_t *ps_mv_buf_mgr, UWORD32 abs_poc);
+mv_buf_t *ihevcd_mv_mgr_get_poc(buf_mgr_t *ps_mv_buf_mgr, UWORD32 abs_poc);
 
 /**
 *******************************************************************************
@@ -101,13 +101,13 @@ mv_buf_t* ihevcd_mv_mgr_get_poc(buf_mgr_t *ps_mv_buf_mgr, UWORD32 abs_poc);
 *
 *******************************************************************************
 */
-IHEVCD_ERROR_T ihevcd_operation_point_set(vps_t *ps_vps, bitstrm_t *ps_bitstrm, WORD32 ops_idx)
+IHEVCD_ERROR_T ihevcd_operation_point_set( vps_t *ps_vps, bitstrm_t *ps_bitstrm, WORD32 ops_idx)
 {
     WORD32 i;
     WORD32 value;
-    UNUSED(ops_idx);
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
-    for(i = 0; i <= ps_vps->i1_vps_max_nuh_reserved_zero_layer_id; i++)
+
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
+    for( i = 0; i <= ps_vps->i1_vps_max_nuh_reserved_zero_layer_id; i++ )
     {
         BITS_PARSE("list_entry_l0[ i ]", value, ps_bitstrm, 1);
         //ps_vps->ai1_layer_id_included_flag[ops_idx][i] = value;
@@ -140,8 +140,8 @@ IHEVCD_ERROR_T ihevcd_operation_point_set(vps_t *ps_vps, bitstrm_t *ps_bitstrm, 
 */
 
 WORD32 ihevcd_ref_pic_list_modification(bitstrm_t *ps_bitstrm,
-                                        slice_header_t *ps_slice_hdr,
-                                        WORD32 num_poc_total_curr)
+                                         slice_header_t *ps_slice_hdr,
+                                         WORD32 num_poc_total_curr)
 {
     WORD32 ret = IHEVCD_SUCCESS;
     WORD32 value;
@@ -219,7 +219,7 @@ WORD32 ihevcd_ref_pic_list_modification(bitstrm_t *ps_bitstrm,
 IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
                                          nal_header_t *ps_nal)
 {
-    IHEVCD_ERROR_T ret = (IHEVCD_ERROR_T)IHEVCD_SUCCESS;
+    IHEVCD_ERROR_T ret = IHEVCD_SUCCESS;
     WORD32 value;
     WORD32 i;
     WORD32 sps_id;
@@ -241,16 +241,16 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
         return ret;
 
 #ifdef GPU_BUILD
-    //TODO GPU : Later define it for ARM only version as well
+   //TODO GPU : Later define it for ARM only version as well
     ps_codec->s_parse.ps_slice_hdr_base = ps_codec->aps_slice_hdr_base[ps_codec->u4_parsing_view];
 #endif
-    idr_pic_flag = (NAL_IDR_W_LP == i1_nal_unit_type) ||
-                    (NAL_IDR_N_LP == i1_nal_unit_type);
+    idr_pic_flag = (NAL_IDR_W_LP == i1_nal_unit_type)  ||
+               (NAL_IDR_N_LP == i1_nal_unit_type);
 
 
     BITS_PARSE("first_slice_in_pic_flag", first_slice_in_pic_flag, ps_bitstrm, 1);
-    if((NAL_BLA_W_LP <= i1_nal_unit_type) &&
-       (NAL_RSV_RAP_VCL23          >= i1_nal_unit_type))
+    if(  (NAL_BLA_W_LP <= i1_nal_unit_type  ) &&
+         (NAL_RSV_RAP_VCL23          >= i1_nal_unit_type ))
     {
         BITS_PARSE("no_output_of_prior_pics_flag", no_output_of_prior_pics_flag, ps_bitstrm, 1);
     }
@@ -327,24 +327,24 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
         //ps_slice_hdr += MAX_SLICE_HDR_CNT;
         memcpy(ps_slice_hdr, ps_slice_hdr - MAX_SLICE_HDR_CNT, sizeof(slice_header_t));
     }
-    else if(ps_codec->u4_parsing_view == 0)
+    else if (ps_codec->u4_parsing_view == 0)
     {
         if(1 != ps_codec->i4_num_cores)
             memcpy(ps_slice_hdr, ps_slice_hdr + MAX_SLICE_HDR_CNT, sizeof(slice_header_t));
     }
 #endif
 
-    if((ps_pps->i1_dependent_slice_enabled_flag) &&
+    if((ps_pps->i1_dependent_slice_enabled_flag)  &&
        (!first_slice_in_pic_flag))
     {
         BITS_PARSE("dependent_slice_flag", value, ps_bitstrm, 1);
 
         /* If dependendent slice, copy slice header from previous slice */
-        if(value && (ps_codec->s_parse.i4_cur_slice_idx > 0))
+        if(value && (ps_codec->s_parse.i4_cur_slice_idx > 0) )
         {
             ihevcd_copy_slice_hdr(ps_codec,
-                                  (ps_codec->s_parse.i4_cur_slice_idx & (MAX_SLICE_HDR_CNT - 1)),
-                                  ((ps_codec->s_parse.i4_cur_slice_idx - 1) & (MAX_SLICE_HDR_CNT - 1)));
+                (ps_codec->s_parse.i4_cur_slice_idx & (MAX_SLICE_HDR_CNT - 1)),
+                ((ps_codec->s_parse.i4_cur_slice_idx - 1)& (MAX_SLICE_HDR_CNT - 1)));
         }
         ps_slice_hdr->i1_dependent_slice_flag = value;
     }
@@ -357,8 +357,8 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
     ps_slice_hdr->i1_first_slice_in_pic_flag = first_slice_in_pic_flag;
 
     ps_slice_hdr->i1_no_output_of_prior_pics_flag = 1;
-    if((NAL_BLA_W_LP <= i1_nal_unit_type) &&
-                    (NAL_RSV_RAP_VCL23          >= i1_nal_unit_type))
+    if(  (NAL_BLA_W_LP <= i1_nal_unit_type  ) &&
+          (NAL_RSV_RAP_VCL23          >= i1_nal_unit_type ))
     {
         ps_slice_hdr->i1_no_output_of_prior_pics_flag = no_output_of_prior_pics_flag;
     }
@@ -390,7 +390,7 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
         ps_slice_hdr->i1_num_long_term_sps = 0;
         ps_slice_hdr->i1_num_long_term_pics = 0;
 
-        for(i = 0; i < ps_pps->i1_num_extra_slice_header_bits; i++)
+        for ( i = 0; i < ps_pps->i1_num_extra_slice_header_bits; i++ )
         {
             BITS_PARSE("slice_reserved_undetermined_flag[ i ]", value, ps_bitstrm, 1);
             //slice_reserved_undetermined_flag[ i ]
@@ -473,11 +473,11 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
                     ps_slice_hdr->i1_num_long_term_sps = CLIP3(ps_slice_hdr->i1_num_long_term_sps,
                                                                0, MAX_DPB_SIZE - num_neg_pics - num_pos_pics);
                 }
-                UEV_PARSE("num_long_term_pics", value, ps_bitstrm);
+                UEV_PARSE("num_long_term_pics",value, ps_bitstrm);
                 ps_slice_hdr->i1_num_long_term_pics = value;
                 ps_slice_hdr->i1_num_long_term_pics = CLIP3(ps_slice_hdr->i1_num_long_term_pics,
                                                             0, MAX_DPB_SIZE - num_neg_pics - num_pos_pics -
-                                                            ps_slice_hdr->i1_num_long_term_sps);
+                                                                ps_slice_hdr->i1_num_long_term_sps);
 
                 for(i = 0; i < (ps_slice_hdr->i1_num_long_term_sps +
                                 ps_slice_hdr->i1_num_long_term_pics); i++)
@@ -487,7 +487,8 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
                         /* Use CLZ to compute Ceil( Log2( num_long_term_ref_pics_sps ) ) */
                         WORD32 num_bits = 32 - CLZ(ps_sps->i1_num_long_term_ref_pics_sps);
                         BITS_PARSE("lt_idx_sps[ i ]", value, ps_bitstrm, num_bits);
-                        ps_slice_hdr->ai4_poc_lsb_lt[i] = ps_sps->ai1_lt_ref_pic_poc_lsb_sps[value];
+                        //ps_slice_hdr->ai4_poc_lsb_lt[i] = ps_sps->ai1_lt_ref_pic_poc_lsb_sps[value]; au2_lt_ref_pic_poc_lsb_sps
+                        ps_slice_hdr->ai4_poc_lsb_lt[i] = ps_sps->au2_lt_ref_pic_poc_lsb_sps[value];
                         ps_slice_hdr->ai1_used_by_curr_pic_lt_flag[i] = ps_sps->ai1_used_by_curr_pic_lt_sps_flag[value];
 
                     }
@@ -505,10 +506,10 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
 
 
                     ps_slice_hdr->ai1_delta_poc_msb_cycle_lt[i] = 0;
-                    if(ps_slice_hdr->ai1_delta_poc_msb_present_flag[i])
+                    if(ps_slice_hdr->ai1_delta_poc_msb_present_flag[ i ])
                     {
 
-                        UEV_PARSE("delata_poc_msb_cycle_lt[ i ]", value, ps_bitstrm);
+                        UEV_PARSE("delata_poc_msb_cycle_lt[ i ]",value, ps_bitstrm);
                         ps_slice_hdr->ai1_delta_poc_msb_cycle_lt[i] = value;
                     }
 
@@ -550,8 +551,8 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
             BITS_PARSE("slice_sao_luma_flag", value, ps_bitstrm, 1);
             ps_slice_hdr->i1_slice_sao_luma_flag = value;
 
-            BITS_PARSE("slice_sao_chroma_flag", value, ps_bitstrm, 1);
-            ps_slice_hdr->i1_slice_sao_chroma_flag = value;
+                BITS_PARSE("slice_sao_chroma_flag", value, ps_bitstrm, 1);
+                ps_slice_hdr->i1_slice_sao_chroma_flag = value;
 
         }
 
@@ -570,12 +571,12 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
 
             if(ps_slice_hdr->i1_num_ref_idx_active_override_flag)
             {
-                UEV_PARSE("num_ref_idx_l0_active_minus1", value, ps_bitstrm);
+                UEV_PARSE("num_ref_idx_l0_active_minus1",value, ps_bitstrm);
                 ps_slice_hdr->i1_num_ref_idx_l0_active = value + 1;
 
                 if(BSLICE == ps_slice_hdr->i1_slice_type)
                 {
-                    UEV_PARSE("num_ref_idx_l1_active_minus1", value, ps_bitstrm);
+                    UEV_PARSE("num_ref_idx_l1_active_minus1",value, ps_bitstrm);
                     ps_slice_hdr->i1_num_ref_idx_l1_active = value + 1;
                 }
 
@@ -595,10 +596,14 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
 
             if(0 == num_poc_total_curr)
                 return IHEVCD_IGNORE_SLICE;
+#ifdef HM9DOT0
+            if(ps_sps->i1_lists_modification_present_flag)
+#else
             if((ps_pps->i1_lists_modification_present_flag) && (num_poc_total_curr > 1))
+#endif
             {
                 ihevcd_ref_pic_list_modification(ps_bitstrm,
-                                                 ps_slice_hdr, num_poc_total_curr);
+                                                         ps_slice_hdr, num_poc_total_curr);
             }
             else
             {
@@ -632,15 +637,15 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
                 if((ps_slice_hdr->i1_collocated_from_l0_flag  &&  (ps_slice_hdr->i1_num_ref_idx_l0_active > 1)) ||
                    (!ps_slice_hdr->i1_collocated_from_l0_flag  && (ps_slice_hdr->i1_num_ref_idx_l1_active > 1)))
                 {
-                    UEV_PARSE("collocated_ref_idx", value, ps_bitstrm);
-                    ps_slice_hdr->i1_collocated_ref_idx = value;
+                     UEV_PARSE("collocated_ref_idx",value, ps_bitstrm);
+                     ps_slice_hdr->i1_collocated_ref_idx = value;
                 }
 
             }
             ps_slice_hdr->i1_collocated_ref_idx = CLIP3(ps_slice_hdr->i1_collocated_ref_idx, 0, MAX_DPB_SIZE - 1);
 
-            if((ps_pps->i1_weighted_pred_flag  &&   (PSLICE == ps_slice_hdr->i1_slice_type)) ||
-               (ps_pps->i1_weighted_bipred_flag  &&  (BSLICE == ps_slice_hdr->i1_slice_type)))
+            if((ps_pps->i1_weighted_pred_flag  &&   (PSLICE == ps_slice_hdr->i1_slice_type))  ||
+               (ps_pps->i1_weighted_bipred_flag  &&  (BSLICE == ps_slice_hdr->i1_slice_type )))
             {
                 ihevcd_parse_pred_wt_ofst(ps_bitstrm, ps_sps, ps_pps, ps_slice_hdr);
             }
@@ -666,8 +671,6 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
         ps_slice_hdr->i1_beta_offset_div2 = ps_pps->i1_beta_offset_div2;
         ps_slice_hdr->i1_tc_offset_div2 = ps_pps->i1_tc_offset_div2;
 
-        disable_deblocking_filter_flag = ps_pps->i1_pic_disable_deblocking_filter_flag;
-
         if(ps_pps->i1_deblocking_filter_control_present_flag)
         {
 
@@ -681,7 +684,7 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
             {
                 BITS_PARSE("slice_disable_deblocking_filter_flag", value, ps_bitstrm, 1);
                 ps_slice_hdr->i1_slice_disable_deblocking_filter_flag = value;
-                disable_deblocking_filter_flag = ps_slice_hdr->i1_slice_disable_deblocking_filter_flag;
+
 
                 if(!ps_slice_hdr->i1_slice_disable_deblocking_filter_flag)
                 {
@@ -694,10 +697,12 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
                 }
             }
         }
+        disable_deblocking_filter_flag = ps_slice_hdr->i1_slice_disable_deblocking_filter_flag ||
+                                         ps_pps->i1_pic_disable_deblocking_filter_flag;
 
         ps_slice_hdr->i1_slice_loop_filter_across_slices_enabled_flag = ps_pps->i1_loop_filter_across_slices_enabled_flag;
         if(ps_pps->i1_loop_filter_across_slices_enabled_flag  &&
-                        (ps_slice_hdr->i1_slice_sao_luma_flag  ||  ps_slice_hdr->i1_slice_sao_chroma_flag  || !disable_deblocking_filter_flag))
+            (ps_slice_hdr->i1_slice_sao_luma_flag  ||  ps_slice_hdr->i1_slice_sao_chroma_flag  || !disable_deblocking_filter_flag))
         {
             BITS_PARSE("slice_loop_filter_across_slices_enabled_flag", value, ps_bitstrm, 1);
             ps_slice_hdr->i1_slice_loop_filter_across_slices_enabled_flag = value;
@@ -716,20 +721,6 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
         slice_header_t *ps_slice_hdr_base = ps_codec->ps_slice_hdr_base;
 #endif
 
-#if 0
-        if((ps_slice_hdr_base->i1_pps_id != ps_slice_hdr->i1_pps_id) ||
-                        (ps_slice_hdr_base->i1_pic_output_flag != ps_slice_hdr->i1_pic_output_flag) ||
-                        (ps_slice_hdr_base->i1_no_output_of_prior_pics_flag != ps_slice_hdr->i1_no_output_of_prior_pics_flag) ||
-                        (ps_slice_hdr_base->i4_pic_order_cnt_lsb != ps_slice_hdr->i4_pic_order_cnt_lsb) ||
-                        (ps_slice_hdr_base->i1_short_term_ref_pic_set_sps_flag != ps_slice_hdr->i1_short_term_ref_pic_set_sps_flag) ||
-                        (ps_slice_hdr_base->i1_short_term_ref_pic_set_idx != ps_slice_hdr->i1_short_term_ref_pic_set_idx) ||
-                        (ps_slice_hdr_base->i1_num_long_term_sps != ps_slice_hdr->i1_num_long_term_sps) ||
-                        (ps_slice_hdr_base->i1_num_long_term_pics != ps_slice_hdr->i1_num_long_term_pics) ||
-                        (ps_slice_hdr_base->i1_slice_temporal_mvp_enable_flag != ps_slice_hdr->i1_slice_temporal_mvp_enable_flag))
-        {
-            return IHEVCD_IGNORE_SLICE;
-        }
-#else
 
         /* According to the standard, the above conditions must be satisfied - But for error resilience,
          * only the following conditions are checked */
@@ -738,14 +729,13 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
         {
             return IHEVCD_IGNORE_SLICE;
         }
-#endif
 
     }
 
 
     if(0 == ps_codec->i4_pic_present)
     {
-        ps_slice_hdr->i4_abs_pic_order_cnt = ihevcd_calc_poc(ps_codec, ps_nal, ps_sps->i1_log2_max_pic_order_cnt_lsb, ps_slice_hdr->i4_pic_order_cnt_lsb);
+        ps_slice_hdr->i4_abs_pic_order_cnt = ihevcd_calc_poc(ps_codec, ps_nal,ps_sps->i1_log2_max_pic_order_cnt_lsb, ps_slice_hdr->i4_pic_order_cnt_lsb);
     }
     else
     {
@@ -753,7 +743,7 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
     }
 
 
-    if(!first_slice_in_pic_flag)
+    if( !first_slice_in_pic_flag )
     {
         /* Check if the current slice belongs to the same pic (Pic being parsed) */
         if(ps_codec->s_parse.i4_abs_pic_order_cnt == ps_slice_hdr->i4_abs_pic_order_cnt)
@@ -766,13 +756,13 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
             {
                 if(ps_codec->i4_pic_present)
                 {
-                    ps_codec->i4_slice_error = 1;
-                    ps_codec->s_parse.i4_cur_slice_idx--;
+                ps_codec->i4_slice_error = 1;
+                ps_codec->s_parse.i4_cur_slice_idx--;
                     if(ps_codec->s_parse.i4_cur_slice_idx < 0)
                         ps_codec->s_parse.i4_cur_slice_idx = 0;
 
-                    return ret;
-                }
+                return ret;
+            }
                 else
                 {
                     return IHEVCD_IGNORE_SLICE;
@@ -838,7 +828,7 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
     // printf("POC: %d\n", ps_slice_hdr->i4_abs_pic_order_cnt);
     // AEV_TRACE("POC", ps_slice_hdr->i4_abs_pic_order_cnt, 0);
     ps_slice_hdr->i4_num_entry_point_offsets = 0;
-    if((ps_pps->i1_tiles_enabled_flag) ||
+    if((ps_pps->i1_tiles_enabled_flag)  ||
        (ps_pps->i1_entropy_coding_sync_enabled_flag))
     {
         UEV_PARSE("num_entry_point_offsets", value, ps_bitstrm);
@@ -899,7 +889,7 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
         dpb_mgr_t *ps_dpb_mgr = (dpb_mgr_t *)ps_codec->pv_dpb_mgr;
         WORD32 r_idx;
 
-        if((NAL_IDR_W_LP == ps_slice_hdr->i1_nal_unit_type) ||
+        if( (NAL_IDR_W_LP == ps_slice_hdr->i1_nal_unit_type) ||
                         (NAL_IDR_N_LP == ps_slice_hdr->i1_nal_unit_type)  ||
                         (NAL_BLA_N_LP == ps_slice_hdr->i1_nal_unit_type)  ||
                         (NAL_BLA_W_DLP == ps_slice_hdr->i1_nal_unit_type) ||
@@ -946,11 +936,11 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
              * pic count is zero leaving the reference list uninitialised  */
             for(r_idx = 0; r_idx < MAX_DPB_SIZE; r_idx++)
             {
-                ps_slice_hdr->as_ref_pic_list0[r_idx].pv_pic_buf = NULL;
-                ps_slice_hdr->as_ref_pic_list0[r_idx].pv_mv_buf = NULL;
+                ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_pic_buf = NULL;
+                ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_mv_buf = NULL;
 
-                ps_slice_hdr->as_ref_pic_list1[r_idx].pv_pic_buf = NULL;
-                ps_slice_hdr->as_ref_pic_list1[r_idx].pv_mv_buf = NULL;
+                ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_pic_buf = NULL;
+                ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_mv_buf = NULL;
             }
 
 #endif
@@ -974,7 +964,7 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
         mv_buf_t *ps_mv_buf_ref;
         WORD32 r_idx;
         dpb_mgr_t *ps_dpb_mgr = (dpb_mgr_t *)ps_codec->pv_dpb_mgr;
-        buf_mgr_t *ps_mv_buf_mgr = (buf_mgr_t *)ps_codec->pv_mv_buf_mgr;
+        buf_mgr_t *ps_mv_buf_mgr = (buf_mgr_t*)ps_codec->pv_mv_buf_mgr;
 
         ps_pic_buf_ref = ihevc_dpb_mgr_get_ref_by_nearest_poc(ps_dpb_mgr, ps_slice_hdr->i4_abs_pic_order_cnt);
         if(NULL == ps_pic_buf_ref)
@@ -983,39 +973,39 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
             ps_mv_buf_ref = ps_codec->s_parse.ps_cur_mv_buf;
         }
         else
-        {
+            {
             ps_mv_buf_ref = ihevcd_mv_mgr_get_poc(ps_mv_buf_mgr, ps_pic_buf_ref->i4_abs_poc);
-        }
+            }
 
         for(r_idx = 0; r_idx < ps_slice_hdr->i1_num_ref_idx_l0_active; r_idx++)
         {
-            if(NULL == ps_slice_hdr->as_ref_pic_list0[r_idx].pv_pic_buf)
+            if(NULL == ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_pic_buf)
             {
-                ps_slice_hdr->as_ref_pic_list0[r_idx].pv_pic_buf = (void *)ps_pic_buf_ref;
-                ps_slice_hdr->as_ref_pic_list0[r_idx].pv_mv_buf = (void *)ps_mv_buf_ref;
+                ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_pic_buf = (void *)ps_pic_buf_ref;
+                ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_mv_buf = (void *)ps_mv_buf_ref;
             }
         }
 
         for(r_idx = ps_slice_hdr->i1_num_ref_idx_l0_active; r_idx < MAX_DPB_SIZE; r_idx++)
         {
-            ps_slice_hdr->as_ref_pic_list0[r_idx].pv_pic_buf = (void *)ps_pic_buf_ref;
-            ps_slice_hdr->as_ref_pic_list0[r_idx].pv_mv_buf = (void *)ps_mv_buf_ref;
+            ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_pic_buf = (void *)ps_pic_buf_ref;
+            ps_slice_hdr->as_ref_pic_list0[ r_idx ].pv_mv_buf = (void *)ps_mv_buf_ref;
         }
 
         for(r_idx = 0; r_idx < ps_slice_hdr->i1_num_ref_idx_l1_active; r_idx++)
         {
-            if(NULL == ps_slice_hdr->as_ref_pic_list1[r_idx].pv_pic_buf)
+            if(NULL == ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_pic_buf)
             {
-                ps_slice_hdr->as_ref_pic_list1[r_idx].pv_pic_buf = (void *)ps_pic_buf_ref;
-                ps_slice_hdr->as_ref_pic_list1[r_idx].pv_mv_buf = (void *)ps_mv_buf_ref;
+                ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_pic_buf = (void *)ps_pic_buf_ref;
+                ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_mv_buf = (void *)ps_mv_buf_ref;
             }
         }
 
         for(r_idx = ps_slice_hdr->i1_num_ref_idx_l1_active; r_idx < MAX_DPB_SIZE; r_idx++)
         {
-            ps_slice_hdr->as_ref_pic_list1[r_idx].pv_pic_buf = (void *)ps_pic_buf_ref;
-            ps_slice_hdr->as_ref_pic_list1[r_idx].pv_mv_buf = (void *)ps_mv_buf_ref;
-        }
+            ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_pic_buf = (void *)ps_pic_buf_ref;
+            ps_slice_hdr->as_ref_pic_list1[ r_idx ].pv_mv_buf = (void *)ps_mv_buf_ref;
+    }
     }
 
     /* Update slice address in the header */
@@ -1065,25 +1055,25 @@ IHEVCD_ERROR_T ihevcd_parse_slice_header(codec_t *ps_codec,
     }
 
     {
-        /* If skip B is enabled,
-         * ignore pictures that are non-reference
-         * TODO: (i1_nal_unit_type < NAL_BLA_W_LP) && (i1_nal_unit_type % 2 == 0) only says it is
-         * sub-layer non-reference slice. May need to find a way to detect actual non-reference pictures*/
+            /* If skip B is enabled,
+             * ignore pictures that are non-reference
+             * TODO: (i1_nal_unit_type < NAL_BLA_W_LP) && (i1_nal_unit_type % 2 == 0) only says it is
+             * sub-layer non-reference slice. May need to find a way to detect actual non-reference pictures*/
 
-        if((i1_nal_unit_type < NAL_BLA_W_LP) &&
-                        (i1_nal_unit_type % 2 == 0))
-        {
-            if(IVD_SKIP_B == ps_codec->e_pic_skip_mode)
+            if((i1_nal_unit_type < NAL_BLA_W_LP) &&
+                            (i1_nal_unit_type % 2 == 0))
+            {
+                if(IVD_SKIP_B == ps_codec->e_pic_skip_mode)
+                    return IHEVCD_IGNORE_SLICE;
+            }
+
+            /* If skip PB is enabled,
+             * decode only I slices */
+            if((IVD_SKIP_PB == ps_codec->e_pic_skip_mode) &&
+                            (ISLICE != ps_slice_hdr->i1_slice_type))
+            {
                 return IHEVCD_IGNORE_SLICE;
-        }
-
-        /* If skip PB is enabled,
-         * decode only I slices */
-        if((IVD_SKIP_PB == ps_codec->e_pic_skip_mode) &&
-                        (ISLICE != ps_slice_hdr->i1_slice_type))
-        {
-            return IHEVCD_IGNORE_SLICE;
-        }
+            }
     }
 
     return ret;

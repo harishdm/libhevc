@@ -25,7 +25,7 @@
 * prediction
 *
 * @author
-*
+*  Ittiam
 *
 * @par List of Functions:
 *   - ihevc_weighted_pred_uni_ssse3()
@@ -145,7 +145,6 @@ void ihevc_weighted_pred_uni_ssse3(WORD16 *pi2_src,
     const_temp_4x32b = _mm_set1_epi32(temp);
     off0_4x32b = _mm_set1_epi32(off0);
 
-
     /* lvl_shift * wgt0 */
     lvl_shift_4x32b = _mm_unpacklo_epi16(res_temp0_4x32b, res_temp1_4x32b);
     /* lvl_shift * wgt0 + 1 << (shift - 1) */
@@ -246,12 +245,10 @@ void ihevc_weighted_pred_uni_ssse3(WORD16 *pi2_src,
                 /* To update pointer */
                 pi2_src += 8;
                 pu1_dst += 8;
-
             } /* inner loop ends here(4-output values in single iteration) */
 
             pi2_src = pi2_src - wd + 4 * src_strd;    /* Pointer update */
             pu1_dst = pu1_dst - wd + 4 * dst_strd; /* Pointer update */
-
         }
     }
     else  /* wd multiple of 4 case */
@@ -335,12 +332,10 @@ void ihevc_weighted_pred_uni_ssse3(WORD16 *pi2_src,
                 /* To update pointer */
                 pi2_src += 4;
                 pu1_dst += 4;
-
             } /* inner loop ends here(4-output values in single iteration) */
 
             pi2_src = pi2_src - wd + 4 * src_strd;    /* Pointer update */
             pu1_dst = pu1_dst - wd + 4 * dst_strd; /* Pointer update */
-
         }
     }
 }
@@ -533,7 +528,6 @@ void ihevc_weighted_pred_chroma_uni_ssse3(WORD16 *pi2_src,
 
                     pi2_src += 16;  /* Pointer update */
                     pu1_dst += 16; /* Pointer update */
-
                 } /* inner loop ends here(4-output values in single iteration) */
                 pi2_src = pi2_src - wdx2 + 2 * src_strd;  /* Pointer update */
                 pu1_dst = pu1_dst - wdx2 + 2 * dst_strd; /* Pointer update */
@@ -598,7 +592,6 @@ void ihevc_weighted_pred_chroma_uni_ssse3(WORD16 *pi2_src,
 
                     pi2_src += 8;   /* Pointer update */
                     pu1_dst += 8; /* Pointer update */
-
                 } /* inner loop ends here(4-output values in single iteration) */
                 pi2_src = pi2_src - wdx2 + 2 * src_strd;  /* Pointer update */
                 pu1_dst = pu1_dst - wdx2 + 2 * dst_strd; /* Pointer update */
@@ -659,7 +652,6 @@ void ihevc_weighted_pred_chroma_uni_ssse3(WORD16 *pi2_src,
 
                     pi2_src += 4;   /* Pointer update */
                     pu1_dst += 4; /* Pointer update */
-
                 } /* inner loop ends here(4-output values in single iteration) */
                 pi2_src = pi2_src - wdx2 + 2 * src_strd;  /* Pointer update */
                 pu1_dst = pu1_dst - wdx2 + 2 * dst_strd; /* Pointer update */
@@ -859,13 +851,11 @@ void ihevc_weighted_pred_bi_ssse3(WORD16 *pi2_src1,
                 pi2_src1 += 8;  /* Pointer update */
                 pi2_src2 += 8;  /* Pointer update */
                 pu1_dst  += 8;  /* Pointer update */
-
             } /* inner loop ends here(4-output values in single iteration) */
 
             pi2_src1 = pi2_src1 - wd + 2 * src_strd1;  /* Pointer update */
             pi2_src2 = pi2_src2 - wd + 2 * src_strd2;  /* Pointer update */
             pu1_dst  = pu1_dst  - wd + 2 * dst_strd;   /* Pointer update */
-
         } /* outer loop ends */
     }
     else /* wd multiple of 4 case */
@@ -948,7 +938,6 @@ void ihevc_weighted_pred_bi_ssse3(WORD16 *pi2_src1,
 
         } /* outer loop ends */
     }
-
 }
 
 /**
@@ -1148,13 +1137,11 @@ void ihevc_weighted_pred_chroma_bi_ssse3(WORD16 *pi2_src1,
                 pi2_src1 += 8;  /* Pointer update */
                 pi2_src2 += 8;  /* Pointer update */
                 pu1_dst  += 8;  /* Pointer update */
-
             } /* inner loop ends here(4-output values in single iteration) */
 
             pi2_src1 = pi2_src1 - wdx2 + 2 * src_strd1;    /* Pointer update */
             pi2_src2 = pi2_src2 - wdx2 + 2 * src_strd2;    /* Pointer update */
             pu1_dst  = pu1_dst  - wdx2 + 2 * dst_strd;   /* Pointer update */
-
         } /* outer loop ends */
     }
     else /* wdx2 multiple of 4 case */
@@ -1228,7 +1215,6 @@ void ihevc_weighted_pred_chroma_bi_ssse3(WORD16 *pi2_src1,
                 pi2_src1 += 4;  /* Pointer update */
                 pi2_src2 += 4;  /* Pointer update */
                 pu1_dst  += 4;  /* Pointer update */
-
             } /* inner loop ends here(4-output values in single iteration) */
 
             pi2_src1 = pi2_src1 - wdx2 + 2 * src_strd1;    /* Pointer update */
@@ -1236,7 +1222,6 @@ void ihevc_weighted_pred_chroma_bi_ssse3(WORD16 *pi2_src1,
             pu1_dst  = pu1_dst  - wdx2 + 2 * dst_strd;   /* Pointer update */
         }
     }
-
 }
 
 /**
@@ -1302,7 +1287,6 @@ void ihevc_weighted_pred_bi_default_ssse3(WORD16 *pi2_src1,
                                           WORD32 ht,
                                           WORD32 wd)
 {
-#if 1
     {
         WORD32 row, col, temp;
         WORD32 shift;
@@ -1422,7 +1406,6 @@ void ihevc_weighted_pred_bi_default_ssse3(WORD16 *pi2_src1,
                     pi2_src1 = pi2_src1 - wd + 4 * src_strd1;  /* Pointer update */
                     pi2_src2 = pi2_src2 - wd + 4 * src_strd2;  /* Pointer update */
                     pu1_dst  = pu1_dst - wd + 4 * dst_strd;   /* Pointer update */
-
                 }
             }
             else if(0 == (wd & 7)) /* multiple of 8 case */
@@ -1479,13 +1462,11 @@ void ihevc_weighted_pred_bi_default_ssse3(WORD16 *pi2_src1,
                         pi2_src1 += 8;
                         pi2_src2 += 8;
                         pu1_dst  += 8;
-
                     } /* inner loop ends here(8-output values in single iteration) */
 
                     pi2_src1 = pi2_src1 - wd + 4 * src_strd1;  /* Pointer update */
                     pi2_src2 = pi2_src2 - wd + 4 * src_strd2;  /* Pointer update */
                     pu1_dst  = pu1_dst - wd + 4 * dst_strd;   /* Pointer update */
-
                 }
             }
             else /* wd multiple of 4 case*/
@@ -1555,19 +1536,16 @@ void ihevc_weighted_pred_bi_default_ssse3(WORD16 *pi2_src1,
                         pi2_src1 += 4;
                         pi2_src2 += 4;
                         pu1_dst  += 4;
-
                     } /* inner loop ends here(4-output values in single iteration) */
 
                     pi2_src1 = pi2_src1 - wd + 4 * src_strd1; /* Pointer update */
                     pi2_src2 = pi2_src2 - wd + 4 * src_strd2; /* Pointer update */
                     pu1_dst  = pu1_dst  - wd + 4 * dst_strd;  /* Pointer update */
-
                 }
             }
         }
         else /* ht multiple of 2 case and wd multiple of 4 case*/
         {
-
             WORD32 dst0, dst1;
 
             /*  outer for loop starts from here */
@@ -1616,260 +1594,14 @@ void ihevc_weighted_pred_bi_default_ssse3(WORD16 *pi2_src1,
                     pi2_src1 += 4;
                     pi2_src2 += 4;
                     pu1_dst  += 4;
-
                 } /* inner loop ends here(4-output values in single iteration) */
 
                 pi2_src1 = pi2_src1 - wd + 2 * src_strd1; /* Pointer update */
                 pi2_src2 = pi2_src2 - wd + 2 * src_strd2; /* Pointer update */
                 pu1_dst  = pu1_dst  - wd + 2 * dst_strd;  /* Pointer update */
-
             }
-
         }
-
     }
-#else
-    {
-        WORD32 row, col,temp;
-        WORD32 shift;
-
-        __m128i src_temp1_8x16b, src_temp2_8x16b, src_temp3_8x16b, src_temp4_8x16b;
-        __m128i const_temp_8x16b, lvl_shift1_8x16b, lvl_shift2_8x16b;
-        __m128i src_temp5_8x16b, src_temp6_8x16b, src_temp7_8x16b, src_temp8_8x16b;
-
-        ASSERT (wd%4 == 0); /* checking assumption*/
-        ASSERT (ht%4 == 0); /* checking assumption*/
-
-        shift = SHIFT_14_MINUS_BIT_DEPTH + 1;
-        temp = 1 << (shift - 1);
-
-        // seting values in register
-        lvl_shift1_8x16b = _mm_set1_epi32 (lvl_shift1);
-        lvl_shift2_8x16b = _mm_set1_epi32 (lvl_shift2);
-        const_temp_8x16b = _mm_set1_epi32 (temp);
-
-        lvl_shift1_8x16b = _mm_add_epi32 (lvl_shift1_8x16b, lvl_shift2_8x16b);
-        lvl_shift1_8x16b = _mm_add_epi32 (lvl_shift1_8x16b, const_temp_8x16b);
-
-        if( 0 == (wd & 7)) /* multiple of 8 case */
-        {
-            __m128i src_temp9_8x16b, src_temp10_8x16b, src_temp11_8x16b, src_temp12_8x16b;
-            __m128i src_temp13_8x16b, src_temp14_8x16b, src_temp15_8x16b, src_temp16_8x16b;
-
-            /*  outer for loop starts from here */
-            for(row = 0; row < ht; row +=4)
-            {
-                for(col = 0; col < wd; col +=8)
-                {
-                    /*load 4 pixel values */
-                    src_temp1_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1));
-                    src_temp2_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2));
-                    /* row = 1 */
-                    src_temp3_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1+src_strd1));
-                    src_temp4_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+src_strd2));
-                    /* row = 2 */
-                    src_temp5_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1+2*src_strd1));
-                    src_temp6_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+2*src_strd2));
-                    /* row = 3 */
-                    src_temp7_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1+3*src_strd1));
-                    src_temp8_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+3*src_strd2));
-
-                    /* considering pix. 3:0 by converting 16-into 32 bit */
-                    src_temp1_8x16b  = _mm_cvtepi16_epi32(src_temp1_8x16b);
-                    src_temp2_8x16b  = _mm_cvtepi16_epi32(src_temp2_8x16b);
-                    /* row = 1 */
-                    src_temp3_8x16b  = _mm_cvtepi16_epi32(src_temp3_8x16b);
-                    src_temp4_8x16b  = _mm_cvtepi16_epi32(src_temp4_8x16b);
-                    /* row = 2 */
-                    src_temp5_8x16b  = _mm_cvtepi16_epi32(src_temp5_8x16b);
-                    src_temp6_8x16b  = _mm_cvtepi16_epi32(src_temp6_8x16b);
-                    /* row = 3 */
-                    src_temp7_8x16b  = _mm_cvtepi16_epi32(src_temp7_8x16b);
-                    src_temp8_8x16b  = _mm_cvtepi16_epi32(src_temp8_8x16b);
-
-                    /* (pi2_src1[col] + lvl_shift1 + lvl_shift2 + shift_value) */
-                    src_temp1_8x16b = _mm_add_epi32 (src_temp1_8x16b, lvl_shift1_8x16b);
-                    src_temp3_8x16b = _mm_add_epi32 (src_temp3_8x16b, lvl_shift1_8x16b);
-                    src_temp5_8x16b = _mm_add_epi32 (src_temp5_8x16b, lvl_shift1_8x16b);
-                    src_temp7_8x16b = _mm_add_epi32 (src_temp7_8x16b, lvl_shift1_8x16b);
-
-                    /* i4_tmp = (pi2_src1[col] + pi2_src2[col] + lvl_shift1 + lvl_shift2 + shift_value) */
-                    src_temp1_8x16b = _mm_add_epi32 (src_temp1_8x16b, src_temp2_8x16b);
-                    src_temp3_8x16b = _mm_add_epi32 (src_temp3_8x16b, src_temp4_8x16b);
-                    src_temp5_8x16b = _mm_add_epi32 (src_temp5_8x16b, src_temp6_8x16b);
-                    src_temp7_8x16b = _mm_add_epi32 (src_temp7_8x16b, src_temp8_8x16b);
-
-                    /* (i4_tmp >> shift) */
-                    src_temp1_8x16b = _mm_srai_epi32(src_temp1_8x16b,  shift);
-                    src_temp3_8x16b = _mm_srai_epi32(src_temp3_8x16b,  shift);
-                    src_temp5_8x16b = _mm_srai_epi32(src_temp5_8x16b,  shift);
-                    src_temp7_8x16b = _mm_srai_epi32(src_temp7_8x16b,  shift);
-
-                    /*load next 4 pixel values */
-                    src_temp9_8x16b  = _mm_loadu_si128((__m128i*)(pi2_src1+4));
-                    src_temp10_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+4));
-                    /* row = 1 */
-                    src_temp11_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1+1*src_strd1+4));
-                    src_temp12_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+1*src_strd2+4));
-                    /* row = 2 */
-                    src_temp13_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1+2*src_strd1+4));
-                    src_temp14_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+2*src_strd2+4));
-                    /* row = 3 */
-                    src_temp15_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1+3*src_strd1+4));
-                    src_temp16_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+3*src_strd2+4));
-
-                    /* considering pix. 7:4 by converting 16-into 32 bit */
-                    src_temp9_8x16b   = _mm_cvtepi16_epi32(src_temp9_8x16b);
-                    src_temp10_8x16b  = _mm_cvtepi16_epi32(src_temp10_8x16b);
-                    /* row = 1 */
-                    src_temp11_8x16b  = _mm_cvtepi16_epi32(src_temp11_8x16b);
-                    src_temp12_8x16b  = _mm_cvtepi16_epi32(src_temp12_8x16b);
-                    /* row = 2 */
-                    src_temp13_8x16b  = _mm_cvtepi16_epi32(src_temp13_8x16b);
-                    src_temp14_8x16b  = _mm_cvtepi16_epi32(src_temp14_8x16b);
-                    /* row = 3 */
-                    src_temp15_8x16b  = _mm_cvtepi16_epi32(src_temp15_8x16b);
-                    src_temp16_8x16b  = _mm_cvtepi16_epi32(src_temp16_8x16b);
-
-                    /* (pi2_src1[col] + lvl_shift1 + lvl_shift2 + shift_value) */
-                    src_temp9_8x16b  = _mm_add_epi32 (src_temp9_8x16b , lvl_shift1_8x16b);
-                    src_temp11_8x16b = _mm_add_epi32 (src_temp11_8x16b, lvl_shift1_8x16b);
-                    src_temp13_8x16b = _mm_add_epi32 (src_temp13_8x16b, lvl_shift1_8x16b);
-                    src_temp15_8x16b = _mm_add_epi32 (src_temp15_8x16b, lvl_shift1_8x16b);
-
-                    /* i4_tmp = (pi2_src1[col] + pi2_src2[col] + lvl_shift1 + lvl_shift2 + shift_value) */
-                    src_temp9_8x16b  = _mm_add_epi32 (src_temp9_8x16b , src_temp10_8x16b);
-                    src_temp11_8x16b = _mm_add_epi32 (src_temp11_8x16b, src_temp12_8x16b);
-                    src_temp13_8x16b = _mm_add_epi32 (src_temp13_8x16b, src_temp14_8x16b);
-                    src_temp15_8x16b = _mm_add_epi32 (src_temp15_8x16b, src_temp16_8x16b);
-
-                    /* (i4_tmp >> shift) */
-                    src_temp9_8x16b  = _mm_srai_epi32(src_temp9_8x16b ,  shift);
-                    src_temp11_8x16b = _mm_srai_epi32(src_temp11_8x16b,  shift);
-                    src_temp13_8x16b = _mm_srai_epi32(src_temp13_8x16b,  shift);
-                    src_temp15_8x16b = _mm_srai_epi32(src_temp15_8x16b,  shift);
-
-                    src_temp1_8x16b = _mm_packs_epi32 (src_temp1_8x16b, src_temp9_8x16b);
-                    src_temp3_8x16b = _mm_packs_epi32 (src_temp3_8x16b, src_temp11_8x16b);
-                    src_temp5_8x16b = _mm_packs_epi32 (src_temp5_8x16b, src_temp13_8x16b);
-                    src_temp7_8x16b = _mm_packs_epi32 (src_temp7_8x16b, src_temp15_8x16b);
-                    /* pu1_dst[col] = CLIP_U8(i4_tmp >> shift); */
-                    src_temp1_8x16b = _mm_packus_epi16 (src_temp1_8x16b, src_temp1_8x16b);
-                    src_temp3_8x16b = _mm_packus_epi16 (src_temp3_8x16b, src_temp3_8x16b);
-                    src_temp5_8x16b = _mm_packus_epi16 (src_temp5_8x16b, src_temp5_8x16b);
-                    src_temp7_8x16b = _mm_packus_epi16 (src_temp7_8x16b, src_temp7_8x16b);
-
-                    /* store four 8-bit output values  */
-                    _mm_storel_epi64((__m128i*)(pu1_dst+0*dst_strd), src_temp1_8x16b); /* row = 0*/
-                    _mm_storel_epi64((__m128i*)(pu1_dst+1*dst_strd), src_temp3_8x16b); /* row = 2*/
-                    _mm_storel_epi64((__m128i*)(pu1_dst+2*dst_strd), src_temp5_8x16b); /* row = 1*/
-                    _mm_storel_epi64((__m128i*)(pu1_dst+3*dst_strd), src_temp7_8x16b); /* row = 3*/
-
-                    /* To update pointer */
-                    pi2_src1 += 8;
-                    pi2_src2 += 8;
-                    pu1_dst  += 8;
-                } /* inner loop ends here(8-output values in single iteration) */
-
-                pi2_src1 = pi2_src1- wd + 4*src_strd1;  /* Pointer update */
-                pi2_src2 = pi2_src2- wd + 4*src_strd2;  /* Pointer update */
-                pu1_dst  = pu1_dst - wd + 4*dst_strd;   /* Pointer update */
-
-            }
-        }
-        else /* wd multiple of 4 case */
-        {
-            WORD32 dst0, dst1, dst2, dst3;
-
-            /*  outer for loop starts from here */
-            for(row = 0; row < ht; row +=4)
-            {
-                for(col = 0; col < wd; col +=4)
-                {
-                    /*load 8 pixel values from 7:0 pos. relative to cur. pos.*/
-                    src_temp1_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1));
-                    /*load 8 pixel values from 7:0 pos. relative to cur. pos.*/
-                    src_temp2_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2));
-
-                    /* row = 1 */
-                    src_temp3_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1+src_strd1));
-                    src_temp4_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+src_strd2));
-                    /* row = 2 */
-                    src_temp5_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1+2*src_strd1));
-                    src_temp6_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+2*src_strd2));
-                    /* row = 3 */
-                    src_temp7_8x16b = _mm_loadu_si128((__m128i*)(pi2_src1+3*src_strd1));
-                    src_temp8_8x16b = _mm_loadu_si128((__m128i*)(pi2_src2+3*src_strd2));
-
-                    /* considering pix. 4:0 by converting 16-into 32 bit */
-                    src_temp1_8x16b  = _mm_cvtepi16_epi32(src_temp1_8x16b);
-                    src_temp2_8x16b  = _mm_cvtepi16_epi32(src_temp2_8x16b);
-                    /* row = 1 */
-                    src_temp3_8x16b  = _mm_cvtepi16_epi32(src_temp3_8x16b);
-                    src_temp4_8x16b  = _mm_cvtepi16_epi32(src_temp4_8x16b);
-                    /* row = 2 */
-                    src_temp5_8x16b  = _mm_cvtepi16_epi32(src_temp5_8x16b);
-                    src_temp6_8x16b  = _mm_cvtepi16_epi32(src_temp6_8x16b);
-                    /* row = 3 */
-                    src_temp7_8x16b  = _mm_cvtepi16_epi32(src_temp7_8x16b);
-                    src_temp8_8x16b  = _mm_cvtepi16_epi32(src_temp8_8x16b);
-
-                    /* (pi2_src1[col] + lvl_shift1 + lvl_shift2 + shift_value) */
-                    src_temp1_8x16b = _mm_add_epi32 (src_temp1_8x16b, lvl_shift1_8x16b);
-                    src_temp3_8x16b = _mm_add_epi32 (src_temp3_8x16b, lvl_shift1_8x16b);
-                    src_temp5_8x16b = _mm_add_epi32 (src_temp5_8x16b, lvl_shift1_8x16b);
-                    src_temp7_8x16b = _mm_add_epi32 (src_temp7_8x16b, lvl_shift1_8x16b);
-
-                    /* i4_tmp = (pi2_src1[col] + pi2_src2[col] + lvl_shift1 + lvl_shift2 + shift_value) */
-                    src_temp1_8x16b = _mm_add_epi32 (src_temp1_8x16b, src_temp2_8x16b);
-                    src_temp3_8x16b = _mm_add_epi32 (src_temp3_8x16b, src_temp4_8x16b);
-                    src_temp5_8x16b = _mm_add_epi32 (src_temp5_8x16b, src_temp6_8x16b);
-                    src_temp7_8x16b = _mm_add_epi32 (src_temp7_8x16b, src_temp8_8x16b);
-
-                    /* (i4_tmp >> shift) */
-                    src_temp1_8x16b = _mm_srai_epi32(src_temp1_8x16b,  shift);
-                    src_temp3_8x16b = _mm_srai_epi32(src_temp3_8x16b,  shift);
-                    src_temp5_8x16b = _mm_srai_epi32(src_temp5_8x16b,  shift);
-                    src_temp7_8x16b = _mm_srai_epi32(src_temp7_8x16b,  shift);
-
-                    src_temp1_8x16b = _mm_packs_epi32 (src_temp1_8x16b, src_temp3_8x16b);
-                    src_temp5_8x16b = _mm_packs_epi32 (src_temp5_8x16b, src_temp7_8x16b);
-                    /* pu1_dst[col] = CLIP_U8(i4_tmp >> shift); */
-                    src_temp1_8x16b = _mm_packus_epi16 (src_temp1_8x16b, src_temp5_8x16b);
-
-                    dst0 = _mm_cvtsi128_si32(src_temp1_8x16b);
-                    /* dst row = 1 to 3 */
-                    src_temp2_8x16b = _mm_shuffle_epi32 (src_temp1_8x16b, 1);
-                    src_temp3_8x16b = _mm_shuffle_epi32 (src_temp1_8x16b, 2);
-                    src_temp4_8x16b = _mm_shuffle_epi32 (src_temp1_8x16b, 3);
-
-                    /* store four 8-bit output values  */
-                    *(WORD32 *) (&pu1_dst[0*dst_strd]) = dst0;
-
-                    dst1 = _mm_cvtsi128_si32(src_temp2_8x16b);
-                    dst2 = _mm_cvtsi128_si32(src_temp3_8x16b);
-                    dst3 = _mm_cvtsi128_si32(src_temp4_8x16b);
-
-                    /* row = 1 to row = 3 */
-                    *(WORD32 *) (&pu1_dst[1*dst_strd]) = dst1;
-                    *(WORD32 *) (&pu1_dst[2*dst_strd]) = dst2;
-                    *(WORD32 *) (&pu1_dst[3*dst_strd]) = dst3;
-
-                    pi2_src1 += 4;
-                    pi2_src2 += 4;
-                    pu1_dst  += 4;
-
-                } /* inner loop ends here(4-output values in single iteration) */
-
-                pi2_src1 = pi2_src1 - wd + 4*src_strd1; /* Pointer update */
-                pi2_src2 = pi2_src2 - wd + 4*src_strd2; /* Pointer update */
-                pu1_dst  = pu1_dst  - wd + 4*dst_strd;  /* Pointer update */
-
-            }
-        }
-
-    }
-#endif
 }
 
 
@@ -2057,13 +1789,11 @@ void ihevc_weighted_pred_chroma_bi_default_ssse3(WORD16 *pi2_src1,
                     pi2_src1 += 16;
                     pi2_src2 += 16;
                     pu1_dst  += 16;
-
                 } /* inner loop ends here(8-output values in single iteration) */
 
                 pi2_src1 = pi2_src1 - wdx2 + 4 * src_strd1;    /* Pointer update */
                 pi2_src2 = pi2_src2 - wdx2 + 4 * src_strd2;    /* Pointer update */
                 pu1_dst  = pu1_dst - wdx2 + 4 * dst_strd; /* Pointer update */
-
             }
         }
         else if(0 == (wdx2 & 7)) /* multiple of 8 case */
@@ -2120,13 +1850,11 @@ void ihevc_weighted_pred_chroma_bi_default_ssse3(WORD16 *pi2_src1,
                     pi2_src1 += 8;
                     pi2_src2 += 8;
                     pu1_dst  += 8;
-
                 } /* inner loop ends here(8-output values in single iteration) */
 
                 pi2_src1 = pi2_src1 - wdx2 + 4 * src_strd1;    /* Pointer update */
                 pi2_src2 = pi2_src2 - wdx2 + 4 * src_strd2;    /* Pointer update */
                 pu1_dst  = pu1_dst - wdx2 + 4 * dst_strd; /* Pointer update */
-
             }
         }
         else /* 2*wd multiple of 4 case */
@@ -2195,13 +1923,11 @@ void ihevc_weighted_pred_chroma_bi_default_ssse3(WORD16 *pi2_src1,
                     pi2_src1 += 4;
                     pi2_src2 += 4;
                     pu1_dst  += 4;
-
                 } /* inner loop ends here(4-output values in single iteration) */
 
                 pi2_src1 = pi2_src1 - wdx2 + 4 * src_strd1;   /* Pointer update */
                 pi2_src2 = pi2_src2 - wdx2 + 4 * src_strd2;   /* Pointer update */
                 pu1_dst  = pu1_dst  - wdx2 + 4 * dst_strd;    /* Pointer update */
-
             }
         }
     }
@@ -2273,13 +1999,11 @@ void ihevc_weighted_pred_chroma_bi_default_ssse3(WORD16 *pi2_src1,
                     pi2_src1 += 16;
                     pi2_src2 += 16;
                     pu1_dst  += 16;
-
                 } /* inner loop ends here(8-output values in single iteration) */
 
                 pi2_src1 = pi2_src1 - wdx2 + 2 * src_strd1;    /* Pointer update */
                 pi2_src2 = pi2_src2 - wdx2 + 2 * src_strd2;    /* Pointer update */
                 pu1_dst  = pu1_dst - wdx2 + 2 * dst_strd; /* Pointer update */
-
             }
         }
         else if(0 == (wdx2 & 7)) /* multiple of 8 case */
@@ -2320,13 +2044,11 @@ void ihevc_weighted_pred_chroma_bi_default_ssse3(WORD16 *pi2_src1,
                     pi2_src1 += 8;
                     pi2_src2 += 8;
                     pu1_dst  += 8;
-
                 } /* inner loop ends here(8-output values in single iteration) */
 
                 pi2_src1 = pi2_src1 - wdx2 + 2 * src_strd1;    /* Pointer update */
                 pi2_src2 = pi2_src2 - wdx2 + 2 * src_strd2;    /* Pointer update */
                 pu1_dst  = pu1_dst - wdx2 + 2 * dst_strd; /* Pointer update */
-
             }
         }
         else /* 2*wd multiple of 4 case */
@@ -2379,7 +2101,6 @@ void ihevc_weighted_pred_chroma_bi_default_ssse3(WORD16 *pi2_src1,
                 pi2_src1 = pi2_src1 - wdx2 + 2 * src_strd1;   /* Pointer update */
                 pi2_src2 = pi2_src2 - wdx2 + 2 * src_strd2;   /* Pointer update */
                 pu1_dst  = pu1_dst  - wdx2 + 2 * dst_strd;    /* Pointer update */
-
             }
         }
     }

@@ -176,7 +176,7 @@ void ihevc_itrans_recon_16x16_sse42(WORD16 *pi2_src,
     /* Following 3 instructions replicates the value in the */
     /* lower 16 bits of m_add_iq in the entire register */
 
-    /* Last 8 cols of 16x16 block are skipped based on the below flag : Lokesh */
+    /* Last 8 cols of 16x16 block are skipped based on the below flag :  */
 
     zero_last8_cols_stg1  = ((zero_cols & 0xFF00) == 0xFF00) ? 1 : 0;
     zero_last8_rows_stg1  = ((zero_rows & 0xFF00) == 0xFF00) ? 1 : 0;
@@ -221,7 +221,7 @@ void ihevc_itrans_recon_16x16_sse42(WORD16 *pi2_src,
 
 
 
-            /* If last 12 rows are zero : Rishab */
+            /* If last 12 rows are zero */
             if(zero_last12_rows_stg1)
             {
 
@@ -390,7 +390,7 @@ void ihevc_itrans_recon_16x16_sse42(WORD16 *pi2_src,
                     pi2_scratch += 8;
                 }
             }
-            /* If last 8 rows are zero : Rishab */
+            /* If last 8 rows are zero */
             else if(zero_last8_rows_stg1)
             {
                 /* eeo */
@@ -587,7 +587,7 @@ void ihevc_itrans_recon_16x16_sse42(WORD16 *pi2_src,
                     _mm_storeu_si128((__m128i *)pi2_scratch, m_temp_reg_35);
                     pi2_scratch += 8;
                 }
-            } /* If all the rows are non-zero : Rishab */
+            } /* If all the rows are non-zero */
             else
             {
                 /* eeo */

@@ -44,49 +44,87 @@
 #define COEFF4          16530
 
 typedef void ihevcd_fmt_conv_420sp_to_rgba8888_ft(UWORD8 *pu1_y_src,
-                                                  UWORD8 *pu1_uv_src,
-                                                  UWORD32 *pu4_rgba_dst,
-                                                  WORD32 wd,
-                                                  WORD32 ht,
-                                                  WORD32 src_y_strd,
-                                                  WORD32 src_uv_strd,
-                                                  WORD32 dst_strd,
-                                                  WORD32 is_u_first);
+                                    UWORD8 *pu1_uv_src,
+                                    UWORD32 *pu4_rgba_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_strd,
+                                    WORD32 is_u_first);
 
 typedef void ihevcd_fmt_conv_420sp_to_rgb565_ft(UWORD8 *pu1_y_src,
-                                                UWORD8 *pu1_uv_src,
-                                                UWORD16 *pu2_rgb_dst,
-                                                WORD32 wd,
-                                                WORD32 ht,
-                                                WORD32 src_y_strd,
-                                                WORD32 src_uv_strd,
-                                                WORD32 dst_strd,
-                                                WORD32 is_u_first);
+                                    UWORD8 *pu1_uv_src,
+                                    UWORD16 *pu2_rgb_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_strd,
+                                    WORD32 is_u_first);
 
 
 typedef void ihevcd_fmt_conv_420sp_to_420sp_ft(UWORD8 *pu1_y_src,
-                                               UWORD8 *pu1_uv_src,
-                                               UWORD8 *pu1_y_dst,
-                                               UWORD8 *pu1_uv_dst,
-                                               WORD32 wd,
-                                               WORD32 ht,
-                                               WORD32 src_y_strd,
-                                               WORD32 src_uv_strd,
-                                               WORD32 dst_y_strd,
-                                               WORD32 dst_uv_strd);
+                                    UWORD8 *pu1_uv_src,
+                                    UWORD8 *pu1_y_dst,
+                                    UWORD8 *pu1_uv_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_y_strd,
+                                    WORD32 dst_uv_strd);
 typedef void ihevcd_fmt_conv_420sp_to_420p_ft(UWORD8 *pu1_y_src,
-                                              UWORD8 *pu1_uv_src,
-                                              UWORD8 *pu1_y_dst,
-                                              UWORD8 *pu1_u_dst,
-                                              UWORD8 *pu1_v_dst,
-                                              WORD32 wd,
-                                              WORD32 ht,
-                                              WORD32 src_y_strd,
-                                              WORD32 src_uv_strd,
-                                              WORD32 dst_y_strd,
-                                              WORD32 dst_uv_strd,
-                                              WORD32 is_u_first,
-                                              WORD32 disable_luma_copy);
+                                    UWORD8 *pu1_uv_src,
+                                    UWORD8 *pu1_y_dst,
+                                    UWORD8 *pu1_u_dst,
+                                    UWORD8 *pu1_v_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_y_strd,
+                                    WORD32 dst_uv_strd,
+                                    WORD32 is_u_first,
+                                    WORD32 disable_luma_copy);
+typedef void ihevcd_hbd_fmt_conv_420sp_to_420p_ft(UWORD16 *pu1_y_src,
+                                    UWORD16 *pu1_uv_src,
+                                    UWORD16 *pu1_y_dst,
+                                    UWORD16 *pu1_u_dst,
+                                    UWORD16 *pu1_v_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_y_strd,
+                                    WORD32 dst_uv_strd,
+                                    WORD32 is_u_first,
+                                    WORD32 disable_luma_copy);
+
+typedef void ihevcd_hbd_fmt_conv_420sp_to_rgba8888_ft(UWORD16 *pu2_y_src,
+                                    UWORD16 *pu2_uv_src,
+                                    UWORD32 *pu4_rgba_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_strd,
+                                    WORD32 is_u_first,
+                                    WORD32 i4_bit_depth_luma);
+
+void ihevcd_hbd_fmt_conv_422sp_to_422p_ssse31(UWORD16 *pu1_y_src,
+                                    UWORD16 *pu1_uv_src,
+                                    UWORD16 *pu1_y_dst,
+                                    UWORD16 *pu1_u_dst,
+                                    UWORD16 *pu1_v_dst,
+                                    WORD32 wd,
+                                    WORD32 ht,
+                                    WORD32 src_y_strd,
+                                    WORD32 src_uv_strd,
+                                    WORD32 dst_y_strd,
+                                    WORD32 dst_uv_strd,
+                                    WORD32 is_u_first,
+                                    WORD32 disable_luma_copy);
 
 /* C function declarations */
 ihevcd_fmt_conv_420sp_to_rgba8888_ft ihevcd_fmt_conv_420sp_to_rgba8888;
@@ -105,14 +143,20 @@ ihevcd_fmt_conv_420sp_to_420sp_ft ihevcd_fmt_conv_420sp_to_420sp_a9a;
 ihevcd_fmt_conv_420sp_to_420p_ft ihevcd_fmt_conv_420sp_to_420p_a9a;
 
 /* SSSe31 function declarations */
-ihevcd_fmt_conv_420sp_to_420p_ft ihevcd_fmt_conv_420sp_to_420p_ssse3;
+ihevcd_fmt_conv_420sp_to_420p_ft ihevcd_fmt_conv_420sp_to_420p_ssse31;
 
-/* SSE4 function declarations */
-ihevcd_fmt_conv_420sp_to_420p_ft ihevcd_fmt_conv_420sp_to_420p_sse42;
+/*HBD functions*/
+ihevcd_hbd_fmt_conv_420sp_to_420p_ft ihevcd_hbd_fmt_conv_420sp_to_420p;
+ihevcd_hbd_fmt_conv_420sp_to_420p_ft ihevcd_hbd_fmt_conv_420sp_to_420p_ssse31;
+ihevcd_hbd_fmt_conv_420sp_to_rgba8888_ft ihevcd_hbd_fmt_conv_420sp_to_rgba8888;
+ihevcd_hbd_fmt_conv_420sp_to_rgba8888_ft ihevcd_hbd_fmt_conv_420sp_to_rgba8888_sse42;
 
 /* armv8 function declarations */
 ihevcd_fmt_conv_420sp_to_rgba8888_ft ihevcd_fmt_conv_420sp_to_rgba8888_av8;
 ihevcd_fmt_conv_420sp_to_420sp_ft ihevcd_fmt_conv_420sp_to_420sp_av8;
 ihevcd_fmt_conv_420sp_to_420p_ft ihevcd_fmt_conv_420sp_to_420p_av8;
 
+/*HBD armv8 functions*/
+ihevcd_hbd_fmt_conv_420sp_to_420p_ft ihevcd_hbd_fmt_conv_420sp_to_420p_neonintr;
+ihevcd_hbd_fmt_conv_420sp_to_420p_ft ihevcd_hbd_fmt_conv_420sp_to_420p_av8;
 #endif /* _IHEVCD_FMT_CONV_H_ */

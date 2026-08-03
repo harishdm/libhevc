@@ -36,6 +36,9 @@
 #ifndef _IHEVC_IQUANT_ITRANS_RECON_H_
 #define _IHEVC_IQUANT_ITRANS_RECON_H_
 
+extern const unsigned char au1_shuffle_itrans_mask1[32];
+extern const unsigned char au1_shuffle_itrans_mask2[32];
+
 typedef void ihevc_iquant_itrans_recon_4x4_ttype1_ft(WORD16 *pi2_src,
                                                      WORD16 *pi2_tmp,
                                                      UWORD8 *pu1_pred,
@@ -193,5 +196,10 @@ ihevc_hbd_iquant_itrans_recon_4x4_ft ihevc_hbd_iquant_itrans_recon_4x4_sse42;
 ihevc_hbd_iquant_itrans_recon_8x8_ft ihevc_hbd_iquant_itrans_recon_8x8_sse42;
 ihevc_hbd_iquant_itrans_recon_16x16_ft ihevc_hbd_iquant_itrans_recon_16x16_sse42;
 ihevc_hbd_iquant_itrans_recon_32x32_ft ihevc_hbd_iquant_itrans_recon_32x32_sse42;
+
+ihevc_iquant_itrans_recon_32x32_ft ihevc_iquant_itrans_recon_flat_scale_mat_32x32_avx2;
+ihevc_iquant_itrans_recon_8x8_ft ihevc_iquant_itrans_recon_flat_scale_mat_8x8_avx;
+ihevc_iquant_itrans_recon_16x16_ft ihevc_iquant_itrans_recon_flat_scale_mat_16x16_avx;
+
 #endif /*_IHEVC_IQUANT_ITRANS_RECON_H_*/
 

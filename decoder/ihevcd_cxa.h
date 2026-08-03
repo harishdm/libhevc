@@ -35,9 +35,7 @@
 */
 #ifndef __IHEVCD_CXA_H__
 #define __IHEVCD_CXA_H__
-#ifdef __cplusplus
-extern "C" {
-#endif
+
 #include "iv.h"
 #include "ivd.h"
 
@@ -64,77 +62,30 @@ extern "C" {
 /* API Function Prototype                                                    */
 /*****************************************************************************/
 IV_API_CALL_STATUS_T ihevcd_cxa_api_function(iv_obj_t *ps_handle,
-                                             void *pv_api_ip,
-                                             void *pv_api_op);
+                                              void *pv_api_ip,
+                                              void *pv_api_op);
 
 /*****************************************************************************/
 /* Enums                                                                     */
 /*****************************************************************************/
 /* Codec Error codes for HEVC  Decoder                                       */
 
-
 typedef enum {
-    /**
-     *  No error
-     */
-    IHEVCD_SUCCESS = 0,
 
-    /**
-     *  Codec calls done without successful init
-     */
-    IHEVCD_INIT_NOT_DONE                        = IVD_DUMMY_ELEMENT_FOR_CODEC_EXTENSIONS,
-
-
-    IHEVCD_CXA_VID_HDR_DEC_NUM_FRM_BUF_NOT_SUFFICIENT,
-
-    /**
-     *  Unsupported level passed as an argument
-     */
-    IHEVCD_LEVEL_UNSUPPORTED,
-    /**
-     *  Unsupported number of reference pictures passed as an argument
-     */
-    IHEVCD_NUM_REF_UNSUPPORTED,
-    /**
-     *  Unsupported number of reorder pictures passed as an argument
-     */
-    IHEVCD_NUM_REORDER_UNSUPPORTED,
-    /**
-     *  Unsupported number of extra display pictures passed as an argument
-     */
-    IHEVCD_NUM_EXTRA_DISP_UNSUPPORTED,
-    /**
-     *  Invalid display stride requested.
-     */
-    IHEVCD_INVALID_DISP_STRD,
-
-    /**
-     * Reached end of sequence
-     */
-    IHEVCD_END_OF_SEQUENCE,
-
-    /**
-     * Width/height greater than max width and max height
-     */
-    IHEVCD_UNSUPPORTED_DIMENSIONS,
-
-    /**
-     *  Buffer size to hold version string is not sufficient
-     *  Allocate more to hold version string
-     */
-    IHEVCD_CXA_VERS_BUF_INSUFFICIENT,
-    /**
-     * Stream chroma format other than YUV420
-     */
-    IHEVCD_UNSUPPORTED_CHROMA_FMT_IDC,
-
-    /**
-     * Generic failure
-     */
-    IHEVCD_FAIL                             = 0x7FFFFFFF
-
+    IHEVCD_CXA_VID_HDR_DEC_NUM_FRM_BUF_NOT_SUFFICIENT   = IVD_DUMMY_ELEMENT_FOR_CODEC_EXTENSIONS + 1,
 
 }IHEVCD_CXA_ERROR_CODES_T;
+
+typedef enum
+{
+    HEVC_MAIN,
+    HEVC_MAIN_10,
+    HEVC_MAIN_12,
+    HEVC_MAIN_422,
+    HEVC_MAIN_422_10,
+    HEVC_MAIN_422_12
+
+}HEVC_DEC_PROFILE_T;
 
 /*****************************************************************************/
 /* Extended Structures                                                       */
@@ -154,7 +105,7 @@ typedef struct {
 }ihevcd_cxa_num_mem_rec_ip_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_num_mem_rec_op_t
@@ -204,10 +155,16 @@ typedef struct {
      */
     UWORD32                                 u4_num_extra_disp_buf;
 
+
+    /**
+     * decoder profile
+     */
+    HEVC_DEC_PROFILE_T                      e_profile;
+
 }ihevcd_cxa_fill_mem_rec_ip_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_fill_mem_rec_op_t
@@ -231,7 +188,7 @@ typedef struct {
 }ihevcd_cxa_retrieve_mem_rec_ip_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_retrieve_mem_rec_op_t
@@ -276,10 +233,16 @@ typedef struct {
      * Number of extra display buffers that will be allocated to handle display pipeline depth
      */
     UWORD32                                 u4_num_extra_disp_buf;
+
+    /**
+     * Profile
+     */
+    HEVC_DEC_PROFILE_T                      e_profile;
+
 }ihevcd_cxa_init_ip_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_init_op_t
@@ -302,7 +265,7 @@ typedef struct {
 }ihevcd_cxa_video_decode_ip_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_video_decode_op_t
@@ -404,7 +367,7 @@ typedef enum
 /*****************************************************************************/
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_ctl_flush_ip_t
@@ -413,7 +376,7 @@ typedef struct {
 }ihevcd_cxa_ctl_flush_ip_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_ctl_flush_op_t
@@ -426,7 +389,7 @@ typedef struct {
 /*****************************************************************************/
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_ctl_reset_ip_t
@@ -435,7 +398,7 @@ typedef struct {
 }ihevcd_cxa_ctl_reset_ip_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_ctl_reset_op_t
@@ -458,7 +421,7 @@ typedef struct {
 }ihevcd_cxa_ctl_set_config_ip_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_ctl_set_config_op_t
@@ -471,7 +434,7 @@ typedef struct {
 /*****************************************************************************/
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_ctl_getbufinfo_ip_t
@@ -481,7 +444,7 @@ typedef struct {
 
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_ctl_getbufinfo_op_t
@@ -495,7 +458,7 @@ typedef struct {
 /*****************************************************************************/
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_ctl_getstatus_ip_t
@@ -505,7 +468,7 @@ typedef struct {
 
 
 
-typedef struct {
+typedef struct{
 
     /**
      * ivd_ctl_getstatus_op_t
@@ -519,7 +482,7 @@ typedef struct {
 /*****************************************************************************/
 
 
-typedef struct {
+typedef struct{
 
     /**
      *  ivd_ctl_getversioninfo_ip_t
@@ -529,7 +492,7 @@ typedef struct {
 
 
 
-typedef struct {
+typedef struct{
 
     /**
      *  ivd_ctl_getversioninfo_op_t
@@ -538,7 +501,7 @@ typedef struct {
 }ihevcd_cxa_ctl_getversioninfo_op_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * u4_size
@@ -634,9 +597,9 @@ typedef struct
 
 typedef struct
 {
-    /**
-     * size
-     */
+     /**
+      * size
+      */
     UWORD32                                     u4_size;
     /**
      * cmd
@@ -677,9 +640,9 @@ typedef struct
 typedef struct
 {
 
-    /**
-     * size
-     */
+     /**
+      * size
+      */
     UWORD32                                     u4_size;
 
     /**
@@ -694,7 +657,7 @@ typedef struct
 }ihevcd_cxa_ctl_get_frame_dimensions_ip_t;
 
 
-typedef struct {
+typedef struct{
 
     /**
      * size
@@ -737,13 +700,13 @@ typedef struct {
     UWORD32                                     u4_buffer_ht[3];
 }ihevcd_cxa_ctl_get_frame_dimensions_op_t;
 
-typedef struct {
+typedef struct{
     UWORD32                                     u4_size;
     IVD_API_COMMAND_TYPE_T                      e_cmd;
     IVD_CONTROL_API_COMMAND_TYPE_T              e_sub_cmd;
 }ihevcd_cxa_ctl_get_vui_params_ip_t;
 
-typedef struct {
+typedef struct{
     UWORD32                                     u4_size;
     UWORD32                                     u4_error_code;
 
@@ -887,7 +850,7 @@ typedef struct {
     *   The number of time units that pass in one second
     */
     UWORD32 u4_vui_time_scale;
-    /**
+   /**
     * if 1, indicates that the POC for each picture in the coded video sequence (cvs) (not the first picture), in decoding order,
     * is proportional to the output time of the picture relative to that of the first picture in the cvs
     */
@@ -1080,19 +1043,17 @@ typedef struct {
 }ihevcd_cxa_ctl_get_vui_params_op_t;
 
 #ifdef GPU_BUILD
-typedef struct {
+typedef struct{
     UWORD32                                     u4_size;
     IVD_API_COMMAND_TYPE_T                      e_cmd;
     IVD_CONTROL_API_COMMAND_TYPE_T              e_sub_cmd;
     UWORD32                                     u4_gpu_enable_diable; // 1 - Enable 0 - Diable
 }ihevcd_cxa_ctl_gpu_enable_diable_ip_t;
 
-typedef struct {
+typedef struct{
     UWORD32                                     u4_size;
     UWORD32                                     u4_error_code;
 }ihevcd_cxa_ctl_gpu_enable_diable_op_t;
 #endif
-#ifdef __cplusplus
-} /* closing brace for extern "C" */
-#endif
+
 #endif /* __IHEVCD_CXA_H__ */

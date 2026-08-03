@@ -83,7 +83,7 @@
 #define SET_NGBHR_TOPRIGHT_NOTAVAIL(avail)  avail &= ~0x1;
 
 WORD32 ihevcd_pu_boundary_strength(pu_t *ps_pu,
-                                   pu_t *ps_ngbr_pu)
+        pu_t *ps_ngbr_pu)
 {
     WORD32 i4_bs;
     UWORD32 l0_ref_pic_buf_id, l1_ref_pic_buf_id;
@@ -92,7 +92,7 @@ WORD32 ihevcd_pu_boundary_strength(pu_t *ps_pu,
     WORD16 i2_mv_x0, i2_mv_y0, i2_mv_x1, i2_mv_y1;
     WORD16 i2_ngbr_mv_x0, i2_ngbr_mv_y0, i2_ngbr_mv_x1, i2_ngbr_mv_y1;
 
-    WORD32 num_mv, ngbr_num_mv;
+    WORD32 num_mv,ngbr_num_mv;
 
     num_mv = (PRED_BI == ps_pu->b2_pred_mode) ? 2 : 1;
     ngbr_num_mv = (PRED_BI == ps_ngbr_pu->b2_pred_mode) ? 2 : 1;
@@ -115,11 +115,11 @@ WORD32 ihevcd_pu_boundary_strength(pu_t *ps_pu,
 
 
     /* If two motion vectors are used */
-    if((2 == num_mv) &&
-            (2 == ngbr_num_mv))
+    if( (2 == num_mv) &&
+            (2 == ngbr_num_mv) )
     {
-        if((l0_ref_pic_buf_id == ngbr_l0_ref_pic_buf_id && l1_ref_pic_buf_id == ngbr_l1_ref_pic_buf_id) ||
-                (l0_ref_pic_buf_id == ngbr_l1_ref_pic_buf_id && l1_ref_pic_buf_id == ngbr_l0_ref_pic_buf_id))
+        if( (l0_ref_pic_buf_id == ngbr_l0_ref_pic_buf_id && l1_ref_pic_buf_id == ngbr_l1_ref_pic_buf_id) ||
+                (l0_ref_pic_buf_id == ngbr_l1_ref_pic_buf_id && l1_ref_pic_buf_id == ngbr_l0_ref_pic_buf_id) )
         {
             if(l0_ref_pic_buf_id != l1_ref_pic_buf_id) /* Different L0 and L1 */
             {
@@ -140,14 +140,14 @@ WORD32 ihevcd_pu_boundary_strength(pu_t *ps_pu,
             }
             else /* Same L0 and L1 */
             {
-                i4_bs = ((ABS(i2_mv_x0 - i2_ngbr_mv_x0) >= 4) ||
-                         (ABS(i2_mv_y0 - i2_ngbr_mv_y0) >= 4) ||
-                         (ABS(i2_mv_x1 - i2_ngbr_mv_x1) >= 4) ||
-                         (ABS(i2_mv_y1 - i2_ngbr_mv_y1) >= 4)) &&
-                                ((ABS(i2_mv_x0 - i2_ngbr_mv_x1) >= 4) ||
-                                 (ABS(i2_mv_y0 - i2_ngbr_mv_y1) >= 4) ||
-                                 (ABS(i2_mv_x1 - i2_ngbr_mv_x0) >= 4) ||
-                                 (ABS(i2_mv_y1 - i2_ngbr_mv_y0) >= 4)) ? 1 : 0;
+                i4_bs = ( (ABS(i2_mv_x0 - i2_ngbr_mv_x0) >= 4) ||
+                        (ABS(i2_mv_y0 - i2_ngbr_mv_y0) >= 4) ||
+                        (ABS(i2_mv_x1 - i2_ngbr_mv_x1) >= 4) ||
+                        (ABS(i2_mv_y1 - i2_ngbr_mv_y1) >= 4) ) &&
+                        ( (ABS(i2_mv_x0 - i2_ngbr_mv_x1) >= 4) ||
+                                (ABS(i2_mv_y0 - i2_ngbr_mv_y1) >= 4) ||
+                                (ABS(i2_mv_x1 - i2_ngbr_mv_x0) >= 4) ||
+                                (ABS(i2_mv_y1 - i2_ngbr_mv_y0) >= 4) ) ? 1 : 0;
             }
         }
         else /* If the reference pictures used are different */
@@ -157,8 +157,8 @@ WORD32 ihevcd_pu_boundary_strength(pu_t *ps_pu,
     }
 
     /* If one motion vector is used in both PUs */
-    else if((1 == num_mv) &&
-            (1 == ngbr_num_mv))
+    else if( (1 == num_mv) &&
+            (1 == ngbr_num_mv) )
     {
         WORD16 i2_mv_x, i2_mv_y;
         WORD16 i2_ngbr_mv_x, i2_ngbr_mv_y;
@@ -217,7 +217,7 @@ WORD32 ihevcd_ctb_boundary_strength_islice(bs_ctxt_t *ps_bs_ctxt)
     WORD32 horz_bs_strd;
     WORD32 vert_bs0_tmp;
     WORD32 horz_bs0_tmp;
-    UWORD8 *pu1_qp;
+    WORD8 *pi1_qp;
     WORD32 qp_strd;
     UWORD32 u4_qp_const_in_ctb;
     WORD32 ctb_indx;
@@ -247,14 +247,14 @@ WORD32 ihevcd_ctb_boundary_strength_islice(bs_ctxt_t *ps_bs_ctxt)
     horz_bs_strd = (ps_sps->i2_pic_wd_in_ctb + 1) << (2 * log2_ctb_size - 7);
     pu4_vert_bs = (UWORD32 *)((UWORD8 *)ps_bs_ctxt->pu4_pic_vert_bs +
                     (ps_bs_ctxt->i4_ctb_x << (2 * log2_ctb_size - 7)) +
-                    ps_bs_ctxt->i4_ctb_y * vert_bs_strd);
+            ps_bs_ctxt->i4_ctb_y * vert_bs_strd);
     pu4_horz_bs = (UWORD32 *)((UWORD8 *)ps_bs_ctxt->pu4_pic_horz_bs +
                     (ps_bs_ctxt->i4_ctb_x << (2 * log2_ctb_size - 7)) +
-                    ps_bs_ctxt->i4_ctb_y * horz_bs_strd);
+            ps_bs_ctxt->i4_ctb_y * horz_bs_strd);
 
     /* ctb_size/8 elements per CTB */
     qp_strd = ps_sps->i2_pic_wd_in_ctb << (log2_ctb_size - 3);
-    pu1_qp = ps_bs_ctxt->pu1_pic_qp + ((ps_bs_ctxt->i4_ctb_x + ps_bs_ctxt->i4_ctb_y * qp_strd) << (log2_ctb_size - 3));
+    pi1_qp = (WORD8 *)ps_bs_ctxt->pu1_pic_qp + ((ps_bs_ctxt->i4_ctb_x + ps_bs_ctxt->i4_ctb_y * qp_strd) << (log2_ctb_size - 3));
 
     ctb_indx = ps_bs_ctxt->i4_ctb_x + ps_sps->i2_pic_wd_in_ctb * ps_bs_ctxt->i4_ctb_y;
     u4_qp_const_in_ctb = ps_bs_ctxt->pu1_pic_qp_const_in_ctb[ctb_indx >> 3] & (1 << (ctb_indx & 7));
@@ -270,8 +270,8 @@ WORD32 ihevcd_ctb_boundary_strength_islice(bs_ctxt_t *ps_bs_ctxt)
     memset(pu4_vert_bs, 0, (ctb_size / 8 + 1) * (ctb_size / 4) / 8 * 2 );
     memset(pu4_horz_bs, 0, (ctb_size / 8) * (ctb_size / 4) / 8 * 2 );
 */
-    memset(pu4_vert_bs, 0, (1 << (2 * log2_ctb_size - 7)) + ((ctb_size >> 5) << 1));
-    memset(pu4_horz_bs, 0, (1 << (2 * log2_ctb_size - 7)));
+    memset(pu4_vert_bs, 0, (1 << (2 * log2_ctb_size - 7)) + ((ctb_size >> 5) << 1) );
+    memset(pu4_horz_bs, 0, (1 << (2 * log2_ctb_size - 7)) );
 
     /* pu4_vert_bs[0] has information about the left CTB which is not required when ctb_x = 0 */
     if(0 != ps_bs_ctxt->i4_ctb_x)
@@ -289,7 +289,7 @@ WORD32 ihevcd_ctb_boundary_strength_islice(bs_ctxt_t *ps_bs_ctxt)
 
     /* Populating the QP array - if const_qp_in_ctb flag is one, set only the first element */
     if(u4_qp_const_in_ctb)
-        pu1_qp[0] = ps_tu->b7_qp;
+        pi1_qp[0] = ps_tu->b7_qp;
 
     for(i = 0; i < i4_tu_cnt; i++)
     {
@@ -347,23 +347,22 @@ WORD32 ihevcd_ctb_boundary_strength_islice(bs_ctxt_t *ps_bs_ctxt)
                 {
                     for(col = start_pos_x; col < start_pos_x + tu_size; col += 2)
                     {
-                        pu1_qp[(row >> 1) * qp_strd + (col >> 1)] = ps_tu->b7_qp;
+                        pi1_qp[(row >> 1) * qp_strd + (col >> 1)] = ps_tu->b7_qp;
                     }
                 }
             }
         }
-
     }
     {
         /*Determine if the slice is dependent, and is its left neighbor belongs to the same slice, in a different tile*/
-        UWORD32 ctb_addr;
-        WORD32 slice_idx, left_slice_idx = -1, top_slice_idx = -1;
+        UWORD32 ctb_addr ;
+        WORD32 slice_idx, left_slice_idx= -1,top_slice_idx= -1;
         /* If left neighbor is not available, then set BS for entire first column to zero */
         if(!ps_pps->i1_tiles_enabled_flag)
         {
             if((0 == i1_loop_filter_across_tiles_enabled_flag && 0 == ps_bs_ctxt->i4_ctb_tile_x) ||
-                            (0 == i1_loop_filter_across_slices_enabled_flag && 0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_slice_y) ||
-                            (0 == ps_bs_ctxt->i4_ctb_x))
+                    (0 == i1_loop_filter_across_slices_enabled_flag && 0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_slice_y) ||
+                    (0 == ps_bs_ctxt->i4_ctb_x) )
             {
                 pu4_vert_bs[0] &= (64 == ctb_size) ? 0 : ((UWORD32)0xFFFFFFFF) << (ctb_size / 2);
             }
@@ -377,20 +376,20 @@ WORD32 ihevcd_ctb_boundary_strength_islice(bs_ctxt_t *ps_bs_ctxt)
             }
             else
             {
-                ctb_addr = ps_bs_ctxt->i4_ctb_x + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb);
+                ctb_addr = ps_bs_ctxt->i4_ctb_x + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb) ;
                 slice_idx = ps_bs_ctxt->pu1_slice_idx[ctb_addr];
                 if(ps_bs_ctxt->i4_ctb_x)
                 {
-                    ctb_addr = (ps_bs_ctxt->i4_ctb_x - 1) + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb);
+                    ctb_addr =(ps_bs_ctxt->i4_ctb_x - 1) + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb) ;
                     left_slice_idx = ps_bs_ctxt->pu1_slice_idx[ctb_addr];
                 }
                 /*If the 1st slice in a new tile is a dependent slice*/
-                if(!((ps_bs_ctxt->ps_slice_hdr->i1_dependent_slice_flag == 1) && (slice_idx == left_slice_idx)))
+                if (!((ps_bs_ctxt->ps_slice_hdr->i1_dependent_slice_flag == 1) && (slice_idx == left_slice_idx )) )
                 {
-                    if((0 == i1_loop_filter_across_slices_enabled_flag && (
-                                    (0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_slice_y) || (0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_tile_x) ||
-                                    ((0 == ps_bs_ctxt->i4_ctb_tile_x) && (slice_idx != left_slice_idx)))) ||
-                                    (0 == ps_bs_ctxt->i4_ctb_x))
+                    if ((0 == i1_loop_filter_across_slices_enabled_flag && (
+                            (0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_slice_y) || (0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_tile_x)||
+                            ((0 == ps_bs_ctxt->i4_ctb_tile_x) && (slice_idx != left_slice_idx))) ) ||
+                            (0 == ps_bs_ctxt->i4_ctb_x))
                     {
                         pu4_vert_bs[0] &= (64 == ctb_size) ? 0 : ((UWORD32)0xFFFFFFFF) << (ctb_size / 2);
                     }
@@ -398,18 +397,18 @@ WORD32 ihevcd_ctb_boundary_strength_islice(bs_ctxt_t *ps_bs_ctxt)
             }
         }
 
-        ctb_addr = ps_bs_ctxt->i4_ctb_x + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb);
+        ctb_addr = ps_bs_ctxt->i4_ctb_x + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb) ;
         slice_idx = ps_bs_ctxt->pu1_slice_idx[ctb_addr];
         if(ps_bs_ctxt->i4_ctb_y)
         {
-            ctb_addr = (ps_bs_ctxt->i4_ctb_x) + ((ps_bs_ctxt->i4_ctb_y - 1) * ps_sps->i2_pic_wd_in_ctb);
+            ctb_addr =(ps_bs_ctxt->i4_ctb_x) + ((ps_bs_ctxt->i4_ctb_y-1) * ps_sps->i2_pic_wd_in_ctb) ;
             top_slice_idx = ps_bs_ctxt->pu1_slice_idx[ctb_addr];
         }
 
         /* If top neighbor is not available, then set BS for entire first row to zero */
         if((0 == i1_loop_filter_across_tiles_enabled_flag && 0 == ps_bs_ctxt->i4_ctb_tile_y)
-                        || (0 == i1_loop_filter_across_slices_enabled_flag && ((0 == ps_bs_ctxt->i4_ctb_slice_y) || (slice_idx != top_slice_idx)))
-                        || (0 == ps_bs_ctxt->i4_ctb_y))
+                || (0 == i1_loop_filter_across_slices_enabled_flag && ((0 == ps_bs_ctxt->i4_ctb_slice_y)||(slice_idx != top_slice_idx )))
+                || (0 == ps_bs_ctxt->i4_ctb_y) )
         {
             pu4_horz_bs[0] &= (64 == ctb_size) ? 0 : ((UWORD32)0xFFFFFFFF) << (ctb_size / 2);
         }
@@ -469,7 +468,7 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
     WORD32 horz_bs_strd;
     WORD32 vert_bs0_tmp;
     WORD32 horz_bs0_tmp;
-    UWORD8 *pu1_qp;
+    WORD8 *pi1_qp;
     WORD32 qp_strd;
     UWORD32 u4_qp_const_in_ctb;
     WORD32 ctb_indx;
@@ -494,10 +493,10 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
     horz_bs_strd = (ps_sps->i2_pic_wd_in_ctb + 1) << (2 * log2_ctb_size - 7);
     pu4_vert_bs = (UWORD32 *)((UWORD8 *)ps_bs_ctxt->pu4_pic_vert_bs +
                     (ps_bs_ctxt->i4_ctb_x << (2 * log2_ctb_size - 7)) +
-                    ps_bs_ctxt->i4_ctb_y * vert_bs_strd);
+            ps_bs_ctxt->i4_ctb_y * vert_bs_strd);
     pu4_horz_bs = (UWORD32 *)((UWORD8 *)ps_bs_ctxt->pu4_pic_horz_bs +
                     (ps_bs_ctxt->i4_ctb_x << (2 * log2_ctb_size - 7)) +
-                    ps_bs_ctxt->i4_ctb_y * horz_bs_strd);
+            ps_bs_ctxt->i4_ctb_y * horz_bs_strd);
 
     vert_bs0_tmp = pu4_vert_bs[0] & (0xFFFFFFFF >> (sizeof(UWORD32) * 8 - ctb_size / 2));
     horz_bs0_tmp = pu4_horz_bs[0] & (0xFFFFFFFF >> (sizeof(UWORD32) * 8 - ctb_size / 2));
@@ -506,7 +505,7 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
 
     /* ctb_size/8 elements per CTB */
     qp_strd = ps_sps->i2_pic_wd_in_ctb << (log2_ctb_size - 3);
-    pu1_qp = ps_bs_ctxt->pu1_pic_qp + ((ps_bs_ctxt->i4_ctb_x + ps_bs_ctxt->i4_ctb_y * qp_strd) << (log2_ctb_size - 3));
+    pi1_qp = ps_bs_ctxt->pu1_pic_qp + ((ps_bs_ctxt->i4_ctb_x + ps_bs_ctxt->i4_ctb_y * qp_strd) << (log2_ctb_size - 3));
 
     ctb_indx = ps_bs_ctxt->i4_ctb_x + ps_sps->i2_pic_wd_in_ctb * ps_bs_ctxt->i4_ctb_y;
     u4_qp_const_in_ctb = ps_bs_ctxt->pu1_pic_qp_const_in_ctb[ctb_indx >> 3] & (1 << (ctb_indx & 7));
@@ -522,8 +521,8 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
     memset(pu4_vert_bs, 0, (ctb_size / 8 + 1) * (ctb_size / 4) * 2 / 8 );
     memset(pu4_horz_bs, 0, (ctb_size / 8) * (ctb_size / 4) * 2 / 8 );
 */
-    memset(pu4_vert_bs, 0, (1 << (2 * log2_ctb_size - 7)) + (ctb_size >> 4));
-    memset(pu4_horz_bs, 0, (1 << (2 * log2_ctb_size - 7)));
+    memset(pu4_vert_bs, 0, (1 << (2 * log2_ctb_size - 7)) + (ctb_size >> 4) );
+    memset(pu4_horz_bs, 0, (1 << (2 * log2_ctb_size - 7)) );
 
     /* pu4_vert_bs[0] has information about the left CTB which is not required when ctb_x = 0 */
     if(0 != ps_bs_ctxt->i4_ctb_x)
@@ -540,7 +539,7 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
     *(UWORD32 *)((UWORD8 *)pu4_horz_bs + horz_bs_strd) = 0;
 
     cur_ctb_idx = ps_bs_ctxt->i4_ctb_x
-                    + ps_bs_ctxt->i4_ctb_y * (ps_sps->i2_pic_wd_in_ctb);
+            + ps_bs_ctxt->i4_ctb_y * (ps_sps->i2_pic_wd_in_ctb);
     next_ctb_idx = ps_bs_ctxt->i4_next_tu_ctb_cnt;
     if(1 == ps_bs_ctxt->ps_codec->i4_num_cores)
     {
@@ -553,7 +552,7 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
 
     ps_tu = ps_bs_ctxt->ps_tu;
     if(u4_qp_const_in_ctb)
-        pu1_qp[0] = ps_tu->b7_qp;
+        pi1_qp[0] = ps_tu->b7_qp;
 
     /* For all TUs in the CTB For left and top edges, check if there are coded coefficients on either sides of the edge */
     for(i = 0; i < i4_tu_cnt; i++)
@@ -693,7 +692,7 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
                 {
                     for(col = start_pos_x; col < start_pos_x + tu_size; col += 2)
                     {
-                        pu1_qp[(row >> 1) * qp_strd + (col >> 1)] = ps_tu->b7_qp;
+                        pi1_qp[(row >> 1) * qp_strd + (col >> 1)] = ps_tu->b7_qp;
                     }
                 }
             }
@@ -704,11 +703,11 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
     For left and top edges, compute BS */
 
     cur_ctb_idx = ps_bs_ctxt->i4_ctb_x
-                    + ps_bs_ctxt->i4_ctb_y * (ps_sps->i2_pic_wd_in_ctb);
+            + ps_bs_ctxt->i4_ctb_y * (ps_sps->i2_pic_wd_in_ctb);
 
     {
         WORD32 next_ctb_idx;
-        next_ctb_idx = ps_bs_ctxt->i4_next_pu_ctb_cnt;
+        next_ctb_idx = ps_bs_ctxt->i4_next_pu_ctb_cnt ;
         i4_pu_cnt = ps_bs_ctxt->pu4_pic_pu_idx[next_ctb_idx] - ps_bs_ctxt->pu4_pic_pu_idx[cur_ctb_idx];
     }
 
@@ -849,7 +848,7 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
                     WORD32 min_pu_wd;
                     WORD32 ngbr_end_pos_x;
                     UWORD32 ngbr_pu_idx_strd = MAX_CTB_SIZE / MIN_PU_SIZE + 2;
-                    u4_ngbr_pu_indx = ps_bs_ctxt->pu4_pic_pu_idx_map[(start_pos_y)*ngbr_pu_idx_strd + (start_pos_x + 1)];
+                    u4_ngbr_pu_indx = ps_bs_ctxt->pu4_pic_pu_idx_map[(start_pos_y) * ngbr_pu_idx_strd + (start_pos_x + 1)];
                     ps_ngbr_pu = ps_bs_ctxt->ps_pic_pu + u4_ngbr_pu_indx;
 
                     pu_ngbr_wd = ps_ngbr_pu->b4_wd + 1;
@@ -911,14 +910,14 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
 
     {
         /* If left neighbor is not available, then set BS for entire first column to zero */
-        UWORD32 ctb_addr;
-        WORD32 slice_idx, left_slice_idx = -1, top_slice_idx = -1;
+        UWORD32 ctb_addr ;
+        WORD32 slice_idx, left_slice_idx=-1,top_slice_idx=-1;
 
         if(!ps_pps->i1_tiles_enabled_flag)
         {
             if((0 == i1_loop_filter_across_tiles_enabled_flag && 0 == ps_bs_ctxt->i4_ctb_tile_x) ||
-                            (0 == i1_loop_filter_across_slices_enabled_flag && 0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_slice_y) ||
-                            (0 == ps_bs_ctxt->i4_ctb_x))
+                    (0 == i1_loop_filter_across_slices_enabled_flag && 0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_slice_y) ||
+                    (0 == ps_bs_ctxt->i4_ctb_x) )
             {
                 pu4_vert_bs[0] &= (64 == ctb_size) ? 0 : ((UWORD32)0xFFFFFFFF) << (ctb_size / 2);
             }
@@ -932,20 +931,20 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
             else
             {
 
-                ctb_addr = ps_bs_ctxt->i4_ctb_x + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb);
+                ctb_addr = ps_bs_ctxt->i4_ctb_x + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb) ;
                 slice_idx = ps_bs_ctxt->pu1_slice_idx[ctb_addr];
 
                 if(ps_bs_ctxt->i4_ctb_x)
                 {
-                    ctb_addr = (ps_bs_ctxt->i4_ctb_x - 1) + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb);
+                    ctb_addr =(ps_bs_ctxt->i4_ctb_x - 1) + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb) ;
                     left_slice_idx = ps_bs_ctxt->pu1_slice_idx[ctb_addr];
                 }
 
-                if(!((ps_bs_ctxt->ps_slice_hdr->i1_dependent_slice_flag == 1) && (slice_idx == left_slice_idx)))
+                if (!((ps_bs_ctxt->ps_slice_hdr->i1_dependent_slice_flag == 1) && (slice_idx == left_slice_idx )) )
                 {
-                    if((0 == i1_loop_filter_across_slices_enabled_flag && (
-                                    (0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_slice_y) || (0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_tile_x)
-                                    || ((0 == ps_bs_ctxt->i4_ctb_tile_x) && (slice_idx != left_slice_idx)))) || (0 == ps_bs_ctxt->i4_ctb_x))
+                    if ((0 == i1_loop_filter_across_slices_enabled_flag && (
+                            (0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_slice_y) || (0 == ps_bs_ctxt->i4_ctb_slice_x && 0 == ps_bs_ctxt->i4_ctb_tile_x)
+                            || ((0 == ps_bs_ctxt->i4_ctb_tile_x) && (slice_idx != left_slice_idx)) )) || (0 == ps_bs_ctxt->i4_ctb_x) )
                     {
                         pu4_vert_bs[0] &= (64 == ctb_size) ? 0 : ((UWORD32)0xFFFFFFFF) << (ctb_size / 2);
                     }
@@ -953,17 +952,17 @@ WORD32 ihevcd_ctb_boundary_strength_pbslice(bs_ctxt_t *ps_bs_ctxt)
             }
         }
 
-        ctb_addr = ps_bs_ctxt->i4_ctb_x + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb);
+        ctb_addr = ps_bs_ctxt->i4_ctb_x + (ps_bs_ctxt->i4_ctb_y * ps_sps->i2_pic_wd_in_ctb) ;
         slice_idx = ps_bs_ctxt->pu1_slice_idx[ctb_addr];
         if(ps_bs_ctxt->i4_ctb_y)
         {
-            ctb_addr = (ps_bs_ctxt->i4_ctb_x) + ((ps_bs_ctxt->i4_ctb_y - 1) * ps_sps->i2_pic_wd_in_ctb);
+            ctb_addr =(ps_bs_ctxt->i4_ctb_x) + ((ps_bs_ctxt->i4_ctb_y-1) * ps_sps->i2_pic_wd_in_ctb) ;
             top_slice_idx = ps_bs_ctxt->pu1_slice_idx[ctb_addr];
         }
         /* If top neighbor is not available, then set BS for entire first row to zero */
         if((0 == i1_loop_filter_across_tiles_enabled_flag && 0 == ps_bs_ctxt->i4_ctb_tile_y)
-                        || (0 == i1_loop_filter_across_slices_enabled_flag && ((0 == ps_bs_ctxt->i4_ctb_slice_y) || (slice_idx != top_slice_idx)))
-                        || (0 == ps_bs_ctxt->i4_ctb_y))
+                || (0 == i1_loop_filter_across_slices_enabled_flag && ((0 == ps_bs_ctxt->i4_ctb_slice_y)||(slice_idx != top_slice_idx)))
+                || (0 == ps_bs_ctxt->i4_ctb_y) )
         {
             pu4_horz_bs[0] &= (64 == ctb_size) ? 0 : ((UWORD32)0xFFFFFFFF) << (ctb_size / 2);
         }

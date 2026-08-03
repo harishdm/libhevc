@@ -25,7 +25,7 @@
 *
 *
 * @author
-*  Srinivas T
+*  Ittiam
 *
 * @par List of Functions:
 *  - ihevc_intra_pred_luma_planar()
@@ -133,7 +133,6 @@ void ihevc_intra_pred_luma_ref_subst_all_avlble(UWORD8 *pu1_top_left,
                                                 UWORD8 *pu1_dst,
                                                 WORD32 dst_strd)
 {
-
     WORD32 i;
     WORD32 two_nt = 2 * nt;
     UNUSED(nbr_flags);
@@ -146,13 +145,10 @@ void ihevc_intra_pred_luma_ref_subst_all_avlble(UWORD8 *pu1_top_left,
      */
     ASSERT((nbr_flags == 0x11188) || (nbr_flags == 0x133CC) || (nbr_flags == 0x1FFFF));
     {
-
         if(nt == 4)
         {
             /* 1 bit extraction for all the neighboring blocks */
 
-
-#if 1
             /* Else fill the corresponding samples */
             pu1_dst[two_nt] = *pu1_top_left;
             //if(left)
@@ -173,15 +169,9 @@ void ihevc_intra_pred_luma_ref_subst_all_avlble(UWORD8 *pu1_top_left,
             {
                 ihevc_memcpy(&pu1_dst[two_nt + 1 + nt], pu1_top + nt, nt);
             }
-
-#endif
-
         }
         else
-
         {
-
-#if 1
             /* Else fill the corresponding samples */
             ASSERT((nt == 8) || (nt == 16) || (nt == 32));
             pu1_dst[two_nt] = *pu1_top_left;
@@ -195,9 +185,7 @@ void ihevc_intra_pred_luma_ref_subst_all_avlble(UWORD8 *pu1_top_left,
             ihevc_memcpy_mul_8(&pu1_dst[two_nt + 1], pu1_top, nt);
 
             ihevc_memcpy_mul_8(&pu1_dst[two_nt + 1 + nt], pu1_top + nt, nt);
-#endif
         }
-
     }
 }
 
@@ -226,7 +214,6 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
     /*dc_val = 1 << (BIT_DEPTH - 1);*/
     dc_val = 1 << (8 - 1);
 
-
     /* Neighbor Flag Structure*/
     /* MSB ---> LSB */
     /*    Top-Left | Top-Right | Top | Left | Bottom-Left
@@ -251,13 +238,11 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
             top = (nbr_flags & 0x100) >> 8;
             tp_right = (nbr_flags & 0x1000) >> 12;
 
-#if 1
             /* Else fill the corresponding samples */
             if(tp_left)
                 pu1_dst[two_nt] = *pu1_top_left;
             else
                 pu1_dst[two_nt] = 0;
-
 
             if(left)
             {
@@ -269,7 +254,6 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
                 ihevc_memset(&pu1_dst[two_nt - 1 - (nt - 1)], 0, nt);
             }
 
-
             if(bot_left)
             {
                 for(i = nt; i < two_nt; i++)
@@ -279,7 +263,6 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
             {
                 ihevc_memset(&pu1_dst[two_nt - 1 - (two_nt - 1)], 0, nt);
             }
-
 
             if(top)
             {
@@ -298,7 +281,6 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
             {
                 ihevc_memset(&pu1_dst[two_nt + 1 + nt], 0, nt);
             }
-#endif
             next = 1;
 
             /* If bottom -left is not available, reverse substitution process*/
@@ -338,7 +320,6 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
             if(left == 0)
             {
                 ihevc_memset(&pu1_dst[nt], pu1_dst[nt - 1], nt);
-
             }
             /* If top-left is Unavailable, copy the last left value */
             if(tp_left == 0)
@@ -352,7 +333,6 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
             if(tp_right == 0)
             {
                 ihevc_memset(&pu1_dst[three_nt + 1], pu1_dst[three_nt], nt);
-
             }
         }
 
@@ -364,7 +344,6 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
                             + ((nbr_flags & 0x3000) >> 6)
                             + ((nbr_flags & 0x10000) >> 8);
 
-#if 1
             /* Else fill the corresponding samples */
             if(nbr_flags & 0x10000)
                 pu1_dst[two_nt] = *pu1_top_left;
@@ -381,16 +360,28 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
                 ihevc_memset_mul_8(&pu1_dst[two_nt - 1 - (nt - 1)], 0, nt);
             }
 
-            if(nbr_flags & 0xC)
+            /* Bottom - left availability is checked for every 8x8 TU position and set accordingly */
             {
-                for(i = nt; i < two_nt; i++)
+                if(nbr_flags & 0x8)
+                {
+                    for(i = nt; i < (nt + 8); i++)
                     pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
-            }
-            else
-            {
-                ihevc_memset_mul_8(&pu1_dst[two_nt - 1 - (two_nt - 1)], 0, nt);
-            }
+                }
+                else
+                {
+                    ihevc_memset_mul_8(&pu1_dst[nt - 8], 0, 8);
+                }
 
+                if(nbr_flags & 0x4)
+                {
+                    for(i = (nt + 8); i < two_nt; i++)
+                        pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
+                }
+                else
+                {
+                    ihevc_memset_mul_8(&pu1_dst[0], 0, 8);
+                }
+            }
 
             if(nbr_flags & 0x300)
             {
@@ -409,7 +400,6 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
             {
                 ihevc_memset_mul_8(&pu1_dst[two_nt + 1 + nt], 0, nt);
             }
-#endif
             /* compute trailing zeors based on nbr_flag for substitution process of below left see section .*/
             /* as each bit in nbr flags corresponds to 8 pels for bot_left, left, top and topright but 1 pel for topleft */
             {
@@ -464,20 +454,14 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
                         /* 8 pel substitution (other than TL) */
                         pu1_ref = pu1_dst[nbr_id_from_bl - 1];
                         ihevc_memset_mul_8(pu1_dst + nbr_id_from_bl, pu1_ref, 8);
-
-
                     }
-
                 }
                 nbr_id_from_bl += (nbr_id_from_bl == (T16_4NT / 2)) ? 1 : 8;
             }
-
-
         }
 
         if(nt == 32)
         {
-#if 1
             /* Else fill the corresponding samples */
             if(nbr_flags & 0x10000)
                 pu1_dst[two_nt] = *pu1_top_left;
@@ -494,16 +478,48 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
                 ihevc_memset_mul_8(&pu1_dst[two_nt - 1 - (nt - 1)], 0, nt);
             }
 
-            if(nbr_flags & 0xF)
+            /* Bottom - left availability is checked for every 8x8 TU position and set accordingly */
             {
-                for(i = nt; i < two_nt; i++)
+                if(nbr_flags & 0x8)
+                {
+                    for(i = nt; i < (nt + 8); i++)
                     pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
-            }
-            else
-            {
-                ihevc_memset_mul_8(&pu1_dst[two_nt - 1 - (two_nt - 1)], 0, nt);
-            }
+                }
+                else
+                {
+                    ihevc_memset_mul_8(&pu1_dst[24], 0, 8);
+                }
 
+                if(nbr_flags & 0x4)
+                {
+                    for(i = (nt + 8); i < (nt + 16); i++)
+                        pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
+                }
+                else
+                {
+                    ihevc_memset_mul_8(&pu1_dst[16], 0, 8);
+                }
+
+                if(nbr_flags & 0x2)
+                {
+                    for(i = (nt + 16); i < (nt + 24); i++)
+                        pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
+                }
+                else
+                {
+                    ihevc_memset_mul_8(&pu1_dst[8], 0, 8);
+                }
+
+                if(nbr_flags & 0x1)
+                {
+                    for(i = (nt + 24); i < (two_nt); i++)
+                        pu1_dst[two_nt - 1 - i] = pu1_left[i * src_strd];
+                }
+                else
+                {
+                    ihevc_memset_mul_8(&pu1_dst[0], 0, 8);
+                }
+            }
 
             if(nbr_flags & 0xF00)
             {
@@ -522,7 +538,6 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
             {
                 ihevc_memset_mul_8(&pu1_dst[two_nt + 1 + nt], 0, nt);
             }
-#endif
             /* compute trailing ones based on mbr_flag for substitution process of below left see section .*/
             /* as each bit in nbr flags corresponds to 8 pels for bot_left, left, top and topright but 1 pel for topleft */
             {
@@ -574,12 +589,10 @@ void ihevc_intra_pred_luma_ref_substitution(UWORD8 *pu1_top_left,
                         ihevc_memset_mul_8(&pu1_dst[nbr_id_from_bl], pu1_ref, 8);
 
                     }
-
                 }
                 nbr_id_from_bl += (nbr_id_from_bl == (T32_4NT / 2)) ? 1 : 8;
             }
         }
-
     }
 }
 
@@ -646,7 +659,6 @@ void ihevc_intra_pred_ref_filtering(UWORD8 *pu1_src,
                 pu1_dst[i] = pu1_src[i];
         }
     }
-
     else
     {
         /* If strong intra smoothin is enabled and transform size is 32 */
@@ -675,7 +687,6 @@ void ihevc_intra_pred_ref_filtering(UWORD8 *pu1_src,
 
             for(i = 1; i < (2 * nt); i++)
                 au1_flt[i + (2 * nt)] = (((2 * nt) - i) * pu1_src[2 * nt] + i * pu1_src[4 * nt] + 32) >> 6;
-
         }
         else
         {
@@ -687,11 +698,9 @@ void ihevc_intra_pred_ref_filtering(UWORD8 *pu1_src,
             }
         }
 
-
         for(i = 0; i < (four_nt + 1); i++)
             pu1_dst[i] = au1_flt[i];
     }
-
 }
 
 
@@ -740,8 +749,6 @@ void ihevc_intra_pred_luma_planar(UWORD8 *pu1_ref,
                                   WORD32 nt,
                                   WORD32 mode)
 {
-
-
     WORD32 row, col;
     WORD32 log2nt = 5;
     WORD32 two_nt, three_nt;
@@ -826,7 +833,6 @@ void ihevc_intra_pred_luma_dc(UWORD8 *pu1_ref,
                               WORD32 nt,
                               WORD32 mode)
 {
-
     WORD32 acc_dc;
     WORD32 dc_val, two_dc_val, three_dc_val;
     WORD32 i;
@@ -867,7 +873,6 @@ void ihevc_intra_pred_luma_dc(UWORD8 *pu1_ref,
 
     two_dc_val = 2 * dc_val;
     three_dc_val = 3 * dc_val;
-
 
     if(nt == 32)
     {
@@ -942,7 +947,6 @@ void ihevc_intra_pred_luma_horz(UWORD8 *pu1_ref,
                                 WORD32 nt,
                                 WORD32 mode)
 {
-
     WORD32 row, col;
     WORD32 two_nt;
     WORD16 s2_predpixel;
@@ -1115,7 +1119,6 @@ void ihevc_intra_pred_luma_mode2(UWORD8 *pu1_ref,
         for(row = 0; row < nt; row++)
             pu1_dst[col + (row * dst_strd)] = pu1_ref[two_nt - row - idx - 1];
     }
-
 }
 
 
@@ -1190,9 +1193,7 @@ void ihevc_intra_pred_luma_mode_18_34(UWORD8 *pu1_ref,
 #endif
         for(col = 0; col < nt; col++)
             pu1_dst[col + (row * dst_strd)] = pu1_ref[two_nt + col + idx + 1];
-
     }
-
 }
 
 
@@ -1267,9 +1268,7 @@ void ihevc_intra_pred_luma_mode_3_to_9(UWORD8 *pu1_ref,
                             * pu1_ref[ref_main_idx]
                             + fract * pu1_ref[ref_main_idx - 1] + 16) >> 5);
         }
-
     }
-
 }
 
 
@@ -1372,11 +1371,8 @@ void ihevc_intra_pred_luma_mode_11_to_17(UWORD8 *pu1_ref,
             pu1_dst[col + (dst_strd * row)] = (UWORD8)(((32 - fract)
                             * ref_main[ref_main_idx]
                             + fract * ref_main[ref_main_idx + 1] + 16) >> 5);
-
         }
-
     }
-
 }
 
 
@@ -1426,7 +1422,6 @@ void ihevc_intra_pred_luma_mode_19_to_25(UWORD8 *pu1_ref,
                                          WORD32 nt,
                                          WORD32 mode)
 {
-
     WORD32 row, col, k;
     WORD32 two_nt, intra_pred_ang, idx;
     WORD32 inv_ang, inv_ang_sum, pos, fract;
@@ -1470,11 +1465,8 @@ void ihevc_intra_pred_luma_mode_19_to_25(UWORD8 *pu1_ref,
             pu1_dst[(row * dst_strd) + col] = (UWORD8)(((32 - fract)
                             * ref_main[ref_main_idx]
                             + fract * ref_main[ref_main_idx + 1] + 16) >> 5);
-
         }
-
     }
-
 }
 
 
@@ -1546,8 +1538,6 @@ void ihevc_intra_pred_luma_mode_27_to_33(UWORD8 *pu1_ref,
                             * pu1_ref[ref_main_idx]
                             + fract * pu1_ref[ref_main_idx + 1] + 16) >> 5);
         }
-
     }
-
 }
 
