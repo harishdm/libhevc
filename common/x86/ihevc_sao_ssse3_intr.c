@@ -2798,7 +2798,7 @@ void ihevc_sao_edge_offset_class2_ssse3(UWORD8 *pu1_src,
             }
             if(0 == pu1_avail[3])
             {
-                src_top_16x8b = src_bottom_16x8b;
+                src_top_16x8b = _mm_loadu_si128((__m128i *)pu1_src_cpy);
                 pu1_src_left_str[0] = pu1_src_cpy[15];
             }
             if(0 == pu1_avail[2])
@@ -3611,7 +3611,7 @@ void ihevc_sao_edge_offset_class2_chroma_ssse3(UWORD8 *pu1_src,
             }
             if(0 == pu1_avail[3])
             {
-                src_top_16x8b = src_bottom_16x8b;
+                src_top_16x8b = _mm_loadu_si128((__m128i *)pu1_src_cpy);
                 pu1_src_left_str[1] = pu1_src_cpy[15];
                 pu1_src_left_str[0] = pu1_src_cpy[14];
             }
@@ -4089,6 +4089,7 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
     WORD32 ht_tmp;
     WORD32 bit_depth;
     UWORD8 u1_avail0, u1_avail1;
+    UWORD8 u1_src_0_wd_1_unprocessed;
 
     __m128i src_top_16x8b, src_bottom_16x8b;
     __m128i src_temp0_16x8b, src_temp1_16x8b;
@@ -4103,7 +4104,8 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
     ht_tmp = ht;
     au1_mask8x16b = _mm_set1_epi8(0xff);
 
-    au1_src_left_tmp[0] = pu1_src[(wd - 1)];
+    u1_src_0_wd_1_unprocessed = pu1_src[(wd - 1)];
+    au1_src_left_tmp[0] = u1_src_0_wd_1_unprocessed;
     //manipulation for bottom left
     for(row = 1; row < ht; row++)
     {
@@ -4403,6 +4405,7 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
             if(0 == pu1_avail[3])
             {
                 src_top_16x8b = src_bottom_16x8b;
+                pu1_src_left_str[0] = pu1_src_cpy[15];
             }
             //for the top left of next part of the block
             left_store_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_top_cpy + wd - col));
@@ -4817,6 +4820,7 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
             if(0 == pu1_avail[3])
             {
                 src_top_16x8b = src_bottom_16x8b;
+                pu1_src_left_str[0] = pu1_src_cpy[7];
             }
             _mm_storel_epi64((__m128i *)(pu1_src_top + wd - col), src_top_16x8b);
             pu1_src += 8;
@@ -4832,10 +4836,18 @@ void ihevc_sao_edge_offset_class3_ssse3(UWORD8 *pu1_src,
         pu1_src_org[wd - 1] = u1_pos_wd_0_tmp;
         pu1_src_org[(ht_tmp - 1) * src_strd] = u1_pos_0_ht_tmp;
         pu1_src_left_cpy = (0 == pu1_avail[2]) ? (pu1_src_left_cpy - 1) : pu1_src_left_cpy;
-        pu1_src_left[0] = au1_src_left_tmp[0];
-        for(row = 1; row < ht_tmp; row++)
+        pu1_src_left[0] = u1_src_0_wd_1_unprocessed;
         {
-            pu1_src_left[row] = pu1_src_left_cpy[row];
+            WORD32 copy_limit = ht_tmp;
+            if(0 == pu1_avail[3])
+            {
+                pu1_src_left[ht_tmp - 1] = pu1_src_org[(ht_tmp - 1) * src_strd + wd - 1];
+                copy_limit--;
+            }
+            for(row = 1; row < copy_limit; row++)
+            {
+                pu1_src_left[row] = pu1_src_left_cpy[row];
+            }
         }
     }
 
@@ -5224,6 +5236,8 @@ void ihevc_sao_edge_offset_class3_chroma_ssse3(UWORD8 *pu1_src,
             if(0 == pu1_avail[3])
             {
                 src_top_16x8b = src_bottom_16x8b;
+                pu1_src_left_cpy[1] = pu1_src_cpy[15];
+                pu1_src_left_cpy[0] = pu1_src_cpy[14];
             }
             //for the top left of next part of the block
             left_store_16x8b = _mm_loadu_si128((__m128i *)(pu1_src_top_cpy + wd - col));
@@ -5634,6 +5648,8 @@ void ihevc_sao_edge_offset_class3_chroma_ssse3(UWORD8 *pu1_src,
             if(0 == pu1_avail[3])
             {
                 src_top_16x8b = src_bottom_16x8b;
+                pu1_src_left_cpy[1] = pu1_src_cpy[7];
+                pu1_src_left_cpy[0] = pu1_src_cpy[6];
             }
 
             _mm_storel_epi64((__m128i *)(pu1_src_top + wd - col), src_top_16x8b);

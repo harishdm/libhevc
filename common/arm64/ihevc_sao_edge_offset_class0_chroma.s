@@ -352,7 +352,6 @@ PU1_SRC_LOOP_RESIDUE:
 
     SUB         x14,x10,x4                  //(ht - row)
     mov         v21.h[7], w11               //vsetq_lane_u8(pu1_src_left[ht - row], pu1_cur_row_tmp, 15)
-    LSL         x14,x14,#1                  //(ht - row) * 2
 
     LD1         {v30.16b},[x12]             //II pu1_cur_row = vld1q_u8(pu1_src_cpy)
     //LD1 {v31.8b},[x12]                    //II pu1_cur_row = vld1q_u8(pu1_src_cpy)
@@ -362,7 +361,7 @@ PU1_SRC_LOOP_RESIDUE:
 
     LDRH        w11,[x2,#2]                 //II load pu1_src_left
     cmhi        v16.16b,  v19.16b ,  v21.16b //vcgtq_u8(pu1_cur_row, pu1_cur_row_tmp)
-    mul         x14, x14, x1                //(ht - row) * 2 * src_strd
+    mul         x14, x14, x1                //(ht - row) * src_strd
 
     cmhi        v18.16b,  v21.16b ,  v19.16b //vcltq_u8(pu1_cur_row, pu1_cur_row_tmp)
     mov         v28.h[7], w11               //II vsetq_lane_u8(pu1_src_left[ht - row], pu1_cur_row_tmp, 15)
@@ -443,13 +442,12 @@ PU1_SRC_LOOP_RESIDUE:
     mov         v28.8b, v1.8b
     SUB         x14,x10,x4                  //II (ht - row)
 
-    LSL         x14,x14,#1                  //II (ht - row) * 2
     TBL         v26.8b, {v7.16b},v28.8b     //II offset = vtbl1_s8(offset_tbl_u, vget_low_s8(edge_idx))
-    mul         x14, x14, x1                //II (ht - row) * 2 * src_strd
+    mul         x14, x14, x1                //II (ht - row) * src_strd
 
-    ADD         x5,x14,x5                   //II (ht - row) * 2 * src_strd + (wd - 2)
+    ADD         x5,x14,x5                   //II (ht - row) * src_strd + (wd - 2)
     TBL         v27.8b, {v0.16b},v29.8b     //II
-    LDRH        w14,[x6, x5]                //II pu1_src_org[(ht - row)  * 2* src_strd + (wd - 2)]
+    LDRH        w14,[x6, x5]                //II pu1_src_org[(ht - row) * src_strd + (wd - 2)]
 
     ZIP1        v1.8b, v26.8b, v27.8b
     ZIP2        v27.8b, v26.8b, v27.8b      //II
