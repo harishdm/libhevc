@@ -332,11 +332,6 @@ TEST_P(SaoEdgeOffsetClass0Test, Run) {
 
 class SaoEdgeOffsetClass0ChromaTest : public SaoChromaTest {};
 TEST_P(SaoEdgeOffsetClass0ChromaTest, Run) {
-#if defined(__arm__) || defined(__aarch64__) || defined(__arm64__)
-  if (wd % 8 == 4) {
-    GTEST_SKIP() << "Skipping failing ARM Chroma SAO Class 0 tests for width % 8 == 4";
-  }
-#endif
   InitializeBuffers();
 
   ref->ihevc_sao_edge_offset_class0_chroma_fptr(
@@ -404,13 +399,6 @@ TEST_P(SaoEdgeOffsetClass1ChromaTest, Run) {
 
 class SaoEdgeOffsetClass2Test : public SaoLumaTest {};
 TEST_P(SaoEdgeOffsetClass2Test, Run) {
-#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || \
-    defined(_M_IX86)
-  if (arch == ARCH_X86_SSSE3 || arch == ARCH_X86_SSE42 ||
-      arch == ARCH_X86_AVX2) {
-    GTEST_SKIP() << "Skipping Class 2 tests for x86 SIMD";
-  }
-#endif
   InitializeBuffers();
 
   ref->ihevc_sao_edge_offset_class2_fptr(
@@ -432,13 +420,6 @@ TEST_P(SaoEdgeOffsetClass2Test, Run) {
 
 class SaoEdgeOffsetClass2ChromaTest : public SaoChromaTest {};
 TEST_P(SaoEdgeOffsetClass2ChromaTest, Run) {
-#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || \
-    defined(_M_IX86)
-  if (arch == ARCH_X86_SSSE3 || arch == ARCH_X86_SSE42 ||
-      arch == ARCH_X86_AVX2) {
-    GTEST_SKIP() << "Skipping Class 2 Chroma tests for x86 SIMD";
-  }
-#endif
   InitializeBuffers();
 
   ref->ihevc_sao_edge_offset_class2_chroma_fptr(
@@ -462,13 +443,6 @@ TEST_P(SaoEdgeOffsetClass2ChromaTest, Run) {
 
 class SaoEdgeOffsetClass3Test : public SaoLumaTest {};
 TEST_P(SaoEdgeOffsetClass3Test, Run) {
-#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || \
-    defined(_M_IX86)
-  if (arch == ARCH_X86_SSSE3 || arch == ARCH_X86_SSE42 ||
-      arch == ARCH_X86_AVX2) {
-    GTEST_SKIP() << "Skipping Class 3 tests for x86 SIMD";
-  }
-#endif
   InitializeBuffers();
 
   ref->ihevc_sao_edge_offset_class3_fptr(
