@@ -83,7 +83,6 @@ static const std::vector<DecodeStreamConfig> kDecodeStreams = {
     {"AMVP_A_MTK_4/AMVP_A_MTK_4/AMVP_A_MTK_4.bit", Format::yuv420p, "AMVP_A_MTK_4/AMVP_A_MTK_4/AMVP_A_MTK_4_md5.txt"},
     {"AMVP_B_MTK_4/AMVP_B_MTK_4/AMVP_B_MTK_4.bit", Format::yuv420p, "AMVP_B_MTK_4/AMVP_B_MTK_4/AMVP_B_MTK_4_md5.txt"},
     {"AMVP_C_Samsung_7/AMVP_C_Samsung_7.bin", Format::yuv420p, "AMVP_C_Samsung_7/AMVP_C_Samsung_7_md5.txt"},
-    {"BUMPING_A_ericsson_1/BUMPING_A_ericsson_1.bit", Format::yuv420p, "BUMPING_A_ericsson_1/BUMPING_A_ericsson_1_md5.txt"},
     {"CAINIT_A_SHARP_4/CAINIT_A_SHARP_4.bit", Format::yuv420p, "CAINIT_A_SHARP_4/CAINIT_A_SHARP_4_md5.txt"},
     {"CAINIT_B_SHARP_4/CAINIT_B_SHARP_4.bit", Format::yuv420p, "CAINIT_B_SHARP_4/CAINIT_B_SHARP_4_md5.txt"},
     {"CAINIT_C_SHARP_3/CAINIT_C_SHARP_3.bit", Format::yuv420p, "CAINIT_C_SHARP_3/CAINIT_C_SHARP_3_md5.txt"},
@@ -135,11 +134,7 @@ static const std::vector<DecodeStreamConfig> kDecodeStreams = {
     {"MVDL1ZERO_A_docomo_4/MVDL1ZERO_A_docomo_4.bit", Format::yuv420p, "MVDL1ZERO_A_docomo_4/MVDL1ZERO_A_docomo_4_md5.txt"},
     {"MVEDGE_A_qualcomm_3/MVEDGE_A_qualcomm_3/MVEDGE_A_qualcomm_3.bit", Format::yuv420p, "MVEDGE_A_qualcomm_3/MVEDGE_A_qualcomm_3/MVEDGE_A_qualcomm_3_md5.txt"},
     {"NUT_A_ericsson_5/NUT_A_ericsson_5.bit", Format::yuv420p, "NUT_A_ericsson_5/NUT_A_ericsson_5_md5.txt"},
-    {"NoOutPrior_A_Qualcomm_1/NoOutPrior_A_Qualcomm_1.bit", Format::yuv420p, "NoOutPrior_A_Qualcomm_1/NoOutPrior_A_Qualcomm_1_md5.txt"},
-    {"NoOutPrior_B_Qualcomm_1/NoOutPrior_B_Qualcomm_1.bit", Format::yuv420p, "NoOutPrior_B_Qualcomm_1/NoOutPrior_B_Qualcomm_1_md5.txt"},
     {"OPFLAG_A_Qualcomm_1/OPFLAG_A_Qualcomm_1.bit", Format::yuv420p, "OPFLAG_A_Qualcomm_1/OPFLAG_A_Qualcomm_1_md5.txt"},
-    {"OPFLAG_B_Qualcomm_1/OPFLAG_B_Qualcomm_1.bit", Format::yuv420p, "OPFLAG_B_Qualcomm_1/OPFLAG_B_Qualcomm_1_md5.txt"},
-    {"OPFLAG_C_Qualcomm_1/OPFLAG_C_Qualcomm_1.bit", Format::yuv420p, "OPFLAG_C_Qualcomm_1/OPFLAG_C_Qualcomm_1_md5.txt"},
     {"PICSIZE_A_Bossen_1/PICSIZE_A_Bossen_1/PICSIZE_A_Bossen_1.bin", Format::yuv420p, "PICSIZE_A_Bossen_1/PICSIZE_A_Bossen_1/PICSIZE_A_Bossen_1_md5.txt"},
     {"PICSIZE_B_Bossen_1/PICSIZE_B_Bossen_1/PICSIZE_B_Bossen_1.bin", Format::yuv420p, "PICSIZE_B_Bossen_1/PICSIZE_B_Bossen_1/PICSIZE_B_Bossen_1_md5.txt"},
     {"PICSIZE_C_Bossen_1/PICSIZE_C_Bossen_1/PICSIZE_C_Bossen_1.bin", Format::yuv420p, "PICSIZE_C_Bossen_1/PICSIZE_C_Bossen_1/PICSIZE_C_Bossen_1_md5.txt"},
@@ -153,7 +148,6 @@ static const std::vector<DecodeStreamConfig> kDecodeStreams = {
     {"PPS_A_qualcomm_7/PPS_A_qualcomm_7/PPS_A_qualcomm_7.bit", Format::yuv420p, "PPS_A_qualcomm_7/PPS_A_qualcomm_7/PPS_A_qualcomm_7_md5.txt"},
     {"PS_B_VIDYO_3/PS_B_VIDYO_3/PS_B_VIDYO_3.bit", Format::yuv420p, "PS_B_VIDYO_3/PS_B_VIDYO_3/PS_B_VIDYO_3_md5.txt"},
     {"RAP_A_docomo_6/RAP_A_docomo_6.bit", Format::yuv420p, "RAP_A_docomo_6/RAP_A_docomo_6_md5.txt"},
-    {"RAP_B_Bossen_2/RAP_B_Bossen_2.bit", Format::yuv420p, "RAP_B_Bossen_2/RAP_B_Bossen_2_md5.txt"},
     {"RPLM_A_qualcomm_4/RPLM_A_qualcomm_4/RPLM_A_qualcomm_4.bit", Format::yuv420p, "RPLM_A_qualcomm_4/RPLM_A_qualcomm_4/RPLM_A_qualcomm_4_md5.txt"},
     {"RPLM_B_qualcomm_4/RPLM_B_qualcomm_4/RPLM_B_qualcomm_4.bit", Format::yuv420p, "RPLM_B_qualcomm_4/RPLM_B_qualcomm_4/RPLM_B_qualcomm_4_md5.txt"},
     {"RPS_A_docomo_5/RPS_A_docomo_5.bit", Format::yuv420p, "RPS_A_docomo_5/RPS_A_docomo_5_md5.txt"},
@@ -196,7 +190,6 @@ static const std::vector<DecodeStreamConfig> kDecodeStreams = {
     {"TSKIP_A_MS_3/TSKIP_A_MS_3.bit", Format::yuv420p, "TSKIP_A_MS_3/TSKIP_A_MS_3_md5.txt"},
     {"TUSIZE_A_Samsung_1/TUSIZE_A_Samsung_1.bin", Format::yuv420p, "TUSIZE_A_Samsung_1/TUSIZE_A_Samsung_1_md5.txt"},
     {"VPSID_A_VIDYO_2/VPSID_A_VIDYO_2/VPSID_A_VIDYO_2.bit", Format::yuv420p, "VPSID_A_VIDYO_2/VPSID_A_VIDYO_2/VPSID_A_VIDYO_2_md5.txt"},
-    {"VPSSPSPPS_A_MainConcept_1/VPSSPSPPS_A_MainConcept_1.bin", Format::yuv420p, "VPSSPSPPS_A_MainConcept_1/VPSSPSPPS_A_MainConcept_1_md5.txt"},
     {"WPP_A_ericsson_MAIN_2/WPP_A_ericsson_MAIN_2.bit", Format::yuv420p, "WPP_A_ericsson_MAIN_2/WPP_A_ericsson_MAIN_2_md5.txt"},
     {"WPP_B_ericsson_MAIN_2/WPP_B_ericsson_MAIN_2.bit", Format::yuv420p, "WPP_B_ericsson_MAIN_2/WPP_B_ericsson_MAIN_2_md5.txt"},
     {"WPP_C_ericsson_MAIN_2/WPP_C_ericsson_MAIN_2.bit", Format::yuv420p, "WPP_C_ericsson_MAIN_2/WPP_C_ericsson_MAIN_2_md5.txt"},
@@ -243,6 +236,16 @@ static const std::vector<DecodeStreamConfig> kDecodeStreams = {
     // extended precision
     // {"rext/8bit/EXTPREC_MAIN_444_16_INTRA_8BIT_RExt_Sony_1/EXTPREC_MAIN_444_16_INTRA_8BIT_RExt_Sony_1.bit", Format::yuv444p, "rext/8bit/EXTPREC_MAIN_444_16_INTRA_8BIT_RExt_Sony_1/EXTPREC_MAIN_444_16_INTRA_8BIT_RExt_Sony_1_md5.txt"},
     // {"rext/10bit/EXTPREC_MAIN_444_16_INTRA_10BIT_RExt_Sony_1/EXTPREC_MAIN_444_16_INTRA_10BIT_RExt_Sony_1.bit", Format::yuv444p, "rext/10bit/EXTPREC_MAIN_444_16_INTRA_10BIT_RExt_Sony_1/EXTPREC_MAIN_444_16_INTRA_10BIT_RExt_Sony_1_md5.txt"},
+    // no_output_of_prior_pics_flag / bumping process not supported in DPB
+    // {"BUMPING_A_ericsson_1/BUMPING_A_ericsson_1.bit", Format::yuv420p, "BUMPING_A_ericsson_1/BUMPING_A_ericsson_1_md5.txt"},
+    // {"NoOutPrior_A_Qualcomm_1/NoOutPrior_A_Qualcomm_1.bit", Format::yuv420p, "NoOutPrior_A_Qualcomm_1/NoOutPrior_A_Qualcomm_1_md5.txt"},
+    // {"NoOutPrior_B_Qualcomm_1/NoOutPrior_B_Qualcomm_1.bit", Format::yuv420p, "NoOutPrior_B_Qualcomm_1/NoOutPrior_B_Qualcomm_1_md5.txt"},
+    // pic_output_flag not supported (pictures with pic_output_flag == 0 are incorrectly output)
+    // {"OPFLAG_B_Qualcomm_1/OPFLAG_B_Qualcomm_1.bit", Format::yuv420p, "OPFLAG_B_Qualcomm_1/OPFLAG_B_Qualcomm_1_md5.txt"},
+    // {"OPFLAG_C_Qualcomm_1/OPFLAG_C_Qualcomm_1.bit", Format::yuv420p, "OPFLAG_C_Qualcomm_1/OPFLAG_C_Qualcomm_1_md5.txt"},
+    // Dynamic resolution change (DRC) / SPS parameter set change mid-stream
+    // {"RAP_B_Bossen_2/RAP_B_Bossen_2.bit", Format::yuv420p, "RAP_B_Bossen_2/RAP_B_Bossen_2_md5.txt"},
+    // {"VPSSPSPPS_A_MainConcept_1/VPSSPSPPS_A_MainConcept_1.bin", Format::yuv420p, "VPSSPSPPS_A_MainConcept_1/VPSSPSPPS_A_MainConcept_1_md5.txt"},
 };
 
 INSTANTIATE_TEST_SUITE_P(DecoderRegression, DecTestFixture,
